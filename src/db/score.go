@@ -46,7 +46,37 @@ func GetScoreByReplayMD5(u *User, md5 string) (Score, error) {
 
 	var score Score
 
-	err := SQL.QueryRow(query, u.Id, md5).Scan(
+	row := SQL.QueryRow(query, u.Id, md5)
+	err := scanScore(&score, row)
+	
+	if err != nil {
+		return Score{}, err
+	}
+	
+	return score, nil
+}
+
+// GetPersonalBestScore Fetches a user's personal best score on a map
+func GetPersonalBestScore(u *User, m *Map) (Score, error) {
+	query := "SELECT * FROM scores " +
+		"WHERE user_id = ? AND map_md5 = ? AND failed = 0 AND personal_best = 1 " +
+		"LIMIT 1"
+	
+	var score Score
+	
+	row := SQL.QueryRow(query, u.Id, m.MD5)
+	err := scanScore(&score, row)
+	
+	if err != nil {
+		return Score{}, err
+	}
+	
+	return score, nil
+}
+
+// Helper function to scan a score's row coming from the database.
+func scanScore(score *Score, row *sql.Row) error {
+	err := row.Scan(
 		&score.Id, &score.UserId, &score.MapMD5, &score.ReplayMD5, &score.Timestamp,
 		&score.Mode, &score.PersonalBest, &score.PerformanceRating, &score.Mods,
 		&score.Failed, &score.TotalScore, &score.Accuracy, &score.MaxCombo,
@@ -55,10 +85,6 @@ func GetScoreByReplayMD5(u *User, md5 string) (Score, error) {
 		&score.TimePlayStart, &score.TimePlayEnd, &score.Ip, &score.ExecutingAssembly,
 		&score.EntryAssembly, &score.QuaverVersion, &score.PauseCount, &score.PerformanceProcessorVersion,
 		&score.DifficultyProcessorVersion, &score.IsDonatorScore, &score.TournamentGameId)
-
-	if err != nil {
-		return Score{}, err
-	}
-
-	return score, nil
+	
+	return err
 }
