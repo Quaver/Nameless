@@ -19,7 +19,7 @@ func TestCalculateDifficulty(t *testing.T) {
 		return
 	}
 	
-	_, err = CalculateDifficulty(qua, common.ModMirror | common.ModSpeed125X)
+	_, err = CalcDifficulty(qua, common.ModMirror | common.ModSpeed125X)
 
 	if err != nil {
 		t.Fatalf(err.Error())

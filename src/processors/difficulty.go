@@ -29,8 +29,8 @@ type DifficultyProcessorResult struct {
 	Version           string  `json:"Version"`
 }
 
-// CalculateDifficulty Calculates the difficulty rating of a local .qua file
-func CalculateDifficulty(path string, mods common.Mods) (DifficultyProcessor, error) {
+// CalcDifficulty Calculates the difficulty rating of a local .qua file
+func CalcDifficulty(path string, mods common.Mods) (DifficultyProcessor, error) {
 	modsStr := strconv.Itoa(int(mods))
 	output, err := exec.Command("dotnet", getQuaverToolsDllPath(), "-calcdiff", path, modsStr).Output()
 

@@ -12,7 +12,7 @@ func TestCalculateRating(t *testing.T) {
 		t.Fatal(err.Error())
 	}
 
-	r, err := CalculatePerformanceRating(30.25, 100)
+	r, err := CalcPerformance(30.25, 100, false)
 
 	if err != nil {
 		t.Fatal(err.Error())

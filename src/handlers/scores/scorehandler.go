@@ -7,6 +7,7 @@ import (
 	"github.com/Swan/Nameless/src/common"
 	"github.com/Swan/Nameless/src/db"
 	"github.com/Swan/Nameless/src/handlers"
+	"github.com/Swan/Nameless/src/processors"
 	"github.com/Swan/Nameless/src/utils"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -17,6 +18,8 @@ type Handler struct {
 	user      db.User
 	mapData   db.Map
 	mapPath   string
+	difficulty processors.DifficultyProcessor
+	rating processors.RatingProcessor
 }
 
 func (h Handler) SubmitPOST(c *gin.Context) {
@@ -95,6 +98,12 @@ func (h Handler) handleSubmission(c *gin.Context) error {
 		return err
 	}
 
+	err = h.calculatePerformanceRating(c)
+	
+	if err != nil {
+		return err
+	}
+	
 	return nil
 }
 
@@ -127,4 +136,24 @@ func (h Handler) checkDuplicateScore(c *gin.Context) error {
 
 	handlers.Return500(c)
 	return fmt.Errorf("error while attempting to fetch duplicate score - %v\n", err)
+}
+
+/// Calculates the difficulty and performance rating of the score and sets them on the handler.
+func (h Handler) calculatePerformanceRating(c *gin.Context) error {
+	var err error
+	
+	h.difficulty, err = processors.CalcDifficulty(h.mapPath, h.scoreData.Mods)
+	
+	if err != nil {
+		handlers.Return500(c)
+		return fmt.Errorf("error while calculating difficulty rating - %v", err)
+	}
+	
+	diffVal := h.difficulty.Result.OverallDifficulty
+	h.rating, err = processors.CalcPerformance(diffVal, h.scoreData.Accuracy, h.scoreData.Failed)
+	
+	fmt.Println(h.difficulty.Result)
+	fmt.Println(h.rating.Rating)
+	
+	return nil
 }
