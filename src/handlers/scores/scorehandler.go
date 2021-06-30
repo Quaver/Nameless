@@ -20,6 +20,7 @@ type Handler struct {
 	mapPath   string
 	difficulty processors.DifficultyProcessor
 	rating processors.RatingProcessor
+	oldPersonalBest db.Score
 }
 
 func (h Handler) SubmitPOST(c *gin.Context) {
@@ -85,7 +86,7 @@ func (h Handler) SubmitPOST(c *gin.Context) {
 }
 
 // Handles submitting the score into the database, achievements, leaderboards, etc
-func (h Handler) handleSubmission(c *gin.Context) error {
+func (h *Handler) handleSubmission(c *gin.Context) error {
 	err := h.checkZeroTotalScore(c)
 
 	if err != nil {
@@ -104,12 +105,18 @@ func (h Handler) handleSubmission(c *gin.Context) error {
 		return err
 	}
 	
+	err = h.getOldPersonalBestScore(c)
+	
+	if err != nil {
+		return err
+	}
+	
 	return nil
 }
 
 // Checks if the score has zero total score (no notes hit whatsoever). These scores
 // are ignored because they are considered useless.
-func (h Handler) checkZeroTotalScore(c *gin.Context) error {
+func (h *Handler) checkZeroTotalScore(c *gin.Context) error {
 	if !h.scoreData.isValidTotalScore() {
 		handlers.Return400(c)
 		return fmt.Errorf("ignoring submitted score with 0 total score")
@@ -120,7 +127,7 @@ func (h Handler) checkZeroTotalScore(c *gin.Context) error {
 
 // Players can sometimes submit duplicate scores unexpectedly (ex. server restarts, timeouts, etc)
 // This checks if the score is a duplicate, and will return a 400 if it is.
-func (h Handler) checkDuplicateScore(c *gin.Context) error {
+func (h *Handler) checkDuplicateScore(c *gin.Context) error {
 	s, err := db.GetScoreByReplayMD5(&h.user, h.scoreData.ReplayMD5)
 
 	// No error returned, which means a duplicate score was found
@@ -139,7 +146,7 @@ func (h Handler) checkDuplicateScore(c *gin.Context) error {
 }
 
 /// Calculates the difficulty and performance rating of the score and sets them on the handler.
-func (h Handler) calculatePerformanceRating(c *gin.Context) error {
+func (h *Handler) calculatePerformanceRating(c *gin.Context) error {
 	var err error
 	
 	h.difficulty, err = processors.CalcDifficulty(h.mapPath, h.scoreData.Mods)
@@ -152,8 +159,23 @@ func (h Handler) calculatePerformanceRating(c *gin.Context) error {
 	diffVal := h.difficulty.Result.OverallDifficulty
 	h.rating, err = processors.CalcPerformance(diffVal, h.scoreData.Accuracy, h.scoreData.Failed)
 	
-	fmt.Println(h.difficulty.Result)
-	fmt.Println(h.rating.Rating)
-	
 	return nil
+}
+
+// Gets the user's personal best score on the map if one exists,
+func (h *Handler) getOldPersonalBestScore(c *gin.Context) error {
+	var err error
+	
+	h.oldPersonalBest, err = db.GetPersonalBestScore(&h.user, &h.mapData)
+
+	if err == nil {
+		return nil	
+	}
+	
+	if err == sql.ErrNoRows {
+		return nil
+	}
+	
+	handlers.Return500(c)
+	return fmt.Errorf("error while fetching old personal best - %v", err)
 }
