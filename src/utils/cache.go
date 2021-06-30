@@ -7,7 +7,7 @@ import (
 )
 
 const folder string = "C:\\Users\\Swan\\go\\src\\Nameless\\data\\maps"
-const apiUrl string = "http://localhost:8082"
+const apiUrl string = "https://api.quavergame.com"
 
 // CacheQuaFile Downloads a .qua file from the API to disk
 func CacheQuaFile(m db.Map) (string, error) {
