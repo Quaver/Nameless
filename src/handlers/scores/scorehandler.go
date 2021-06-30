@@ -61,36 +61,36 @@ func (h Handler) SubmitPOST(c *gin.Context) {
 		handlers.Return400(c)
 		return
 	}
-	
+
 	h.mapPath, err = utils.CacheQuaFile(h.mapData)
-	
+
 	if err != nil {
 		fmt.Printf("unable to cache map file - %v\n", err.Error())
 		handlers.Return500(c)
 		return
 	}
-	
+
 	err = h.handleSubmission(c)
-	
+
 	// Responses are given to the player inside of handleSubmission, so it's not needed here
 	if err != nil {
 		fmt.Printf("unable to submit score - %v\n", err.Error())
 		return
 	}
-	
+
 	handlers.ReturnMessage(c, http.StatusOK, "OK")
 }
 
 // Handles submitting the score into the database, achievements, leaderboards, etc
 func (h Handler) handleSubmission(c *gin.Context) error {
 	err := h.checkZeroTotalScore(c)
-	
+
 	if err != nil {
 		return err
 	}
-	
+
 	err = h.checkDuplicateScore(c)
-	
+
 	if err != nil {
 		return err
 	}
@@ -105,7 +105,7 @@ func (h Handler) checkZeroTotalScore(c *gin.Context) error {
 		handlers.Return400(c)
 		return fmt.Errorf("ignoring submitted score with 0 total score")
 	}
-	
+
 	return nil
 }
 
@@ -113,8 +113,8 @@ func (h Handler) checkZeroTotalScore(c *gin.Context) error {
 // This checks if the score is a duplicate, and will return a 400 if it is.
 func (h Handler) checkDuplicateScore(c *gin.Context) error {
 	s, err := db.GetScoreByReplayMD5(&h.user, h.scoreData.ReplayMD5)
-	
-	// No error returned, which means a duplicate score was found 
+
+	// No error returned, which means a duplicate score was found
 	if err == nil {
 		handlers.Return400(c)
 		return fmt.Errorf("duplicate submitted score found - `#%v`\n", s.Id)
@@ -124,8 +124,7 @@ func (h Handler) checkDuplicateScore(c *gin.Context) error {
 	if err == sql.ErrNoRows {
 		return nil
 	}
-	
+
 	handlers.Return500(c)
 	return fmt.Errorf("error while attempting to fetch duplicate score - %v\n", err)
-} 
-
+}

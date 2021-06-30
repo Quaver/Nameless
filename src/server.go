@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"github.com/Swan/Nameless/src/handlers"
 	"github.com/Swan/Nameless/src/handlers/scores"
+	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
 )

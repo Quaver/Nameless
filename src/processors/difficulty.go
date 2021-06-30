@@ -1,0 +1,50 @@
+package processors
+
+import (
+	"encoding/json"
+	"github.com/Swan/Nameless/src/common"
+	"os/exec"
+	"strconv"
+)
+
+type DifficultyProcessor struct {
+	Metadata DifficultyProcessorMetadata `json:"Metadata"`
+	Result   DifficultyProcessorResult   `json:"Difficulty"`
+}
+
+type DifficultyProcessorMetadata struct {
+	Artist         string      `json:"Artist"`
+	Title          string      `json:"Title"`
+	DifficultyName string      `json:"DifficultyName"`
+	Creator        string      `json:"Creator"`
+	Mode           common.Mode `json:"Mode"`
+	Length         int         `json:"Length"`
+	MapId          int         `json:"MapId"`
+	MapSetId       int         `json:"MapSetId"`
+	ObjectCount    int         `json:"ObjectCount"`
+}
+
+type DifficultyProcessorResult struct {
+	OverallDifficulty float64 `json:"OverallDifficulty"`
+	Version           string  `json:"Version"`
+}
+
+// CalculateDifficulty Calculates the difficulty rating of a local .qua file
+func CalculateDifficulty(path string, mods common.Mods) (DifficultyProcessor, error) {
+	output, err := exec.Command("dotnet", getQuaverToolsDllPath(), "-calcdiff", 
+		path, strconv.Itoa(int(mods))).Output()
+	
+	if err != nil {
+		return DifficultyProcessor{}, err
+	}
+	
+	var d DifficultyProcessor
+	
+	err = json.Unmarshal(output, &d)
+	
+	if err != nil {
+		return DifficultyProcessor{}, err
+	}
+	
+	return d, nil
+}

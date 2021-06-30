@@ -3,10 +3,10 @@ package scores
 import (
 	"encoding/base64"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"github.com/Swan/Nameless/src/common"
 	"github.com/Swan/Nameless/src/db"
 	"github.com/Swan/Nameless/src/utils"
+	"github.com/gin-gonic/gin"
 )
 
 type scoreSubmissionData struct {
@@ -173,7 +173,7 @@ func (data *scoreSubmissionData) validateGameMode(m *db.Map) error {
 	return nil
 }
 
-// Returns if the score has valid total score 
+// Returns if the score has valid total score
 func (data *scoreSubmissionData) isValidTotalScore() bool {
 	return !(data.Failed && data.TotalScore == 0)
 }

@@ -12,30 +12,30 @@ const apiUrl string = "http://localhost:8082"
 // CacheQuaFile Downloads a .qua file from the API to disk
 func CacheQuaFile(m db.Map) (string, error) {
 	err := os.MkdirAll(folder, os.ModePerm)
-	
+
 	if err != nil {
 		fmt.Println(err.Error())
 		return "", err
 	}
-	
+
 	path := fmt.Sprintf("%v/%v.qua", folder, m.Id)
 	needsDownload := false
-	
+
 	// If the file exists, check if the MD5 hash matches the DB
 	if _, err := os.Stat(path); err == nil {
 		md5, err := GetFileMD5(path)
-		
+
 		if err != nil {
 			return "", err
 		}
-		
+
 		if md5 != m.MD5 {
 			needsDownload = true
 		}
 	} else {
 		needsDownload = true
 	}
-	
+
 	// Attempt to download the file from the API if needed
 	if needsDownload {
 		url := fmt.Sprintf("%v/d/web/map/%v", apiUrl, m.Id)
@@ -60,7 +60,6 @@ func CacheQuaFile(m db.Map) (string, error) {
 
 		return path, nil
 	}
-	
+
 	return "", fmt.Errorf("failed to cache `%v.qua`", m.Id)
 }
-

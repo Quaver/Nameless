@@ -3,8 +3,8 @@ package auth
 import (
 	"errors"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"github.com/Swan/Nameless/src/db"
+	"github.com/gin-gonic/gin"
 	"strconv"
 )
 
