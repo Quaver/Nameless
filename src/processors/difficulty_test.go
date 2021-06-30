@@ -12,10 +12,14 @@ func TestCalculateDifficulty(t *testing.T) {
 		return
 	}
 
-	// TODO: Needs testing file
 	const qua string = ""
 
-	_, err = CalculateDifficulty(qua, common.ModMirror)
+	// TODO: Needs test file
+	if qua == "" {
+		return
+	}
+	
+	_, err = CalculateDifficulty(qua, common.ModMirror | common.ModSpeed125X)
 
 	if err != nil {
 		t.Fatalf(err.Error())
