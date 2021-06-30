@@ -105,7 +105,7 @@ func (h *Handler) handleSubmission(c *gin.Context) error {
 		return err
 	}
 	
-	err = h.getOldPersonalBestScore(c)
+	err = h.updateOldPersonalBest(c)
 	
 	if err != nil {
 		return err
@@ -162,20 +162,32 @@ func (h *Handler) calculatePerformanceRating(c *gin.Context) error {
 	return nil
 }
 
-// Gets the user's personal best score on the map if one exists,
-func (h *Handler) getOldPersonalBestScore(c *gin.Context) error {
+// Fetches the old personal best score and determines if this 
+func (h *Handler) updateOldPersonalBest(c *gin.Context) error {
 	var err error
 	
 	h.oldPersonalBest, err = db.GetPersonalBestScore(&h.user, &h.mapData)
-
+	
+	// Existing personal best score was found
 	if err == nil {
+		// Player has beat their old personal best, so update the old score.
+		if h.isPersonalBestScore() {
+			// TODO: SET PB to 0
+		}
+		
 		return nil	
 	}
 	
+	// No personal best found
 	if err == sql.ErrNoRows {
 		return nil
 	}
 	
 	handlers.Return500(c)
 	return fmt.Errorf("error while fetching old personal best - %v", err)
+}
+
+// Returns if the score is a personal best score
+func (h *Handler) isPersonalBestScore() bool {
+	return !h.scoreData.Failed && h.rating.Rating > h.oldPersonalBest.PerformanceRating
 }
