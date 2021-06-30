@@ -1,12 +1,15 @@
 package db
 
-import "github.com/Swan/Nameless/src/common"
+import (
+	"database/sql"
+	"github.com/Swan/Nameless/src/common"
+)
 
 type Map struct {
 	Id               int
 	MapsetId         int
 	MD5              string
-	AlternativeMD5   string
+	AlternativeMD5   sql.NullString
 	CreatorId        int
 	CreatorUsername  string
 	GameMode         common.Mode
