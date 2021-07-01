@@ -11,6 +11,7 @@ import (
 	"github.com/Swan/Nameless/src/utils"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"time"
 )
 
 type Handler struct {
@@ -229,7 +230,7 @@ func (h *Handler) insertNewScore(c *gin.Context) error {
 		"(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 
 	grade := common.GetGradeFromAccuracy(h.scoreData.Accuracy, h.scoreData.Failed)
-	timestamp := 0
+	timestamp := time.Now().Unix()
 	ip := utils.GetIpFromRequest(c)
 	isDonorScore := h.mapData.RankedStatus != common.StatusRanked
 	
