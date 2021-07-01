@@ -84,6 +84,7 @@ func (h Handler) SubmitPOST(c *gin.Context) {
 		return
 	}
 
+	h.logScore()
 	handlers.ReturnMessage(c, http.StatusOK, "OK")
 }
 
@@ -302,7 +303,7 @@ func (h *Handler) updateUserLatestActivity(c *gin.Context) error {
 
 /// TODO: Uploads the replay to azure storage 
 func (h *Handler) uploadReplay(c *gin.Context) error {
-	if !h.isPersonalBestScore() && h.scoreData.GameId != -1 {
+	if !h.isPersonalBestScore() && h.scoreData.GameId == -1 {
 		return nil
 	}
 	
@@ -329,4 +330,11 @@ func (h *Handler) updateLeaderboardCache(c *gin.Context) error {
 	}
 	
 	return nil
+}
+
+// Logs out the score in a readable way
+func (h *Handler) logScore() {
+	fmt.Printf("[#%v] %v (#%v) | Map: #%v | Rating: %.2f | Accuracy: %.2f%% | PB: %v \n", 
+		h.newScoreId, h.user.Username, h.user.Id, h.mapData.Id, h.rating.Rating, h.scoreData.Accuracy,
+		h.isPersonalBestScore())
 }
