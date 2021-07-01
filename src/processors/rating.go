@@ -33,6 +33,6 @@ func CalcPerformance(diff float64, acc float32, failed bool) (RatingProcessor, e
 	if failed {
 		r.Rating = 0
 	}
-	
+
 	return r, nil
 }

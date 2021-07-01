@@ -18,8 +18,8 @@ func TestCalculateDifficulty(t *testing.T) {
 	if qua == "" {
 		return
 	}
-	
-	_, err = CalcDifficulty(qua, common.ModMirror | common.ModSpeed125X)
+
+	_, err = CalcDifficulty(qua, common.ModMirror|common.ModSpeed125X)
 
 	if err != nil {
 		t.Fatalf(err.Error())

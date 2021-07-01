@@ -15,14 +15,14 @@ import (
 )
 
 type Handler struct {
-	scoreData scoreSubmissionData
-	user      db.User
-	mapData   db.Map
-	mapPath   string
-	difficulty processors.DifficultyProcessor
-	rating processors.RatingProcessor
+	scoreData       scoreSubmissionData
+	user            db.User
+	mapData         db.Map
+	mapPath         string
+	difficulty      processors.DifficultyProcessor
+	rating          processors.RatingProcessor
 	oldPersonalBest db.Score
-	newScoreId int64
+	newScoreId      int64
 }
 
 func (h Handler) SubmitPOST(c *gin.Context) {
@@ -102,23 +102,23 @@ func (h *Handler) handleSubmission(c *gin.Context) error {
 	}
 
 	err = h.calculatePerformanceRating(c)
-	
+
 	if err != nil {
 		return err
 	}
-	
+
 	err = h.updateOldPersonalBest(c)
-	
+
 	if err != nil {
 		return err
 	}
-	
+
 	err = h.insertNewScore(c)
-	
+
 	if err != nil {
 		return err
 	}
-	
+
 	return nil
 }
 
@@ -156,42 +156,42 @@ func (h *Handler) checkDuplicateScore(c *gin.Context) error {
 /// Calculates the difficulty and performance rating of the score and sets them on the handler.
 func (h *Handler) calculatePerformanceRating(c *gin.Context) error {
 	var err error
-	
+
 	h.difficulty, err = processors.CalcDifficulty(h.mapPath, h.scoreData.Mods)
-	
+
 	if err != nil {
 		handlers.Return500(c)
 		return fmt.Errorf("error while calculating difficulty rating - %v", err)
 	}
-	
+
 	diffVal := h.difficulty.Result.OverallDifficulty
 	h.rating, err = processors.CalcPerformance(diffVal, h.scoreData.Accuracy, h.scoreData.Failed)
-	
+
 	return nil
 }
 
 // Fetches the old personal best score and makes it no longer a PB if it isn't
 func (h *Handler) updateOldPersonalBest(c *gin.Context) error {
 	var err error
-	
+
 	h.oldPersonalBest, err = db.GetPersonalBestScore(&h.user, &h.mapData)
-	
-	// Existing personal best score was found, 
+
+	// Existing personal best score was found,
 	if err == nil {
 		err = h.unsetOldPersonalBest()
-		
+
 		if err != nil {
 			return err
 		}
-		
-		return nil	
+
+		return nil
 	}
-	
+
 	// No personal best found, everything is OK
 	if err == sql.ErrNoRows {
 		return nil
 	}
-	
+
 	handlers.Return500(c)
 	return fmt.Errorf("error while fetching old personal best - %v", err)
 }
@@ -201,14 +201,14 @@ func (h *Handler) unsetOldPersonalBest() error {
 	if !h.isPersonalBestScore() {
 		return nil
 	}
-	
+
 	const query string = "UPDATE scores SET personal_best = 0 WHERE id = ?"
 	_, err := db.SQL.Exec(query, h.oldPersonalBest.Id)
 
 	if err != nil {
 		return err
 	}
-	
+
 	return nil
 }
 
@@ -231,32 +231,32 @@ func (h *Handler) insertNewScore(c *gin.Context) error {
 
 	grade := common.GetGradeFromAccuracy(h.scoreData.Accuracy, h.scoreData.Failed)
 	isDonorScore := h.mapData.RankedStatus != common.StatusRanked
-	
-	result, err := db.SQL.Exec(query, 
-		h.user.Id, h.mapData.MD5, h.scoreData.ReplayMD5, time.Now().Unix(), h.scoreData.GameMode, 
-		h.isPersonalBestScore(), h.rating.Rating, h.scoreData.Mods, h.scoreData.Failed, 
-		h.scoreData.TotalScore, h.scoreData.Accuracy, h.scoreData.MaxCombo, h.scoreData.CountMarv, 
-		h.scoreData.CountPerf, h.scoreData.CountGreat, h.scoreData.CountGood, h.scoreData.CountOkay, 
-		h.scoreData.CountMiss, grade, h.scoreData.ScrollSpeed, h.scoreData.TimePlayStart, 
-		h.scoreData.TimePlayEnded, utils.GetIpFromRequest(c), h.scoreData.ExecutingAssemblyMD5, 
-		h.scoreData.EntryAssemblyMD5, h.scoreData.ReplayVersion, h.scoreData.PauseCount, h.rating.Version, 
+
+	result, err := db.SQL.Exec(query,
+		h.user.Id, h.mapData.MD5, h.scoreData.ReplayMD5, time.Now().Unix(), h.scoreData.GameMode,
+		h.isPersonalBestScore(), h.rating.Rating, h.scoreData.Mods, h.scoreData.Failed,
+		h.scoreData.TotalScore, h.scoreData.Accuracy, h.scoreData.MaxCombo, h.scoreData.CountMarv,
+		h.scoreData.CountPerf, h.scoreData.CountGreat, h.scoreData.CountGood, h.scoreData.CountOkay,
+		h.scoreData.CountMiss, grade, h.scoreData.ScrollSpeed, h.scoreData.TimePlayStart,
+		h.scoreData.TimePlayEnded, utils.GetIpFromRequest(c), h.scoreData.ExecutingAssemblyMD5,
+		h.scoreData.EntryAssemblyMD5, h.scoreData.ReplayVersion, h.scoreData.PauseCount, h.rating.Version,
 		h.difficulty.Result.Version, isDonorScore, h.scoreData.GameId)
-	
+
 	const errStr = "error while inserting score - %v"
-	
+
 	if err != nil {
 		fmt.Printf(errStr, err)
 		handlers.Return500(c)
 		return err
 	}
-	
+
 	h.newScoreId, err = result.LastInsertId()
-	
+
 	if err != nil {
 		fmt.Printf(errStr, err)
 		handlers.Return500(c)
-		return err	
+		return err
 	}
-	
+
 	return nil
 }

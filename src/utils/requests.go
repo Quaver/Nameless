@@ -6,10 +6,10 @@ import "github.com/gin-gonic/gin"
 func GetIpFromRequest(c *gin.Context) string {
 	// Running under NGINX
 	ip := c.GetHeader("X-Forwarded-For")
-	
+
 	if ip != "" {
 		return ip
 	}
-	
+
 	return "::1"
 }

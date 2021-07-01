@@ -8,7 +8,7 @@ import (
 // Tests fetching a score by its replay md5 hash and user
 func TestGetScoreByReplayMD5(t *testing.T) {
 	InitializeSQL()
-	
+
 	user, err := GetUserById(1)
 
 	if err != nil {
@@ -32,21 +32,21 @@ func TestGetScoreByReplayMD5(t *testing.T) {
 // Tests fetching a user's personal best score on a map
 func TestGetPersonalBestScore(t *testing.T) {
 	InitializeSQL()
-	
+
 	user, err := GetUserById(1)
-	
+
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
-	
+
 	dbMap, err := GetMapById(2)
-	
+
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
-	
+
 	_, err = GetPersonalBestScore(&user, &dbMap)
-	
+
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
@@ -75,4 +75,3 @@ func TestGetNoPersonalBestScore(t *testing.T) {
 		t.Fatalf(err.Error())
 	}
 }
-

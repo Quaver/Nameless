@@ -18,7 +18,7 @@ func GetGradeFromAccuracy(acc float32, failed bool) Grade {
 	if failed {
 		return GradeF
 	}
-	
+
 	if acc >= 100 {
 		return GradeX
 	}
@@ -37,6 +37,6 @@ func GetGradeFromAccuracy(acc float32, failed bool) Grade {
 	if acc >= 70 {
 		return GradeC
 	}
-	
+
 	return GradeD
 }
