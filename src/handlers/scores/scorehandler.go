@@ -230,19 +230,17 @@ func (h *Handler) insertNewScore(c *gin.Context) error {
 		"(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 
 	grade := common.GetGradeFromAccuracy(h.scoreData.Accuracy, h.scoreData.Failed)
-	timestamp := time.Now().Unix()
-	ip := utils.GetIpFromRequest(c)
 	isDonorScore := h.mapData.RankedStatus != common.StatusRanked
 	
 	result, err := db.SQL.Exec(query, 
-		h.user.Id, h.mapData.MD5, h.scoreData.ReplayMD5, timestamp, h.scoreData.GameMode, 
+		h.user.Id, h.mapData.MD5, h.scoreData.ReplayMD5, time.Now().Unix(), h.scoreData.GameMode, 
 		h.isPersonalBestScore(), h.rating.Rating, h.scoreData.Mods, h.scoreData.Failed, 
 		h.scoreData.TotalScore, h.scoreData.Accuracy, h.scoreData.MaxCombo, h.scoreData.CountMarv, 
 		h.scoreData.CountPerf, h.scoreData.CountGreat, h.scoreData.CountGood, h.scoreData.CountOkay, 
 		h.scoreData.CountMiss, grade, h.scoreData.ScrollSpeed, h.scoreData.TimePlayStart, 
-		h.scoreData.TimePlayEnded, ip, h.scoreData.ExecutingAssemblyMD5, h.scoreData.EntryAssemblyMD5, 
-		h.scoreData.ReplayVersion, h.scoreData.PauseCount, h.rating.Version, h.difficulty.Result.Version,
-		isDonorScore, h.scoreData.GameId)
+		h.scoreData.TimePlayEnded, utils.GetIpFromRequest(c), h.scoreData.ExecutingAssemblyMD5, 
+		h.scoreData.EntryAssemblyMD5, h.scoreData.ReplayVersion, h.scoreData.PauseCount, h.rating.Version, 
+		h.difficulty.Result.Version, isDonorScore, h.scoreData.GameId)
 	
 	const errStr = "error while inserting score - %v"
 	
