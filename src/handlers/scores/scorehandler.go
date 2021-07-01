@@ -119,6 +119,13 @@ func (h *Handler) handleSubmission(c *gin.Context) error {
 		return err
 	}
 
+	err = db.UpdateLatestActivity(h.user.Id)
+	
+	if err != nil {
+		handlers.Return500(c)
+		return err
+	}
+	
 	
 	return nil
 }
@@ -225,9 +232,10 @@ func (h *Handler) insertScore(c *gin.Context) error {
 
 	grade := common.GetGradeFromAccuracy(h.scoreData.Accuracy, h.scoreData.Failed)
 	isDonorScore := h.mapData.RankedStatus != common.StatusRanked
+	timestamp := time.Now().UnixNano() / int64(time.Millisecond)
 
 	result, err := db.SQL.Exec(query,
-		h.user.Id, h.mapData.MD5, h.scoreData.ReplayMD5, time.Now().Unix(), h.scoreData.GameMode,
+		h.user.Id, h.mapData.MD5, h.scoreData.ReplayMD5, timestamp, h.scoreData.GameMode,
 		h.isPersonalBestScore(), h.rating.Rating, h.scoreData.Mods, h.scoreData.Failed,
 		h.scoreData.TotalScore, h.scoreData.Accuracy, h.scoreData.MaxCombo, h.scoreData.CountMarv,
 		h.scoreData.CountPerf, h.scoreData.CountGreat, h.scoreData.CountGood, h.scoreData.CountOkay,

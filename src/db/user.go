@@ -1,6 +1,10 @@
 package db
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+	"time"
+)
 
 type User struct {
 	Id                          int
@@ -34,3 +38,17 @@ func GetUserById(id int) (User, error) {
 
 	return user, nil
 }
+
+// UpdateLatestActivity Updates a user's latest activity to the current time
+func UpdateLatestActivity(id int) error {
+	timestamp := time.Now().UnixNano() / int64(time.Millisecond)
+	_, err := SQL.Exec("UPDATE users SET latest_activity = ? WHERE id = ?", timestamp, id)
+	
+	if err != nil {
+		fmt.Printf("Failed to update latest_activity for user %v", id)
+		return err
+	}
+	
+	return err
+}
+
