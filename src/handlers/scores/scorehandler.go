@@ -21,6 +21,7 @@ type Handler struct {
 	difficulty processors.DifficultyProcessor
 	rating processors.RatingProcessor
 	oldPersonalBest db.Score
+	newScoreId int64
 }
 
 func (h Handler) SubmitPOST(c *gin.Context) {
@@ -111,6 +112,12 @@ func (h *Handler) handleSubmission(c *gin.Context) error {
 		return err
 	}
 	
+	err = h.insertNewScore(c)
+	
+	if err != nil {
+		return err
+	}
+	
 	return nil
 }
 
@@ -162,23 +169,24 @@ func (h *Handler) calculatePerformanceRating(c *gin.Context) error {
 	return nil
 }
 
-// Fetches the old personal best score and determines if this 
+// Fetches the old personal best score and makes it no longer a PB if it isn't
 func (h *Handler) updateOldPersonalBest(c *gin.Context) error {
 	var err error
 	
 	h.oldPersonalBest, err = db.GetPersonalBestScore(&h.user, &h.mapData)
 	
-	// Existing personal best score was found
+	// Existing personal best score was found, 
 	if err == nil {
-		// Player has beat their old personal best, so update the old score.
-		if h.isPersonalBestScore() {
-			// TODO: SET PB to 0
+		err = h.unsetOldPersonalBest()
+		
+		if err != nil {
+			return err
 		}
 		
 		return nil	
 	}
 	
-	// No personal best found
+	// No personal best found, everything is OK
 	if err == sql.ErrNoRows {
 		return nil
 	}
@@ -187,7 +195,69 @@ func (h *Handler) updateOldPersonalBest(c *gin.Context) error {
 	return fmt.Errorf("error while fetching old personal best - %v", err)
 }
 
-// Returns if the score is a personal best score
+// Checks if the user has beat their old PB and updates the old PB in the database
+func (h *Handler) unsetOldPersonalBest() error {
+	if !h.isPersonalBestScore() {
+		return nil
+	}
+	
+	const query string = "UPDATE scores SET personal_best = 0 WHERE id = ?"
+	_, err := db.SQL.Exec(query, h.oldPersonalBest.Id)
+
+	if err != nil {
+		return err
+	}
+	
+	return nil
+}
+
+// Returns if the incoming score is a personal best
 func (h *Handler) isPersonalBestScore() bool {
 	return !h.scoreData.Failed && h.rating.Rating > h.oldPersonalBest.PerformanceRating
+}
+
+// Inserts the incoming score into the database
+func (h *Handler) insertNewScore(c *gin.Context) error {
+	const query string = "INSERT INTO scores " +
+		"(user_id, map_md5, replay_md5, timestamp, mode, personal_best, performance_rating, " +
+		"mods, failed, total_score, accuracy, max_combo, count_marv, count_perf, count_great, " +
+		"count_good, count_okay, count_miss, grade, scroll_speed, time_play_start, time_play_end, " +
+		"ip, executing_assembly, entry_assembly, quaver_version, pause_count, " +
+		"performance_processor_version, difficulty_processor_version, is_donator_score, " +
+		"tournament_game_id) " +
+		"VALUES " +
+		"(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+
+	grade := common.GetGradeFromAccuracy(h.scoreData.Accuracy, h.scoreData.Failed)
+	timestamp := 0
+	ip := utils.GetIpFromRequest(c)
+	isDonorScore := h.mapData.RankedStatus != common.StatusRanked
+	
+	result, err := db.SQL.Exec(query, 
+		h.user.Id, h.mapData.MD5, h.scoreData.ReplayMD5, timestamp, h.scoreData.GameMode, 
+		h.isPersonalBestScore(), h.rating.Rating, h.scoreData.Mods, h.scoreData.Failed, 
+		h.scoreData.TotalScore, h.scoreData.Accuracy, h.scoreData.MaxCombo, h.scoreData.CountMarv, 
+		h.scoreData.CountPerf, h.scoreData.CountGreat, h.scoreData.CountGood, h.scoreData.CountOkay, 
+		h.scoreData.CountMiss, grade, h.scoreData.ScrollSpeed, h.scoreData.TimePlayStart, 
+		h.scoreData.TimePlayEnded, ip, h.scoreData.ExecutingAssemblyMD5, h.scoreData.EntryAssemblyMD5, 
+		h.scoreData.ReplayVersion, h.scoreData.PauseCount, h.rating.Version, h.difficulty.Result.Version,
+		isDonorScore, h.scoreData.GameId)
+	
+	const errStr = "error while inserting score - %v"
+	
+	if err != nil {
+		fmt.Printf(errStr, err)
+		handlers.Return500(c)
+		return err
+	}
+	
+	h.newScoreId, err = result.LastInsertId()
+	
+	if err != nil {
+		fmt.Printf(errStr, err)
+		handlers.Return500(c)
+		return err	
+	}
+	
+	return nil
 }
