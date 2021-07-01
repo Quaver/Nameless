@@ -255,7 +255,7 @@ func (h *Handler) insertScore(c *gin.Context) error {
 	_, err = db.Redis.Incr(db.RedisCtx, "quaver:total_scores").Result()
 	
 	if err != nil {
-		fmt.Printf("Failed to increment total scores in redis - %v", err)
+		fmt.Printf("Failed to increment total scores in redis - %v\n", err)
 		handlers.Return500(c)
 		return err
 	}
