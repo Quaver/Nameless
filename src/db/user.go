@@ -39,8 +39,8 @@ func GetUserById(id int) (User, error) {
 	return user, nil
 }
 
-// UpdateLatestActivity Updates a user's latest activity to the current time
-func UpdateLatestActivity(id int) error {
+// UpdateUserLatestActivity Updates a user's latest activity to the current time
+func UpdateUserLatestActivity(id int) error {
 	timestamp := time.Now().UnixNano() / int64(time.Millisecond)
 	_, err := SQL.Exec("UPDATE users SET latest_activity = ? WHERE id = ?", timestamp, id)
 	

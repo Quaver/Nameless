@@ -119,13 +119,29 @@ func (h *Handler) handleSubmission(c *gin.Context) error {
 		return err
 	}
 
-	err = db.UpdateLatestActivity(h.user.Id)
+	err = h.updateUserLatestActivity(c)
 	
 	if err != nil {
-		handlers.Return500(c)
 		return err
 	}
 	
+	err = h.uploadReplay(c)
+	
+	if err != nil {
+		return err
+	}
+	
+	err = h.updateLeaderboardCache(c)
+	
+	if err != nil {
+		return err
+	}
+	
+	// Anything below this point requires the map to be ranked
+	// since there will be updating leaderboards, handling achievements, etc.
+	if h.mapData.RankedStatus != common.StatusRanked {
+		return nil
+	}
 	
 	return nil
 }
@@ -268,5 +284,49 @@ func (h *Handler) insertScore(c *gin.Context) error {
 		return err
 	}
 
+	return nil
+}
+
+// Updates the user's latest activity in the database
+func (h *Handler) updateUserLatestActivity(c *gin.Context) error {
+	err := db.UpdateUserLatestActivity(h.user.Id)
+	
+	if err != nil {
+		fmt.Printf("error while updating user latest activity - %v", err)
+		handlers.Return500(c)
+		return err
+	}
+	
+	return nil
+}
+
+/// TODO: Uploads the replay to azure storage 
+func (h *Handler) uploadReplay(c *gin.Context) error {
+	if !h.isPersonalBestScore() && h.scoreData.GameId != -1 {
+		return nil
+	}
+	
+	return nil
+}
+
+// Updates the play + fail count of the map
+func (h *Handler) updateMapPlayCount(c *gin.Context) error {
+	err := db.IncrementMapPlayCount(h.mapData.Id, h.scoreData.Failed)
+	
+	if err != nil {
+		fmt.Printf("error while incrementing map play count - %v", err)
+		handlers.Return500(c)
+		return err
+	}
+	
+	return nil
+}
+
+// Updates the top 50 score leaderboard cache
+func (h *Handler) updateLeaderboardCache(c *gin.Context) error {
+	if h.scoreData.Failed {
+		return nil
+	}
+	
 	return nil
 }

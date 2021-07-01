@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"fmt"
 	"github.com/Swan/Nameless/src/common"
 )
 
@@ -56,4 +57,24 @@ func GetMapById(id int32) (Map, error) {
 	}
 
 	return m, nil
+}
+
+// IncrementMapPlayCount Increments the play count & fail count of the map in the db & ES
+// TODO: Update ES
+func IncrementMapPlayCount(id int, failed bool) error {
+	failQueryStr := ""
+	
+	if failed {
+		failQueryStr = ", fail_count = fail_count + 1"
+	}
+	
+	query := fmt.Sprintf("UPDATE maps SET play_count = play_count + 1%v WHERE id = ?", failQueryStr)
+	
+	_, err := SQL.Exec(query, id)
+	
+	if err != nil {
+		return err
+	}
+	
+	return nil
 }
