@@ -113,12 +113,13 @@ func (h *Handler) handleSubmission(c *gin.Context) error {
 		return err
 	}
 
-	err = h.insertNewScore(c)
+	err = h.insertScore(c)
 
 	if err != nil {
 		return err
 	}
 
+	
 	return nil
 }
 
@@ -218,16 +219,9 @@ func (h *Handler) isPersonalBestScore() bool {
 }
 
 // Inserts the incoming score into the database
-func (h *Handler) insertNewScore(c *gin.Context) error {
-	const query string = "INSERT INTO scores " +
-		"(user_id, map_md5, replay_md5, timestamp, mode, personal_best, performance_rating, " +
-		"mods, failed, total_score, accuracy, max_combo, count_marv, count_perf, count_great, " +
-		"count_good, count_okay, count_miss, grade, scroll_speed, time_play_start, time_play_end, " +
-		"ip, executing_assembly, entry_assembly, quaver_version, pause_count, " +
-		"performance_processor_version, difficulty_processor_version, is_donator_score, " +
-		"tournament_game_id) " +
-		"VALUES " +
-		"(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+func (h *Handler) insertScore(c *gin.Context) error {
+	const query string = "INSERT INTO scores VALUES " +
+		"(NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 
 	grade := common.GetGradeFromAccuracy(h.scoreData.Accuracy, h.scoreData.Failed)
 	isDonorScore := h.mapData.RankedStatus != common.StatusRanked
@@ -242,7 +236,7 @@ func (h *Handler) insertNewScore(c *gin.Context) error {
 		h.scoreData.EntryAssemblyMD5, h.scoreData.ReplayVersion, h.scoreData.PauseCount, h.rating.Version,
 		h.difficulty.Result.Version, isDonorScore, h.scoreData.GameId)
 
-	const errStr = "error while inserting score - %v"
+	const errStr = "error while inserting score - %v\n"
 
 	if err != nil {
 		fmt.Printf(errStr, err)
@@ -257,6 +251,7 @@ func (h *Handler) insertNewScore(c *gin.Context) error {
 		handlers.Return500(c)
 		return err
 	}
-
+	
+	
 	return nil
 }
