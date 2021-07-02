@@ -301,10 +301,20 @@ func (h *Handler) updateUserLatestActivity(c *gin.Context) error {
 	return nil
 }
 
-/// TODO: Uploads the replay to azure storage 
+/// Uploads the replay to azure storage 
 func (h *Handler) uploadReplay(c *gin.Context) error {
 	if !h.isPersonalBestScore() && h.scoreData.GameId == -1 {
 		return nil
+	}
+	
+	fileName := fmt.Sprintf("%v.qr", h.newScoreId)
+	
+	err := utils.AzureClient.UploadFile("replays", fileName, h.scoreData.RawReplayData)
+	
+	if err != nil {
+		fmt.Printf("error while uploading replay to azure - %v", err.Error())
+		handlers.Return500(c)
+		return err
 	}
 	
 	return nil
