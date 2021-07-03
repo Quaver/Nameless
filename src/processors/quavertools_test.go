@@ -1,11 +1,11 @@
 package processors
 
-import "testing"
+import (
+	"github.com/Swan/Nameless/src/config"
+	"testing"
+)
 
 func TestCompileQuaverTools(t *testing.T) {
-	err := CompileQuaverTools()
-
-	if err != nil {
-		t.Fatalf(err.Error())
-	}
+	config.InitializeConfig("../../")
+	CompileQuaverTools()
 }

@@ -2,15 +2,12 @@ package processors
 
 import (
 	"github.com/Swan/Nameless/src/common"
+	"github.com/Swan/Nameless/src/config"
 	"testing"
 )
 
 func TestCalculateDifficulty(t *testing.T) {
-	err := CompileQuaverTools()
-
-	if err != nil {
-		return
-	}
+	config.InitializeConfig("../../")
 
 	const qua string = ""
 
@@ -19,7 +16,7 @@ func TestCalculateDifficulty(t *testing.T) {
 		return
 	}
 
-	_, err = CalcDifficulty(qua, common.ModMirror|common.ModSpeed125X)
+	_, err := CalcDifficulty(qua, common.ModMirror|common.ModSpeed125X)
 
 	if err != nil {
 		t.Fatalf(err.Error())

@@ -1,17 +1,19 @@
 package utils
 
 import (
+	"github.com/Swan/Nameless/src/config"
 	"github.com/Swan/Nameless/src/db"
 	"testing"
 )
 
 func TestInitialize(t *testing.T) {
+	config.InitializeConfig("../../")
 	db.InitializeSQL()
 	InitializeAzure()
 }
 
 func TestUploadFile(t *testing.T) {
-	err := AzureClient.UploadFile("maps", "random.qua", []byte("hi"))
+	err := AzureClient.UploadFile("maps", "random2.qua", []byte("hi"))
 
 	if err != nil {
 		t.Fatalf(err.Error())

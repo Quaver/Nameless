@@ -1,0 +1,19 @@
+{
+  "sql": {
+    "host": "",
+    "username": "",
+    "password": "",
+    "database": ""
+  },
+  "redis": {
+    "address": "",
+    "password": "",
+    "db": 0
+  },
+  "azure": {
+    "account_name": "",
+    "account_key": ""
+  },
+  "quaver_api_path": "",
+  "map_cache_dir": ""
+}

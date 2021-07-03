@@ -2,16 +2,12 @@ package processors
 
 import (
 	"fmt"
+	"github.com/Swan/Nameless/src/config"
 	"testing"
 )
 
 func TestCalculateRating(t *testing.T) {
-	err := CompileQuaverTools()
-
-	if err != nil {
-		t.Fatal(err.Error())
-	}
-
+	config.InitializeConfig("../../")
 	r, err := CalcPerformance(30.25, 100, false)
 
 	if err != nil {

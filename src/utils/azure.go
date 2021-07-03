@@ -8,6 +8,7 @@ import (
 	"github.com/Azure/azure-pipeline-go/pipeline"
 	"github.com/Azure/azure-storage-blob-go/azblob"
 	"github.com/Swan/Nameless/src/common"
+	"github.com/Swan/Nameless/src/config"
 	"github.com/Swan/Nameless/src/db"
 	"io"
 	"io/fs"
@@ -23,9 +24,6 @@ type AzureStorageClient struct {
 	pipe pipeline.Pipeline
 }
 
-const accountName string = ""
-const accountKey string = ""
-
 // AzureClient Global storage client used throughout the application.
 // Must call InitializeAzure to create
 var AzureClient AzureStorageClient
@@ -39,11 +37,11 @@ func InitializeAzure() {
 	var err error
 	
 	client := AzureStorageClient{
-		accountName: accountName,
-		accountKey: accountKey,
+		accountName: config.Data.Azure.AccountName,
+		accountKey: config.Data.Azure.AccountKey,
 	}
 	
-	client.credential, err = azblob.NewSharedKeyCredential(accountName, accountKey)
+	client.credential, err = azblob.NewSharedKeyCredential(client.accountName, client.accountKey)
 	
 	if err != nil {
 		panic(err)
@@ -118,7 +116,7 @@ func (c *AzureStorageClient) DownloadFile(container string, name string, path st
 
 // CacheQuaFile Downloads a .qua file from the API to disk
 func CacheQuaFile(m db.Map) (string, error) {
-	const folder string = "C:\\Users\\Swan\\go\\src\\Nameless\\data\\maps"
+	folder := config.Data.MapCacheDir
 	err := os.MkdirAll(folder, os.ModePerm)
 
 	if err != nil {

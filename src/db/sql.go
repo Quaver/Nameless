@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	"github.com/Swan/Nameless/src/config"
 	_ "github.com/go-sql-driver/mysql"
 	"time"
 )
@@ -15,7 +16,10 @@ func InitializeSQL() {
 		return
 	}
 
-	db, err := sql.Open("mysql", "root:lol123@/quaver")
+	connStr := fmt.Sprintf("%v:%v@tcp(%v)/%v", config.Data.SQL.Username, config.Data.SQL.Password,
+		config.Data.SQL.Host, config.Data.SQL.Database)
+	
+	db, err := sql.Open("mysql", connStr)
 
 	if err != nil {
 		panic(err)
