@@ -16,5 +16,5 @@ func main() {
 	db.InitializeRedis()
 	db.InitializeSQL()
 	utils.InitializeAzure()
-	server{}.Start(8083)
+	server{}.Start(config.Data.Port)
 }

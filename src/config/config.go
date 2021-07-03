@@ -9,6 +9,7 @@ import (
 )
 
 type Configuration struct {
+	Port int `json:"port"`
 	Redis ConfigurationRedis `json:"redis"` 
 	SQL ConfigurationSQL `json:"sql"`
 	Azure ConfigurationAzure `json:"azure"`
