@@ -408,6 +408,35 @@ func (h *Handler) updateUserTotalHits(c *gin.Context) error {
 
 // Performs an update of the user's statistics
 func (h *Handler) updateUserStats(c *gin.Context) error {
+	h.stats.TotalScore += int64(h.scoreData.TotalScore)
+	h.stats.PlayCount++
+	
+	if h.scoreData.Failed {
+		h.stats.FailCount++
+	}
+	
+	if h.scoreData.MaxCombo > h.stats.MaxCombo {
+		h.stats.MaxCombo = h.scoreData.MaxCombo
+	}
+	
+	if h.isPersonalBestScore() {
+		// Update ranked score. If beating old personal best, take the difference between old and new score
+		h.stats.RankedScore += int64(h.scoreData.TotalScore)
+		if h.oldPersonalBest != (db.Score{}) {
+			h.stats.RankedScore -= int64(h.oldPersonalBest.TotalScore)
+		}
+		
+		// Update Overall Rating & Acc
+	}
+	
+	err := h.stats.UpdateDatabase()
+	
+	if err != nil {
+		fmt.Printf("error while updating stats - %v\n", err.Error())
+		handlers.Return500(c)
+		return err
+	}
+	
 	return nil
 }
 

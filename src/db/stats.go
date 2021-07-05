@@ -12,10 +12,10 @@ type UserStats struct {
 	RankedScore     int64
 	OverallAccuracy float64
 	OverallRating   float64
-	PlayCount       int
-	FailCount       int
-	MaxCombo        int
-	ReplaysWatched  int
+	PlayCount       int32
+	FailCount       int32
+	MaxCombo        int32
+	ReplaysWatched  int32
 	TotalMarv       int32
 	TotalPerf       int32
 	TotalGreat      int32
