@@ -95,6 +95,16 @@ func TestCalculateOverallRating(t *testing.T) {
 	_ = CalculateOverallRating(scores)
 }
 
+func TestCalculateOverallAccuracy(t *testing.T) {
+	scores, err := GetUserTopScores(1, common.ModeKeys4)
+
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	_= CalculateOverallAccuracy(scores)
+}
+
 func TestCloseScore(t *testing.T) {
 	CloseSQLConnection()
 }

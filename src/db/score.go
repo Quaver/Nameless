@@ -126,6 +126,25 @@ func CalculateOverallRating(scores []Score) float64 {
 	return sum
 }
 
+// CalculateOverallAccuracy calculates the overall accuracy from a list of scores
+// Assumes that the scores are sorted by performance rating
+func CalculateOverallAccuracy(scores []Score) float64 {
+	var total float64
+	var divideTotal float64
+	
+	for i, score := range scores {
+		add := math.Pow(0.95, float64(i)) * 100
+		total += float64(score.Accuracy) * add
+		divideTotal += add
+	}
+	
+	if divideTotal == 0 {
+		return 0
+	}
+	
+	return total / divideTotal
+}
+
 // Helper function to scan a score's row coming from the database.
 func scanScore(score *Score, scanner RowScanner) error {
 	err := scanner.Scan(
