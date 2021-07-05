@@ -142,7 +142,7 @@ func (h *Handler) handleSubmission(c *gin.Context) error {
 		return err
 	}
 	
-	err = h.updateLeaderboardCache(c)
+	err = h.updateScoreboardCache(c)
 	
 	if err != nil {
 		return err
@@ -426,7 +426,14 @@ func (h *Handler) updateUserStats(c *gin.Context) error {
 			h.stats.RankedScore -= int64(h.oldPersonalBest.TotalScore)
 		}
 		
-		// Update Overall Rating & Acc
+		// Update Overall Rating & Acc 
+		_, err := db.GetUserTopScores(h.user.Id, h.scoreData.GameMode)
+		
+		if err != nil {
+			fmt.Printf("error while fetching user top scores - %v", err)
+			handlers.Return500(c)
+			return  err
+		}
 	}
 	
 	err := h.stats.UpdateDatabase()
@@ -441,7 +448,7 @@ func (h *Handler) updateUserStats(c *gin.Context) error {
 }
 
 // Updates the top 50 score leaderboard cache
-func (h *Handler) updateLeaderboardCache(c *gin.Context) error {
+func (h *Handler) updateScoreboardCache(c *gin.Context) error {
 	if h.scoreData.Failed {
 		return nil
 	}

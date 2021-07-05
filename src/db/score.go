@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"github.com/Swan/Nameless/src/common"
+	"math"
 )
 
 type Score struct {
@@ -107,6 +108,22 @@ func GetUserTopScores(id int, mode common.Mode) ([]Score, error) {
 	}
 	
 	return scores, nil
+}
+
+// CalculateOverallRating Calculates the overall rating of a list of scores.
+// Assumes that scores are sorted by performance rating
+func CalculateOverallRating(scores []Score) float64 {
+	if len(scores) == 0 {
+		return 0
+	}
+	
+	sum := 0.00
+	
+	for i, score := range scores {
+		sum += score.PerformanceRating * math.Pow(0.95, float64(i))
+	}
+	
+	return sum
 }
 
 // Helper function to scan a score's row coming from the database.

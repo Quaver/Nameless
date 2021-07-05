@@ -77,15 +77,22 @@ func TestGetNoPersonalBestScore(t *testing.T) {
 }
 
 func TestGetUserTopScores(t *testing.T) {
-	scores, err := GetUserTopScores(1, common.ModeKeys4)
+	_, err := GetUserTopScores(1, common.ModeKeys4)
 	
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
-	
-	if len(scores) != 500 {
-		t.Fatalf("Expected 500 scores, got %v", len(scores))
+}
+
+
+func TestCalculateOverallRating(t *testing.T) {
+	scores, err := GetUserTopScores(1, common.ModeKeys4)
+
+	if err != nil {
+		t.Fatalf(err.Error())
 	}
+	
+	_ = CalculateOverallRating(scores)
 }
 
 func TestCloseScore(t *testing.T) {
