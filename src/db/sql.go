@@ -47,4 +47,5 @@ func CloseSQLConnection() {
 	}
 
 	fmt.Println("SQL Database connection has been closed.")
+	SQL = nil
 }

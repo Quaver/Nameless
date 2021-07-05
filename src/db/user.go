@@ -52,3 +52,5 @@ func UpdateUserLatestActivity(id int) error {
 	return err
 }
 
+
+

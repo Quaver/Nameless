@@ -333,6 +333,13 @@ func (h *Handler) updateMapPlayCount(c *gin.Context) error {
 	return nil
 }
 
+// Performs an update of the user's statistics
+func (h *Handler) updateUserStats(c *gin.Context) error {
+	// Update Total Hits
+	// 
+	return nil
+}
+
 // Updates the top 50 score leaderboard cache
 func (h *Handler) updateLeaderboardCache(c *gin.Context) error {
 	if h.scoreData.Failed {

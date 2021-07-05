@@ -2,13 +2,17 @@ package db
 
 import (
 	"database/sql"
+	"github.com/Swan/Nameless/src/config"
 	"testing"
 )
 
+func TestInitializeScore(t *testing.T) {
+	config.InitializeConfig("../../")
+	InitializeSQL()
+}
+
 // Tests fetching a score by its replay md5 hash and user
 func TestGetScoreByReplayMD5(t *testing.T) {
-	InitializeSQL()
-
 	user, err := GetUserById(1)
 
 	if err != nil {
@@ -31,8 +35,6 @@ func TestGetScoreByReplayMD5(t *testing.T) {
 
 // Tests fetching a user's personal best score on a map
 func TestGetPersonalBestScore(t *testing.T) {
-	InitializeSQL()
-
 	user, err := GetUserById(1)
 
 	if err != nil {
@@ -54,9 +56,6 @@ func TestGetPersonalBestScore(t *testing.T) {
 
 // Tests fetching a user's personal best score, but they do not have one
 func TestGetNoPersonalBestScore(t *testing.T) {
-	InitializeSQL()
-	defer CloseSQLConnection()
-
 	user, err := GetUserById(1)
 
 	if err != nil {
@@ -74,4 +73,8 @@ func TestGetNoPersonalBestScore(t *testing.T) {
 	if err != nil && err != sql.ErrNoRows {
 		t.Fatalf(err.Error())
 	}
+}
+
+func TestCloseScore(t *testing.T) {
+	CloseSQLConnection()
 }
