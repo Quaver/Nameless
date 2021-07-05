@@ -10,7 +10,6 @@ import (
 
 func main() {
 	cwd, _ := os.Getwd()
-	
 	config.InitializeConfig(cwd)
 	processors.CompileQuaverTools()
 	db.InitializeRedis()

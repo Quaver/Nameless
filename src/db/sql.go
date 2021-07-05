@@ -8,6 +8,10 @@ import (
 	"time"
 )
 
+type RowScanner interface {
+	Scan(dest ...interface{}) error
+}
+
 var SQL *sql.DB
 
 // InitializeSQL Initializes the SQL database connection

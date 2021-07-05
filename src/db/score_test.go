@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"github.com/Swan/Nameless/src/common"
 	"github.com/Swan/Nameless/src/config"
 	"testing"
 )
@@ -72,6 +73,18 @@ func TestGetNoPersonalBestScore(t *testing.T) {
 
 	if err != nil && err != sql.ErrNoRows {
 		t.Fatalf(err.Error())
+	}
+}
+
+func TestGetUserTopScores(t *testing.T) {
+	scores, err := GetUserTopScores(1, common.ModeKeys4)
+	
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	
+	if len(scores) != 500 {
+		t.Fatalf("Expected 500 scores, got %v", len(scores))
 	}
 }
 

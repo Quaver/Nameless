@@ -74,9 +74,44 @@ func GetPersonalBestScore(u *User, m *Map) (Score, error) {
 	return score, nil
 }
 
+// GetUserTopScores Fetches a user's top 500 scores
+func GetUserTopScores(id int, mode common.Mode) ([]Score, error) {
+	query := "SELECT * FROM scores " +
+		"WHERE user_id = ? AND mode = ? AND personal_best = 1 AND is_donator_score = 0 " +
+		"ORDER BY performance_rating DESC LIMIT 500"
+	
+	rows, err := SQL.Query(query, id, mode)
+	
+	if err != nil {
+		return []Score{}, nil
+	}
+	
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			return
+		}
+	}(rows)
+
+	var scores []Score
+	
+	for rows.Next() {
+		var score Score
+		err = scanScore(&score, rows)
+		
+		if err != nil {
+			return []Score{}, err
+		}
+		
+		scores = append(scores, score)
+	}
+	
+	return scores, nil
+}
+
 // Helper function to scan a score's row coming from the database.
-func scanScore(score *Score, row *sql.Row) error {
-	err := row.Scan(
+func scanScore(score *Score, scanner RowScanner) error {
+	err := scanner.Scan(
 		&score.Id, &score.UserId, &score.MapMD5, &score.ReplayMD5, &score.Timestamp,
 		&score.Mode, &score.PersonalBest, &score.PerformanceRating, &score.Mods,
 		&score.Failed, &score.TotalScore, &score.Accuracy, &score.MaxCombo,
