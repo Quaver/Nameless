@@ -427,13 +427,16 @@ func (h *Handler) updateUserStats(c *gin.Context) error {
 		}
 		
 		// Update Overall Rating & Acc 
-		_, err := db.GetUserTopScores(h.user.Id, h.scoreData.GameMode)
+		scores, err := db.GetUserTopScores(h.user.Id, h.scoreData.GameMode)
 		
 		if err != nil {
 			fmt.Printf("error while fetching user top scores - %v", err)
 			handlers.Return500(c)
 			return  err
 		}
+		
+		h.stats.OverallRating = db.CalculateOverallRating(scores)
+		h.stats.OverallAccuracy = db.CalculateOverallAccuracy(scores)
 	}
 	
 	err := h.stats.UpdateDatabase()
