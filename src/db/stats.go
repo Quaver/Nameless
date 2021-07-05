@@ -16,12 +16,12 @@ type UserStats struct {
 	FailCount       int
 	MaxCombo        int
 	ReplaysWatched  int
-	TotalMarv       int
-	TotalPerf       int
-	TotalGreat      int
-	TotalGood       int
-	TotalOkay       int
-	TotalMiss       int
+	TotalMarv       int32
+	TotalPerf       int32
+	TotalGreat      int32
+	TotalGood       int32
+	TotalOkay       int32
+	TotalMiss       int32
 	TotalPauses int
 	MultiplayerWins int
 	MultiplayerLosses int
@@ -71,6 +71,11 @@ func (s *UserStats) UpdateDatabase() error {
 	}
 	
 	return nil
+}
+
+// GetTotalHits Returns a sum of all hits (misses do onot count)
+func (s *UserStats) GetTotalHits() int32 {
+	return s.TotalMarv + s.TotalPerf + s.TotalGreat + s.TotalGood + s.TotalOkay
 }
 
 // Returns the name of the table depending on the game mode

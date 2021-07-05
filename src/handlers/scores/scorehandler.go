@@ -10,6 +10,7 @@ import (
 	"github.com/Swan/Nameless/src/processors"
 	"github.com/Swan/Nameless/src/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis/v8"
 	"net/http"
 	"time"
 )
@@ -19,6 +20,7 @@ type Handler struct {
 	user            db.User
 	mapData         db.Map
 	mapPath         string
+	stats			db.UserStats
 	difficulty      processors.DifficultyProcessor
 	rating          processors.RatingProcessor
 	oldPersonalBest db.Score
@@ -76,6 +78,14 @@ func (h Handler) SubmitPOST(c *gin.Context) {
 		return
 	}
 
+	h.stats, err = db.GetUserStats(h.user.Id, h.scoreData.GameMode)
+	
+	if err != nil {
+		fmt.Printf("error fetching user stats - %v", err.Error())
+		handlers.Return500(c)
+		return
+	}
+	
 	err = h.handleSubmission(c)
 
 	// Responses are given to the player inside of handleSubmission, so it's not needed here
@@ -138,10 +148,22 @@ func (h *Handler) handleSubmission(c *gin.Context) error {
 		return err
 	}
 	
+	err = h.updateUserTotalHits(c)
+	
+	if err != nil {
+		return err
+	}
+	
 	// Anything below this point requires the map to be ranked
 	// since there will be updating leaderboards, handling achievements, etc.
 	if h.mapData.RankedStatus != common.StatusRanked {
 		return nil
+	}
+	
+	err = h.updateUserStats(c)
+	
+	if err != nil {
+		return err
 	}
 	
 	return nil
@@ -333,10 +355,59 @@ func (h *Handler) updateMapPlayCount(c *gin.Context) error {
 	return nil
 }
 
+/// Updates the total hits data of the user in the database & redis
+func (h *Handler) updateUserTotalHits(c *gin.Context) error {
+	h.stats.TotalMarv += h.scoreData.CountMarv
+	h.stats.TotalPerf += h.scoreData.CountPerf
+	h.stats.TotalGreat += h.scoreData.CountGreat
+	h.stats.TotalGood += h.scoreData.CountGood
+	h.stats.TotalOkay += h.scoreData.CountOkay
+	h.stats.TotalMiss += h.scoreData.CountMiss
+	
+	err := h.stats.UpdateDatabase()
+	
+	if err != nil {
+		fmt.Printf("error while updating user stats in db - %v\n", err.Error())
+		handlers.Return500(c)
+		return err
+	}
+	
+	// Fetch stats of the other game mode, so it can be totaled up and added to the total hits leaderboard
+	var otherMode common.Mode
+	
+	switch h.stats.Mode {
+	case common.ModeKeys4:
+		otherMode = common.ModeKeys7
+	case common.ModeKeys7:
+		otherMode = common.ModeKeys4
+	}
+	
+	otherModeStats, err := db.GetUserStats(h.user.Id, otherMode)
+	
+	if err != nil {
+		fmt.Printf("error while fetching user stats for %v - %v", otherMode, err.Error())
+		handlers.Return500(c)
+		return err
+	}
+	
+	total := h.stats.GetTotalHits() + otherModeStats.GetTotalHits()
+	
+	err = db.Redis.ZAdd(db.RedisCtx, "quaver:leaderboard:total_hits_global", &redis.Z{
+		Score: float64(total),
+		Member: h.user.Id,	
+	}).Err()
+	
+	if err != nil {
+		fmt.Printf("error while updating total hits in redis - %v\n", err.Error())
+		handlers.Return500(c)
+		return err
+	}
+	
+	return nil
+}
+
 // Performs an update of the user's statistics
 func (h *Handler) updateUserStats(c *gin.Context) error {
-	// Update Total Hits
-	// 
 	return nil
 }
 
