@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
 	"net/http"
-	"strings"
 	"time"
 )
 
@@ -168,6 +167,12 @@ func (h *Handler) handleSubmission(c *gin.Context) error {
 	}
 	
 	err = h.updateLeaderboards(c)
+	
+	if err != nil {
+		return err
+	}
+	
+	err = h.handleFirstPlaceScore(c)
 	
 	if err != nil {
 		return err
@@ -469,12 +474,7 @@ func (h *Handler) updateScoreboardCache(c *gin.Context) error {
 
 // Updates the global and country leaderboards for the user.
 func (h *Handler) updateLeaderboards(c *gin.Context) error {
-	globalKey := fmt.Sprintf("quaver:leaderboard:%v", h.mapData.GameMode)
-	
-	err := db.Redis.ZAdd(db.RedisCtx, globalKey, &redis.Z{
-		Score: h.stats.OverallRating,
-		Member: h.user.Id,
-	}).Err()
+	err := db.UpdateGlobalLeaderboard(&h.user, h.mapData.GameMode, h.stats.OverallRating)
 
 	if err != nil {
 		fmt.Printf("error updating global leaderboard - %v", err.Error())
@@ -482,20 +482,19 @@ func (h *Handler) updateLeaderboards(c *gin.Context) error {
 		return err
 	}
 	
-	countryKey := fmt.Sprintf("quaver:country_leaderboard:%v:%v", strings.ToLower(h.user.Country), 
-		h.mapData.GameMode)
-
-	err = db.Redis.ZAdd(db.RedisCtx, countryKey, &redis.Z{
-		Score: h.stats.OverallRating,
-		Member: h.user.Id,
-	}).Err()
-
+	err = db.UpdateCountryLeaderboard(&h.user, h.mapData.GameMode, h.stats.OverallRating)
+	
 	if err != nil {
-		fmt.Printf("error updating country leaderboard - %v", err.Error())
+		fmt.Printf("error updating country leaderboard -%v", err.Error())
 		handlers.Return500(c)
 		return err
 	}
 	
+	return nil
+}
+
+// Checks if the user has a first place score and sends it to discord/albatross
+func (h *Handler) handleFirstPlaceScore(c *gin.Context) error {
 	return nil
 }
 
