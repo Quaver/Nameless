@@ -12,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -161,6 +162,12 @@ func (h *Handler) handleSubmission(c *gin.Context) error {
 	}
 	
 	err = h.updateUserStats(c)
+	
+	if err != nil {
+		return err
+	}
+	
+	err = h.updateLeaderboards(c)
 	
 	if err != nil {
 		return err
@@ -422,6 +429,7 @@ func (h *Handler) updateUserStats(c *gin.Context) error {
 	if h.isPersonalBestScore() {
 		// Update ranked score. If beating old personal best, take the difference between old and new score
 		h.stats.RankedScore += int64(h.scoreData.TotalScore)
+		
 		if h.oldPersonalBest != (db.Score{}) {
 			h.stats.RankedScore -= int64(h.oldPersonalBest.TotalScore)
 		}
@@ -454,6 +462,38 @@ func (h *Handler) updateUserStats(c *gin.Context) error {
 func (h *Handler) updateScoreboardCache(c *gin.Context) error {
 	if h.scoreData.Failed {
 		return nil
+	}
+	
+	return nil
+}
+
+// Updates the global and country leaderboards for the user.
+func (h *Handler) updateLeaderboards(c *gin.Context) error {
+	globalKey := fmt.Sprintf("quaver:leaderboard:%v", h.mapData.GameMode)
+	
+	err := db.Redis.ZAdd(db.RedisCtx, globalKey, &redis.Z{
+		Score: h.stats.OverallRating,
+		Member: h.user.Id,
+	}).Err()
+
+	if err != nil {
+		fmt.Printf("error updating global leaderboard - %v", err.Error())
+		handlers.Return500(c)
+		return err
+	}
+	
+	countryKey := fmt.Sprintf("quaver:country_leaderboard:%v:%v", strings.ToLower(h.user.Country), 
+		h.mapData.GameMode)
+
+	err = db.Redis.ZAdd(db.RedisCtx, countryKey, &redis.Z{
+		Score: h.stats.OverallRating,
+		Member: h.user.Id,
+	}).Err()
+
+	if err != nil {
+		fmt.Printf("error updating country leaderboard - %v", err.Error())
+		handlers.Return500(c)
+		return err
 	}
 	
 	return nil
