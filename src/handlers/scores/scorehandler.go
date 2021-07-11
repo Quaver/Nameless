@@ -178,6 +178,8 @@ func (h *Handler) handleSubmission(c *gin.Context) error {
 		return err
 	}
 	
+	h.updateElasticSearch()
+	
 	return nil
 }
 
@@ -639,4 +641,16 @@ func (h *Handler) convertToDbScore() db.Score {
 		Accuracy:          h.scoreData.Accuracy,
 		MaxCombo: 		   int(h.scoreData.MaxCombo),
 	}
+}
+
+// Updates elastic search on the API. This is ran in a goroutine because the result
+// isn't important enough to block score submission.
+func (h Handler) updateElasticSearch() {
+	go func() {
+		err := utils.UpdateElasticSearchMapset(h.mapData.MapsetId)
+		
+		if err != nil {
+			fmt.Printf("error updating elasticsearch - %v", err.Error())
+		}
+	}()
 }

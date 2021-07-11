@@ -23,5 +23,7 @@
   "discord_webhook_first_place": {
     "id": -1,
     "secret": ""
-  }
+  },
+  "api_secret_key": "",
+  "api_base_url": "http://localhost:8082"
 }
