@@ -1,5 +1,7 @@
 package common
 
+import "strings"
+
 type Mods int64
 
 const (
@@ -84,6 +86,53 @@ var RankedMods = []Mods{
 	ModMirror,
 }
 
+var ModStrings = map[Mods]string{
+	ModNoSliderVelocities: "NSV",
+	ModSpeed05X: "0.5x",
+	ModSpeed06X: "0.6x",
+	ModSpeed07X: "0.7x",
+	ModSpeed08X: "0.8x",
+	ModSpeed09X: "0.9x",
+	ModSpeed11X: "1.1x",
+	ModSpeed12X: "1.2x",
+	ModSpeed13X: "1.3x",
+	ModSpeed14X: "1.4x",
+	ModSpeed15X: "1.5x",
+	ModSpeed16X: "1.6x",
+	ModSpeed17X: "1.7x",
+	ModSpeed18X: "1.8x",
+	ModSpeed19X: "1.9x",
+	ModSpeed20X: "2.0x",
+	ModStrict: "Strict",
+	ModChill: "Chill",
+	ModNoPause: "No Pause",
+	ModAutoplay: "Autoplay",
+	ModPaused: "Paused",
+	ModNoFail: "No Fail",
+	ModNoLongNotes: "No Long Notes",
+	ModRandomize: "Randomize",
+	ModSpeed055X: "0.55x",
+	ModSpeed065X: "0.65x",
+	ModSpeed075X: "0.75x",
+	ModSpeed085X: "0.85x",
+	ModSpeed095X: "0.95x",
+	ModInverse: "Inverse",
+	ModFullLN: "Full Long Notes",
+	ModMirror: "Mirror",
+	ModCoop: "Co-op",
+	ModSpeed105X: "1.05x",
+	ModSpeed115X: "1.15x",
+	ModSpeed125X: "1.25x",
+	ModSpeed135X: "1.35x",
+	ModSpeed145X: "1.45x",
+	ModSpeed155X: "1.55x",
+	ModSpeed165X: "1.65x",
+	ModSpeed175X: "1.75x",
+	ModSpeed185X: "1.85x",
+	ModSpeed195X: "1.95x",
+	ModHealthAdjust: "Health Adjustments",
+	ModEnumMaxValue: "INVALID!",
+}
 // IsModActivated Returns if a given mod is activated in a mod combo
 func IsModActivated(modCombo Mods, mod Mods) bool {
 	return modCombo&mod != 0
@@ -124,4 +173,25 @@ func IsModComboRanked(modCombo Mods) bool {
 	}
 
 	return true
+}
+
+// GetModsString Gets a stringified version of a mod combination
+func GetModsString(modCombo Mods) string {
+	if modCombo == 0 {
+		return "None"
+	}
+	
+	mods := []string{}
+	
+	for i := 0; (1 << i) < ModEnumMaxValue-1; i++ {
+		mod := Mods(1 << i)
+
+		if !IsModActivated(modCombo, mod) {
+			continue
+		}
+		
+		mods = append(mods, ModStrings[mod])
+	}
+	
+	return strings.Join(mods[:], ", ")
 }
