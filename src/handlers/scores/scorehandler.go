@@ -625,7 +625,7 @@ func (h Handler) updateElasticSearch() {
 		err := utils.UpdateElasticSearchMapset(h.mapData.MapsetId)
 
 		if err != nil {
-			fmt.Printf("error updating elasticsearch - %v", err.Error())
+			fmt.Printf("error updating elasticsearch - %v\n", err.Error())
 		}
 	}()
 }
