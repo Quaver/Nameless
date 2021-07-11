@@ -618,6 +618,18 @@ func (h *Handler) updateFirstPlaceScore(score *db.FirstPlaceScore) error {
 	return nil
 }
 
+// Updates elastic search on the API. This is ran in a goroutine because the result
+// isn't important enough to block score submission.
+func (h Handler) updateElasticSearch() {
+	go func() {
+		err := utils.UpdateElasticSearchMapset(h.mapData.MapsetId)
+
+		if err != nil {
+			fmt.Printf("error updating elasticsearch - %v", err.Error())
+		}
+	}()
+}
+
 // Logs out the score in a readable way
 func (h *Handler) logScore() {
 	fmt.Printf("[#%v] %v (#%v) | Map: #%v | Rating: %.2f | Accuracy: %.2f%% | PB: %v \n", 
@@ -641,16 +653,4 @@ func (h *Handler) convertToDbScore() db.Score {
 		Accuracy:          h.scoreData.Accuracy,
 		MaxCombo: 		   int(h.scoreData.MaxCombo),
 	}
-}
-
-// Updates elastic search on the API. This is ran in a goroutine because the result
-// isn't important enough to block score submission.
-func (h Handler) updateElasticSearch() {
-	go func() {
-		err := utils.UpdateElasticSearchMapset(h.mapData.MapsetId)
-		
-		if err != nil {
-			fmt.Printf("error updating elasticsearch - %v", err.Error())
-		}
-	}()
 }
