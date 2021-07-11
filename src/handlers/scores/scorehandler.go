@@ -469,6 +469,15 @@ func (h *Handler) updateScoreboardCache(c *gin.Context) error {
 		return nil
 	}
 	
+	score := h.convertToDbScore()
+	err := db.UpdateScoreboardCache(&score, &h.mapData)
+	
+	if err != nil {
+		fmt.Printf("error while updating scoreboard cache - %v\n", err.Error())
+		handlers.Return500(c)
+		return err
+	}
+	
 	return nil
 }
 
