@@ -10,11 +10,15 @@ import (
 
 type Configuration struct {
 	Port int `json:"port"`
+	WebsiteUrl string `json:"website_url"`
+	CdnUrl string `json:"cdn_url"`
+	QuaverAvatar string `json:"quaver_avatar"`
 	Redis ConfigurationRedis `json:"redis"` 
 	SQL ConfigurationSQL `json:"sql"`
 	Azure ConfigurationAzure `json:"azure"`
 	QuaverAPIPath string `json:"quaver_api_path"`
 	MapCacheDir string `json:"map_cache_dir"`
+	DiscordWebhookFirstPlace ConfigurationDiscordWebhook `json:"discord_webhook_first_place"`
 }
 
 type ConfigurationRedis struct {
@@ -33,6 +37,11 @@ type ConfigurationSQL struct {
 type ConfigurationAzure struct {
 	AccountName string `json:"account_name"`
 	AccountKey string `json:"account_key"`
+}
+
+type ConfigurationDiscordWebhook struct {
+	Id int64 `json:"id"`
+	Secret string `json:"secret"`
 }
 
 var Data Configuration
