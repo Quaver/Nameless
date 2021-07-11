@@ -495,6 +495,115 @@ func (h *Handler) updateLeaderboards(c *gin.Context) error {
 
 // Checks if the user has a first place score and sends it to discord/albatross
 func (h *Handler) handleFirstPlaceScore(c *gin.Context) error {
+	if !h.isPersonalBestScore() {
+		return nil
+	}
+	
+	existingFp, err := db.GetFirstPlaceScore(h.mapData.MD5)
+	gainedFirstPlace := false
+	
+	if err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			err := h.insertFirstPlaceScore()
+
+			if err != nil {
+				fmt.Printf("error while inserting first place existingFp - %v", err.Error())
+				handlers.Return500(c)
+				return err
+			}
+			
+			gainedFirstPlace = true
+		default:
+			fmt.Printf("error while fetching existing first place existingFp - %v", err.Error())
+			handlers.Return500(c)
+			return nil
+		}
+	} else {
+		err := h.updateFirstPlaceScore(&existingFp)
+		
+		if err != nil {
+			fmt.Printf("error while updating first place existingFp - %v", err.Error())
+			handlers.Return500(c)
+			return err
+		}
+		
+		gainedFirstPlace = true
+	}
+
+	if !gainedFirstPlace { 
+		return nil
+	}
+	
+	mapStr := h.mapData.GetString()
+
+	// Update Activity Feed For First Place Winner
+	err = db.InsertActivityFeed(h.user.Id, db.ActivityFeedAchievedFirstPlace, mapStr, h.mapData.MapsetId)
+	
+	if err != nil {
+		fmt.Printf("error while inserting first place winner feed - %v", err.Error())
+		handlers.Return500(c)
+		return err
+	}
+	
+	// Update activity feed for the first place loser
+	if existingFp != (db.FirstPlaceScore{}) && existingFp.UserId != h.user.Id {
+		err = db.InsertActivityFeed(existingFp.UserId, db.ActivityFeedLostFirstPlace, mapStr, h.mapData.MapsetId)
+		
+		if err != nil {
+			fmt.Printf("error while inserting first place loser feed - %v", err.Error())
+			handlers.Return500(c)
+			return err
+		}
+	}
+	
+	var oldUser db.User
+	oldUser, err = db.GetUserById(existingFp.UserId)
+
+	if err != nil && err != sql.ErrNoRows {
+		fmt.Printf("error while fetching existing first place from db - %v", err.Error())
+		handlers.Return500(c)
+		return err
+	}
+	
+	dbScore := h.convertToDbScore()
+	err = utils.SendFirstPlaceWebhook(&h.user, &dbScore, &h.mapData, &oldUser)
+	
+	// No need to return a 500 here, that could be an issue on Discord's end, it's not crucial to log webhooks.
+	if err != nil {
+		fmt.Printf("error while sending first place score - %v", err.Error())
+	}
+	
+	return nil
+}
+
+// Inserts a new first place score into the database.
+func (h *Handler) insertFirstPlaceScore() error {
+	fp := db.NewFirstPlaceScore(h.mapData.MD5, h.user.Id, int(h.newScoreId), h.rating.Rating)
+
+	err := fp.Insert()
+
+	if err != nil {
+		return nil
+	}
+	
+	return nil
+}
+
+// Updates an existing first place score to the new user
+func (h *Handler) updateFirstPlaceScore(score *db.FirstPlaceScore) error {
+	if h.rating.Rating < score.PerformanceRating {
+		return nil
+	}
+
+	fp := db.NewFirstPlaceScore(h.mapData.MD5, h.user.Id, int(h.newScoreId), h.rating.Rating)
+
+	err := fp.Update()
+
+	if err != nil {
+		return err
+	}
+	
 	return nil
 }
 
@@ -503,4 +612,22 @@ func (h *Handler) logScore() {
 	fmt.Printf("[#%v] %v (#%v) | Map: #%v | Rating: %.2f | Accuracy: %.2f%% | PB: %v \n", 
 		h.newScoreId, h.user.Username, h.user.Id, h.mapData.Id, h.rating.Rating, h.scoreData.Accuracy,
 		h.isPersonalBestScore())
+}
+
+// Converts the incoming score's to a db score.
+func (h *Handler) convertToDbScore() db.Score {
+	return db.Score{
+		Id: 			   int(h.newScoreId),
+		UserId:            h.user.Id,
+		MapMD5:            h.mapData.MD5,
+		ReplayMD5:         h.scoreData.ReplayMD5,
+		Mode:              h.scoreData.GameMode,
+		PersonalBest:      h.isPersonalBestScore(),
+		PerformanceRating: h.rating.Rating,
+		Mods:              h.scoreData.Mods,
+		Failed:            h.scoreData.Failed,
+		TotalScore:        h.scoreData.TotalScore,
+		Accuracy:          h.scoreData.Accuracy,
+		MaxCombo: 		   int(h.scoreData.MaxCombo),
+	}
 }

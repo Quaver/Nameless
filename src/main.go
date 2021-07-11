@@ -15,5 +15,6 @@ func main() {
 	db.InitializeRedis()
 	db.InitializeSQL()
 	utils.InitializeAzure()
+	utils.InitializeDiscordWebhooks()
 	server{}.Start(config.Data.Port)
 }
