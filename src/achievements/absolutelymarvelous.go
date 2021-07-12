@@ -7,8 +7,8 @@ import (
 
 type AchievementAbsolutelyMarvelous Achievement
 
-func NewAchievementAbsolutelyMarvelous() AchievementBabySteps {
-	return AchievementBabySteps{
+func NewAchievementAbsolutelyMarvelous() AchievementAbsolutelyMarvelous {
+	return AchievementAbsolutelyMarvelous {
 		Id: 2,
 		SteamAPIName: "ABSOLUTELY_MARVELOUS",
 	}

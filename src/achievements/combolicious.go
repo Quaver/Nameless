@@ -7,8 +7,8 @@ import (
 
 type AchievementCombolicious Achievement
 
-func NewAchievementCombolicious() AchievementBabySteps {
-	return AchievementBabySteps{
+func NewAchievementCombolicious() AchievementCombolicious {
+	return AchievementCombolicious {
 		Id: 3,
 		SteamAPIName: "COMBOLICIOUS",
 	}
