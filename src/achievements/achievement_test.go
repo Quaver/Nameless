@@ -50,6 +50,25 @@ func TestAbsolutelyMarvelous(t *testing.T) {
 	}
 }
 
+func TestCombolicious(t *testing.T) {
+	user, stats, err := getUser(1, common.ModeKeys4)
+
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	a := NewAchievementCombolicious()
+	ok, err := a.Check(&user, &db.Score{ Failed: true }, &stats)
+
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	if !ok {
+		t.Fatalf("achievement not unlocked")
+	}
+}
+
 func TestCloseAchievement(t *testing.T) {
 	db.CloseSQLConnection()
 }
