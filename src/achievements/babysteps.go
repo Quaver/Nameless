@@ -16,16 +16,17 @@ func NewAchievementBabySteps() AchievementBabySteps {
 
 // Check Unlocked by passing any map
 func (a *AchievementBabySteps) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
-	if !score.Failed {
+	if !score.Failed && !score.IsDonatorScore {
 		return true, nil
 	}
 	
 	if user.CheckedPreviousAchievements {
 		return false, nil
 	}
-	
-	q := "SELECT id FROM scores WHERE failed = 0 AND is_donator_score = 0 LIMIT 1"
-	err := db.SQL.QueryRow(q).Err()
+
+	var dbScore db.Score
+	q := "SELECT id FROM scores WHERE failed = 0 AND is_donator_score = 0 AND user_id = ? LIMIT 1"
+	err := db.SQL.QueryRow(q, user.Id).Scan(&dbScore.Id)
 
 	if err != nil {
 		if err == sql.ErrNoRows {

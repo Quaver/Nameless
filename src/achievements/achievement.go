@@ -8,5 +8,5 @@ type Achievement struct {
 }
 
 type AchievementChecker interface {
-	Check(*db.User, *db.Score, *db.UserStats) bool
+	Check(*db.User, *db.Score, *db.UserStats) (bool, error)
 }
