@@ -89,13 +89,32 @@ func TestPerfectionist(t *testing.T) {
 }
 
 func TestKeptYouPlayingHuh(t *testing.T) {
-	user, stats, err := getUser(2, common.ModeKeys4)
+	user, stats, err := getUser(1, common.ModeKeys4)
 
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
 	a := NewAchievementKeptYouPlayingHuh()
+	ok, err := a.Check(&user, &db.Score{}, &stats)
+
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	if !ok {
+		t.Fatalf("achievement not unlocked")
+	}
+}
+
+func TestHumbleBeginnings(t *testing.T) {
+	user, stats, err := getUser(1, common.ModeKeys4)
+
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	a := NewAchievementHumbleBeginnings()
 	ok, err := a.Check(&user, &db.Score{}, &stats)
 
 	if err != nil {
