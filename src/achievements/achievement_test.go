@@ -202,6 +202,25 @@ func TestOutOfThisWorld(t *testing.T) {
 	}
 }
 
+func TestArea51(t *testing.T) {
+	user, stats, err := getUser(608, common.ModeKeys4)
+
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	a := NewAchievementArea51()
+	ok, err := a.Check(&user, &db.Score{}, &stats)
+
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	if !ok {
+		t.Fatalf("achievement not unlocked")
+	}
+}
+
 func TestCloseAchievement(t *testing.T) {
 	db.CloseSQLConnection()
 }
