@@ -449,6 +449,25 @@ func TestYoureAnExpert(t *testing.T) {
 	}
 }
 
+func TestPieceOfCake(t *testing.T) {
+	user, stats, err := getUser(1, common.ModeKeys7)
+
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	a := NewAchievementPieceOfCake()
+	ok, err := a.Check(&user, &db.Score{}, &stats)
+
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	if !ok {
+		t.Fatalf("achievement not unlocked")
+	}
+}
+
 func TestCloseAchievement(t *testing.T) {
 	db.CloseSQLConnection()
 }
