@@ -15,7 +15,7 @@ func NewAchievementItsGettingHarder() AchievementItsGettingHarder {
 }
 
 func (a *AchievementItsGettingHarder) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
-	if score.PerformanceRating >= 15 {
+	if score.PerformanceRating >= 15 && !score.IsDonatorScore {
 		return true, nil
 	}
 
@@ -24,7 +24,7 @@ func (a *AchievementItsGettingHarder) Check(user *db.User, score *db.Score, stat
 	}
 
 	var dbScore db.Score
-	q := "SELECT id FROM scores WHERE performance_rating >= 15 AND user_id = ?"
+	q := "SELECT id FROM scores WHERE performance_rating >= 15 AND is_donator_score = 0 AND user_id = ? LIMIT 1"
 	err := db.SQL.QueryRow(q, user.Id).Scan(&dbScore.Id)
 
 	if err != nil {

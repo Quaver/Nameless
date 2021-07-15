@@ -15,7 +15,7 @@ func NewAchievementBeginnersLuck() AchievementBeginnersLuck {
 }
 
 func (a *AchievementBeginnersLuck) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
-	if score.PerformanceRating >= 10 {
+	if score.PerformanceRating >= 10 && !score.IsDonatorScore {
 		return true, nil
 	}
 
@@ -24,7 +24,7 @@ func (a *AchievementBeginnersLuck) Check(user *db.User, score *db.Score, stats *
 	}
 
 	var dbScore db.Score
-	q := "SELECT id FROM scores WHERE performance_rating >= 10 AND user_id = ?"
+	q := "SELECT id FROM scores WHERE performance_rating >= 10 AND is_donator_score = 0 AND user_id = ? LIMIT 1"
 	err := db.SQL.QueryRow(q, user.Id).Scan(&dbScore.Id)
 
 	if err != nil {
