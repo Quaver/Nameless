@@ -335,6 +335,25 @@ func TestItsOver5000(t *testing.T) {
 	}
 }
 
+func Test7500Deep(t *testing.T) {
+	user, stats, err := getUser(608, common.ModeKeys7)
+
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	a := NewAchievement7500Deep()
+	ok, err := a.Check(&user, &db.Score{}, &stats)
+
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	if !ok {
+		t.Fatalf("achievement not unlocked")
+	}
+}
+
 func TestCloseAchievement(t *testing.T) {
 	db.CloseSQLConnection()
 }
