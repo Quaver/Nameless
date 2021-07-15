@@ -15,7 +15,7 @@ func NewAchievement7500Deep() Achievement7500Deep {
 }
 
 func (a *Achievement7500Deep) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
-	if score.MaxCombo >= 7500 {
+	if score.MaxCombo >= 7500 && !score.Failed && !score.IsDonatorScore {
 		return true, nil
 	}
 
@@ -24,7 +24,7 @@ func (a *Achievement7500Deep) Check(user *db.User, score *db.Score, stats *db.Us
 	}
 
 	var dbScore db.Score
-	q := "SELECT id FROM scores WHERE max_combo >= 7500 AND user_id = ? LIMIT 1"
+	q := "SELECT id FROM scores WHERE max_combo >= 7500 AND is_donator_score = 0 AND failed = 0 AND user_id = ? LIMIT 1"
 	err := db.SQL.QueryRow(q, user.Id).Scan(&dbScore.Id)
 
 	if err != nil {
