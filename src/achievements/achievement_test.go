@@ -10,6 +10,7 @@ import (
 func TestInitializeAchievement(t *testing.T) {
 	config.InitializeConfig("../../")
 	db.InitializeSQL()
+	db.InitializeRedis()
 }
 
 func TestBabySteps(t *testing.T) {
@@ -477,6 +478,25 @@ func TestFailureIsAnOption(t *testing.T) {
 
 	a := NewAchievementFailureIsAnOption()
 	ok, err := a.Check(&user, &db.Score{}, &stats)
+
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	if !ok {
+		t.Fatalf("achievement not unlocked")
+	}
+}
+
+func TestApproachingTheBlueZenith(t *testing.T) {
+	user, stats, err := getUser(1, common.ModeKeys4)
+
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	a := NewAchievementApproachingTheBlueZenith()
+	ok, err := a.Check(&user, &db.Score{ Mode: common.ModeKeys4 }, &stats)
 
 	if err != nil {
 		t.Fatalf(err.Error())
