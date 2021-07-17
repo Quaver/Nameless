@@ -583,6 +583,25 @@ func TestHeWasNumberOne(t *testing.T) {
 	}
 }
 
+func TestStarvelous(t *testing.T) {
+	user, stats, err := getUser(608, common.ModeKeys4)
+
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	a := NewAchievementStarvelous()
+	ok, err := a.Check(&user, &db.Score{ Mode: common.ModeKeys4, CountMarv: 1 }, &stats)
+
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	if !ok {
+		t.Fatalf("achievement not unlocked")
+	}
+}
+
 func TestCloseAchievement(t *testing.T) {
 	db.CloseSQLConnection()
 }
