@@ -31,7 +31,7 @@ func GetUserById(id int) (User, error) {
 		&user.Id, &user.SteamId, &user.Username, &user.Allowed,
 		&user.Privileges, &user.UserGroups, &user.LatestActivity,
 		&user.Country, &user.CheckedPreviousAchievements, &user.AvatarURL)
-
+	
 	if err != nil {
 		return User{}, err
 	}
