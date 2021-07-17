@@ -19,7 +19,7 @@ func TestGetUserUnlockedAchievements(t *testing.T) {
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
-
+	
 	if len(achievements) != 23 {
 		t.Fatalf("expected 23 achievement count")
 	}

@@ -7,40 +7,37 @@ type Achievement struct {
 	SteamAPIName string `json:"steam_api_name"`
 }
 
-type UserAchievement struct {
-	UserId int
-	AchievementId int
-}
-
 type AchievementChecker interface {
 	Check(*db.User, *db.Score, *db.UserStats) (bool, error)
 }
 
 // GetUserUnlockedAchievements Retrieves all of the user's unlocked achievements
-func GetUserUnlockedAchievements(id int) ([]UserAchievement, error) {
-	query := "SELECT * FROM user_achievements WHERE user_id = ?"
+func GetUserUnlockedAchievements(id int) ([]Achievement, error) {
+	query := "SELECT id, steam_api_name FROM achievements WHERE id IN " +
+		"(SELECT achievement_id FROM user_achievements WHERE user_id = ?)"
+	
 	rows, err := db.SQL.Query(query, id)
 
 	if err != nil {
-		return []UserAchievement{}, err
+		return []Achievement{}, err
 	}
 
 	defer rows.Close()
 
-	var achievements []UserAchievement
+	var achievements []Achievement
 
 	for rows.Next() {
-		var a UserAchievement
-		err = rows.Scan(&a.UserId, &a.AchievementId)
+		var a Achievement
+		err = rows.Scan(&a.Id, &a.SteamAPIName)
 
 		if err != nil {
-			return []UserAchievement{}, err
+			return []Achievement{}, err
 		}
 
 		err = rows.Err()
 
 		if err != nil {
-			return []UserAchievement{}, err
+			return []Achievement{}, err
 		}
 
 		achievements = append(achievements, a)
