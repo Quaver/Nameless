@@ -468,6 +468,25 @@ func TestPieceOfCake(t *testing.T) {
 	}
 }
 
+func TestFailureIsAnOption(t *testing.T) {
+	user, stats, err := getUser(170, common.ModeKeys4)
+
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	a := NewAchievementFailureIsAnOption()
+	ok, err := a.Check(&user, &db.Score{}, &stats)
+
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	if !ok {
+		t.Fatalf("achievement not unlocked")
+	}
+}
+
 func TestCloseAchievement(t *testing.T) {
 	db.CloseSQLConnection()
 }
