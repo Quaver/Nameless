@@ -14,7 +14,7 @@ func NewAchievementTenThousand() AchievementTenThousand {
 	}
 }
 
-func (a *AchievementTenThousand) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
+func (a AchievementTenThousand) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
 	if score.MaxCombo >= 10000 && !score.Failed && !score.IsDonatorScore {
 		return true, nil
 	}

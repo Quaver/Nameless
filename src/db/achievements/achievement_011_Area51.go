@@ -11,7 +11,7 @@ func NewAchievementArea51() AchievementArea51 {
 	}
 }
 
-func (a *AchievementArea51) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
+func (a AchievementArea51) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
 	if stats.OverallRating >= 700 {
 		return true, nil
 	}

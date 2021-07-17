@@ -11,7 +11,7 @@ func NewAchievementWideningYourHorizons() AchievementWideningYourHorizons {
 	}
 }
 
-func (a *AchievementWideningYourHorizons) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
+func (a AchievementWideningYourHorizons) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
 	if stats.OverallRating >= 300 {
 		return true, nil
 	}

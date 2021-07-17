@@ -13,7 +13,7 @@ func NewAchievementFailureIsAnOption() AchievementFailureIsAnOption {
 	}
 }
 
-func (a *AchievementFailureIsAnOption) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
+func (a AchievementFailureIsAnOption) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
 	if stats.FailCount >= 1000 {
 		return true, nil
 	}

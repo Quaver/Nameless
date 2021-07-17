@@ -16,7 +16,7 @@ func NewAchievementSlowlyButSurely() AchievementSlowlyButSurely {
 	}
 }
 
-func (a *AchievementSlowlyButSurely) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
+func (a AchievementSlowlyButSurely) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
 	if !score.Failed && !score.IsDonatorScore && common.IsModActivated(score.Mods, common.ModSpeed05X) {
 		return true, nil
 	}

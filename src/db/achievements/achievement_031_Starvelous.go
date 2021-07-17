@@ -14,7 +14,7 @@ func NewAchievementStarvelous() AchievementStarvelous {
 	}
 }
 
-func (a *AchievementStarvelous) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
+func (a AchievementStarvelous) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
 	if !score.Failed && !score.IsDonatorScore && score.CountMarv == 0 {
 		return true, nil
 	}

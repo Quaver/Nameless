@@ -14,7 +14,7 @@ func NewAchievementQuombo() AchievementQuombo {
 	}
 }
 
-func (a *AchievementQuombo) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
+func (a AchievementQuombo) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
 	if score.MaxCombo >= 500 && !score.Failed && !score.IsDonatorScore {
 		return true, nil
 	}

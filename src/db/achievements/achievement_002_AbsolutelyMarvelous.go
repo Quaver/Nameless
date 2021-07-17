@@ -14,7 +14,7 @@ func NewAchievementAbsolutelyMarvelous() AchievementAbsolutelyMarvelous {
 	}
 }
 
-func (a *AchievementAbsolutelyMarvelous) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
+func (a AchievementAbsolutelyMarvelous) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
 	if !score.Failed && score.Accuracy == 100 && !score.IsDonatorScore {
 		return true, nil
 	}

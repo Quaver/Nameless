@@ -14,11 +14,11 @@ func NewAchievementItsOver5000() AchievementItsOver5000 {
 	}
 }
 
-func (a *AchievementItsOver5000) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
+func (a AchievementItsOver5000) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
 	if score.MaxCombo >= 5000 && !score.Failed && !score.IsDonatorScore {
 		return true, nil
 	}
-
+	
 	if user.CheckedPreviousAchievements {
 		return false, nil
 	}

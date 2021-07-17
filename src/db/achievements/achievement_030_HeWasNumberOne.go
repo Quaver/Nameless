@@ -14,7 +14,7 @@ func NewAchievementHeWasNumberOne() AchievementHeWasNumberOne {
 	}
 }
 
-func (a *AchievementHeWasNumberOne) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
+func (a AchievementHeWasNumberOne) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
 	var id int
 	q := "SELECT 1 FROM scores_first_place WHERE user_id = ? LIMIT 1"
 	err := db.SQL.QueryRow(q, user.Id).Scan(&id)

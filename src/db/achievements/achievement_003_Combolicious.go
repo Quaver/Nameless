@@ -14,7 +14,7 @@ func NewAchievementCombolicious() AchievementCombolicious {
 	}
 }
 
-func (a *AchievementCombolicious) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
+func (a AchievementCombolicious) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
 	if !score.Failed && score.MaxCombo >= 1000 && !score.IsDonatorScore {
 		return true, nil
 	}

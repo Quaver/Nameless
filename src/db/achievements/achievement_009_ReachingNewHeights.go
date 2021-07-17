@@ -11,7 +11,7 @@ func NewAchievementReachingNewHeights() AchievementReachingNewHeights {
 	}
 }
 
-func (a *AchievementReachingNewHeights) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
+func (a AchievementReachingNewHeights) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
 	if stats.OverallRating >= 500 {
 		return true, nil
 	}

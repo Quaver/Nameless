@@ -14,7 +14,7 @@ func NewAchievementPerfectionist() AchievementPerfectionist {
 	}
 }
 
-func (a *AchievementPerfectionist) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
+func (a AchievementPerfectionist) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
 	if !score.Failed && !score.IsDonatorScore &&
 		score.CountGreat == 0 && score.CountGood == 0 && score.CountOkay == 0 && score.CountMiss == 0 {
 		return true, nil

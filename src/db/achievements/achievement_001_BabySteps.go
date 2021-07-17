@@ -8,14 +8,14 @@ import (
 type AchievementBabySteps Achievement
 
 func NewAchievementBabySteps() AchievementBabySteps {
-	return AchievementBabySteps{
+	return AchievementBabySteps {
 		Id: 1,
 		SteamAPIName: "BABY_STEPS",
 	}
 }
 
 // Check Unlocked by passing any map
-func (a *AchievementBabySteps) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
+func (a AchievementBabySteps) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
 	if !score.Failed && !score.IsDonatorScore {
 		return true, nil
 	}

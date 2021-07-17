@@ -13,6 +13,6 @@ func NewAchievementFingerBreaker() AchievementFingerBreaker {
 	}
 }
 
-func (a *AchievementFingerBreaker) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
+func (a AchievementFingerBreaker) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
 	return stats.RankedScore >= 100000000, nil
 }

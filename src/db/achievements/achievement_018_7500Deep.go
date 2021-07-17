@@ -14,7 +14,7 @@ func NewAchievement7500Deep() Achievement7500Deep {
 	}
 }
 
-func (a *Achievement7500Deep) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
+func (a Achievement7500Deep) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
 	if score.MaxCombo >= 7500 && !score.Failed && !score.IsDonatorScore {
 		return true, nil
 	}

@@ -11,7 +11,7 @@ func NewAchievementAlien() AchievementAlien {
 	}
 }
 
-func (a *AchievementAlien) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
+func (a AchievementAlien) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
 	if stats.OverallRating >= 800 {
 		return true, nil
 	}

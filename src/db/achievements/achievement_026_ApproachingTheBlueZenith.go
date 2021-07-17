@@ -15,7 +15,7 @@ func NewAchievementApproachingTheBlueZenith() AchievementApproachingTheBlueZenit
 	}
 }
 
-func (a *AchievementApproachingTheBlueZenith) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
+func (a AchievementApproachingTheBlueZenith) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
 	key := fmt.Sprintf("quaver:leaderboard:%v", score.Mode)
 	result, err := db.Redis.ZRevRank(db.RedisCtx, key, strconv.Itoa(user.Id)).Result()
 	

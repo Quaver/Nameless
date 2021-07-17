@@ -13,6 +13,6 @@ func NewAchievementClickTheArrows() AchievementClickTheArrows {
 	}
 }
 
-func (a *AchievementClickTheArrows) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
+func (a AchievementClickTheArrows) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
 	return stats.GetTotalHits() >= 1000000, nil
 }

@@ -14,7 +14,7 @@ func NewAchievementBeginnersLuck() AchievementBeginnersLuck {
 	}
 }
 
-func (a *AchievementBeginnersLuck) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
+func (a AchievementBeginnersLuck) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
 	if score.PerformanceRating >= 10 && !score.IsDonatorScore {
 		return true, nil
 	}

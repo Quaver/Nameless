@@ -14,7 +14,7 @@ func NewAchievementYoureAnExpert() AchievementYoureAnExpert {
 	}
 }
 
-func (a *AchievementYoureAnExpert) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
+func (a AchievementYoureAnExpert) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
 	if score.PerformanceRating >= 30 && !score.IsDonatorScore {
 		return true, nil
 	}

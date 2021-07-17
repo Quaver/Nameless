@@ -14,7 +14,7 @@ func NewAchievementItsGettingHarder() AchievementItsGettingHarder {
 	}
 }
 
-func (a *AchievementItsGettingHarder) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
+func (a AchievementItsGettingHarder) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
 	if score.PerformanceRating >= 15 && !score.IsDonatorScore {
 		return true, nil
 	}

@@ -11,7 +11,7 @@ func NewAchievementOutOfThisWorld() AchievementOutOfThisWorld {
 	}
 }
 
-func (a *AchievementOutOfThisWorld) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
+func (a AchievementOutOfThisWorld) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
 	if stats.OverallRating >= 600 {
 		return true, nil
 	}

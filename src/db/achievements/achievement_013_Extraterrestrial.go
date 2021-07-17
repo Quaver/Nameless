@@ -11,7 +11,7 @@ func NewAchievementAExtraterrestrial() AchievementExtraterrestrial {
 	}
 }
 
-func (a *AchievementExtraterrestrial) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
+func (a AchievementExtraterrestrial) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
 	if stats.OverallRating >= 900 {
 		return true, nil
 	}

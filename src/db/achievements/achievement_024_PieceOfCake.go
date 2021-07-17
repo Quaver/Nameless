@@ -14,7 +14,7 @@ func NewAchievementPieceOfCake() AchievementPieceOfCake {
 	}
 }
 
-func (a *AchievementPieceOfCake) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
+func (a AchievementPieceOfCake) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
 	if score.PerformanceRating >= 35 && !score.IsDonatorScore {
 		return true, nil
 	}
