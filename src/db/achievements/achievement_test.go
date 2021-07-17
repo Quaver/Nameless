@@ -25,6 +25,18 @@ func TestGetUserUnlockedAchievements(t *testing.T) {
 	}
 }
 
+func TestGetUserLockedAchievements(t *testing.T) {
+	achievements, err := GetUserLockedAchievements(1)
+
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	
+	if len(achievements) != 8 {
+		t.Fatalf("expected 8 achievement count")
+	}
+}
+
 func TestBabySteps(t *testing.T) {
 	user, stats, err := getUser(1, common.ModeKeys4)
 	

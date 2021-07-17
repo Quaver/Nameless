@@ -48,3 +48,38 @@ func GetUserUnlockedAchievements(id int) ([]UserAchievement, error) {
 
 	return achievements, nil
 }
+
+// GetUserLockedAchievements Retrieves all of the user's currently locked achievements
+func GetUserLockedAchievements(id int) ([]Achievement, error) {
+	q :=  "SELECT id, steam_api_name FROM achievements WHERE id NOT IN " +
+		"(SELECT achievement_id FROM user_achievements WHERE user_id = ?)"
+	
+	rows, err := db.SQL.Query(q, id)
+	
+	if err != nil {
+		return []Achievement{}, err
+	}
+	
+	defer rows.Close()
+	
+	var achievements []Achievement
+	
+	for rows.Next() {
+		var a Achievement
+		err = rows.Scan(&a.Id, &a.SteamAPIName)
+		
+		if err != nil {
+			return []Achievement{}, err
+		}
+		
+		err = rows.Err()
+
+		if err != nil {
+			return []Achievement{}, err
+		}
+
+		achievements = append(achievements, a)
+	}
+	
+	return achievements, nil
+}
