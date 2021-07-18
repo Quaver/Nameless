@@ -6,6 +6,7 @@ import (
 	"github.com/Swan/Nameless/src/auth"
 	"github.com/Swan/Nameless/src/common"
 	"github.com/Swan/Nameless/src/db"
+	"github.com/Swan/Nameless/src/db/achievements"
 	"github.com/Swan/Nameless/src/handlers"
 	"github.com/Swan/Nameless/src/processors"
 	"github.com/Swan/Nameless/src/utils"
@@ -25,6 +26,7 @@ type Handler struct {
 	rating          processors.RatingProcessor
 	oldPersonalBest db.Score
 	newScoreId      int64
+	unlockedAchievements []achievements.Achievement
 }
 
 func (h Handler) SubmitPOST(c *gin.Context) {
@@ -178,6 +180,12 @@ func (h *Handler) handleSubmission(c *gin.Context) error {
 		return err
 	}
 
+	err = h.unlockAchievements(c)
+	
+	if err != nil {
+		return err
+	}
+	
 	h.updateElasticSearch()
 
 	return nil
@@ -618,9 +626,25 @@ func (h *Handler) updateFirstPlaceScore(score *db.FirstPlaceScore) error {
 	return nil
 }
 
+// Checks and unlocks achievements
+func (h *Handler) unlockAchievements(c *gin.Context) error {
+	score := h.convertToDbScore()
+	
+	var err error
+	h.unlockedAchievements, err = achievements.CheckAchievementsWithNewScore(&h.user, &score, &h.stats)
+	
+	if err != nil {
+		fmt.Printf("error while unlocking achievements - %v", err.Error())
+		handlers.Return500(c)
+		return err
+	}
+	
+	return nil
+}
+
 // Updates elastic search on the API. This is ran in a goroutine because the result
 // isn't important enough to block score submission.
-func (h Handler) updateElasticSearch() {
+func (h *Handler) updateElasticSearch() {
 	go func() {
 		err := utils.UpdateElasticSearchMapset(h.mapData.MapsetId)
 
