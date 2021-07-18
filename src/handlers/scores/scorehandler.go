@@ -20,7 +20,7 @@ type Handler struct {
 	user            db.User
 	mapData         db.Map
 	mapPath         string
-	stats			db.UserStats
+	stats           db.UserStats
 	difficulty      processors.DifficultyProcessor
 	rating          processors.RatingProcessor
 	oldPersonalBest db.Score
@@ -79,13 +79,13 @@ func (h Handler) SubmitPOST(c *gin.Context) {
 	}
 
 	h.stats, err = db.GetUserStats(h.user.Id, h.scoreData.GameMode)
-	
+
 	if err != nil {
 		fmt.Printf("error fetching user stats - %v", err.Error())
 		handlers.Return500(c)
 		return
 	}
-	
+
 	err = h.handleSubmission(c)
 
 	// Responses are given to the player inside of handleSubmission, so it's not needed here
@@ -131,55 +131,55 @@ func (h *Handler) handleSubmission(c *gin.Context) error {
 	}
 
 	err = h.updateUserLatestActivity(c)
-	
+
 	if err != nil {
 		return err
 	}
-	
+
 	err = h.uploadReplay(c)
-	
+
 	if err != nil {
 		return err
 	}
-	
+
 	err = h.updateScoreboardCache(c)
-	
+
 	if err != nil {
 		return err
 	}
-	
+
 	err = h.updateUserTotalHits(c)
-	
+
 	if err != nil {
 		return err
 	}
-	
+
 	// Anything below this point requires the map to be ranked
 	// since there will be updating leaderboards, handling achievements, etc.
 	if h.mapData.RankedStatus != common.StatusRanked {
 		return nil
 	}
-	
+
 	err = h.updateUserStats(c)
-	
+
 	if err != nil {
 		return err
 	}
-	
+
 	err = h.updateLeaderboards(c)
-	
+
 	if err != nil {
 		return err
 	}
-	
+
 	err = h.handleFirstPlaceScore(c)
-	
+
 	if err != nil {
 		return err
 	}
-	
+
 	h.updateElasticSearch()
-	
+
 	return nil
 }
 
@@ -312,9 +312,9 @@ func (h *Handler) insertScore(c *gin.Context) error {
 		handlers.Return500(c)
 		return err
 	}
-	
+
 	_, err = db.Redis.Incr(db.RedisCtx, "quaver:total_scores").Result()
-	
+
 	if err != nil {
 		fmt.Printf("Failed to increment total scores in redis - %v\n", err)
 		handlers.Return500(c)
@@ -327,45 +327,45 @@ func (h *Handler) insertScore(c *gin.Context) error {
 // Updates the user's latest activity in the database
 func (h *Handler) updateUserLatestActivity(c *gin.Context) error {
 	err := db.UpdateUserLatestActivity(h.user.Id)
-	
+
 	if err != nil {
 		fmt.Printf("error while updating user latest activity - %v", err)
 		handlers.Return500(c)
 		return err
 	}
-	
+
 	return nil
 }
 
-/// Uploads the replay to azure storage 
+/// Uploads the replay to azure storage
 func (h *Handler) uploadReplay(c *gin.Context) error {
 	if !h.isPersonalBestScore() && h.scoreData.GameId == -1 {
 		return nil
 	}
-	
+
 	fileName := fmt.Sprintf("%v.qr", h.newScoreId)
-	
+
 	err := utils.AzureClient.UploadFile("replays", fileName, h.scoreData.RawReplayData)
-	
+
 	if err != nil {
 		fmt.Printf("error while uploading replay to azure - %v", err.Error())
 		handlers.Return500(c)
 		return err
 	}
-	
+
 	return nil
 }
 
 // Updates the play + fail count of the map
 func (h *Handler) updateMapPlayCount(c *gin.Context) error {
 	err := db.IncrementMapPlayCount(h.mapData.Id, h.scoreData.Failed)
-	
+
 	if err != nil {
 		fmt.Printf("error while incrementing map play count - %v", err)
 		handlers.Return500(c)
 		return err
 	}
-	
+
 	return nil
 }
 
@@ -377,46 +377,46 @@ func (h *Handler) updateUserTotalHits(c *gin.Context) error {
 	h.stats.TotalGood += h.scoreData.CountGood
 	h.stats.TotalOkay += h.scoreData.CountOkay
 	h.stats.TotalMiss += h.scoreData.CountMiss
-	
+
 	err := h.stats.UpdateDatabase()
-	
+
 	if err != nil {
 		fmt.Printf("error while updating user stats in db - %v\n", err.Error())
 		handlers.Return500(c)
 		return err
 	}
-	
+
 	// Fetch stats of the other game mode, so it can be totaled up and added to the total hits leaderboard
 	var otherMode common.Mode
-	
+
 	switch h.stats.Mode {
 	case common.ModeKeys4:
 		otherMode = common.ModeKeys7
 	case common.ModeKeys7:
 		otherMode = common.ModeKeys4
 	}
-	
+
 	otherModeStats, err := db.GetUserStats(h.user.Id, otherMode)
-	
+
 	if err != nil {
 		fmt.Printf("error while fetching user stats for %v - %v", otherMode, err.Error())
 		handlers.Return500(c)
 		return err
 	}
-	
+
 	total := h.stats.GetTotalHits() + otherModeStats.GetTotalHits()
-	
+
 	err = db.Redis.ZAdd(db.RedisCtx, "quaver:leaderboard:total_hits_global", &redis.Z{
-		Score: float64(total),
-		Member: h.user.Id,	
+		Score:  float64(total),
+		Member: h.user.Id,
 	}).Err()
-	
+
 	if err != nil {
 		fmt.Printf("error while updating total hits in redis - %v\n", err.Error())
 		handlers.Return500(c)
 		return err
 	}
-	
+
 	return nil
 }
 
@@ -424,44 +424,44 @@ func (h *Handler) updateUserTotalHits(c *gin.Context) error {
 func (h *Handler) updateUserStats(c *gin.Context) error {
 	h.stats.TotalScore += int64(h.scoreData.TotalScore)
 	h.stats.PlayCount++
-	
+
 	if h.scoreData.Failed {
 		h.stats.FailCount++
 	}
-	
+
 	if h.scoreData.MaxCombo > h.stats.MaxCombo {
 		h.stats.MaxCombo = h.scoreData.MaxCombo
 	}
-	
+
 	if h.isPersonalBestScore() {
 		// Update ranked score. If beating old personal best, take the difference between old and new score
 		h.stats.RankedScore += int64(h.scoreData.TotalScore)
-		
+
 		if h.oldPersonalBest != (db.Score{}) {
 			h.stats.RankedScore -= int64(h.oldPersonalBest.TotalScore)
 		}
-		
-		// Update Overall Rating & Acc 
+
+		// Update Overall Rating & Acc
 		scores, err := db.GetUserTopScores(h.user.Id, h.scoreData.GameMode)
-		
+
 		if err != nil {
 			fmt.Printf("error while fetching user top scores - %v", err)
 			handlers.Return500(c)
-			return  err
+			return err
 		}
-		
+
 		h.stats.OverallRating = db.CalculateOverallRating(scores)
 		h.stats.OverallAccuracy = db.CalculateOverallAccuracy(scores)
 	}
-	
+
 	err := h.stats.UpdateDatabase()
-	
+
 	if err != nil {
 		fmt.Printf("error while updating stats - %v\n", err.Error())
 		handlers.Return500(c)
 		return err
 	}
-	
+
 	return nil
 }
 
@@ -470,16 +470,16 @@ func (h *Handler) updateScoreboardCache(c *gin.Context) error {
 	if h.scoreData.Failed {
 		return nil
 	}
-	
+
 	score := h.convertToDbScore()
 	err := db.UpdateScoreboardCache(&score, &h.mapData)
-	
+
 	if err != nil {
 		fmt.Printf("error while updating scoreboard cache - %v\n", err.Error())
 		handlers.Return500(c)
 		return err
 	}
-	
+
 	return nil
 }
 
@@ -492,15 +492,15 @@ func (h *Handler) updateLeaderboards(c *gin.Context) error {
 		handlers.Return500(c)
 		return err
 	}
-	
+
 	err = db.UpdateCountryLeaderboard(&h.user, h.mapData.GameMode, h.stats.OverallRating)
-	
+
 	if err != nil {
 		fmt.Printf("error updating country leaderboard -%v", err.Error())
 		handlers.Return500(c)
 		return err
 	}
-	
+
 	return nil
 }
 
@@ -509,10 +509,10 @@ func (h *Handler) handleFirstPlaceScore(c *gin.Context) error {
 	if !h.isPersonalBestScore() {
 		return nil
 	}
-	
+
 	existingFp, err := db.GetFirstPlaceScore(h.mapData.MD5)
 	gainedFirstPlace := false
-	
+
 	if err != nil {
 		switch err {
 		case sql.ErrNoRows:
@@ -523,7 +523,7 @@ func (h *Handler) handleFirstPlaceScore(c *gin.Context) error {
 				handlers.Return500(c)
 				return err
 			}
-			
+
 			gainedFirstPlace = true
 		default:
 			fmt.Printf("error while fetching existing first place existingFp - %v", err.Error())
@@ -532,42 +532,42 @@ func (h *Handler) handleFirstPlaceScore(c *gin.Context) error {
 		}
 	} else {
 		err := h.updateFirstPlaceScore(&existingFp)
-		
+
 		if err != nil {
 			fmt.Printf("error while updating first place existingFp - %v", err.Error())
 			handlers.Return500(c)
 			return err
 		}
-		
+
 		gainedFirstPlace = true
 	}
 
-	if !gainedFirstPlace { 
+	if !gainedFirstPlace {
 		return nil
 	}
-	
+
 	mapStr := h.mapData.GetString()
 
 	// Update Activity Feed For First Place Winner
 	err = db.InsertActivityFeed(h.user.Id, db.ActivityFeedAchievedFirstPlace, mapStr, h.mapData.MapsetId)
-	
+
 	if err != nil {
 		fmt.Printf("error while inserting first place winner feed - %v", err.Error())
 		handlers.Return500(c)
 		return err
 	}
-	
+
 	// Update activity feed for the first place loser
 	if existingFp != (db.FirstPlaceScore{}) && existingFp.UserId != h.user.Id {
 		err = db.InsertActivityFeed(existingFp.UserId, db.ActivityFeedLostFirstPlace, mapStr, h.mapData.MapsetId)
-		
+
 		if err != nil {
 			fmt.Printf("error while inserting first place loser feed - %v", err.Error())
 			handlers.Return500(c)
 			return err
 		}
 	}
-	
+
 	var oldUser db.User
 	oldUser, err = db.GetUserById(existingFp.UserId)
 
@@ -576,15 +576,15 @@ func (h *Handler) handleFirstPlaceScore(c *gin.Context) error {
 		handlers.Return500(c)
 		return err
 	}
-	
+
 	dbScore := h.convertToDbScore()
 	err = utils.SendFirstPlaceWebhook(&h.user, &dbScore, &h.mapData, &oldUser)
-	
+
 	// No need to return a 500 here, that could be an issue on Discord's end, it's not crucial to log webhooks.
 	if err != nil {
 		fmt.Printf("error while sending first place score - %v", err.Error())
 	}
-	
+
 	return nil
 }
 
@@ -597,7 +597,7 @@ func (h *Handler) insertFirstPlaceScore() error {
 	if err != nil {
 		return nil
 	}
-	
+
 	return nil
 }
 
@@ -614,7 +614,7 @@ func (h *Handler) updateFirstPlaceScore(score *db.FirstPlaceScore) error {
 	if err != nil {
 		return err
 	}
-	
+
 	return nil
 }
 
@@ -632,7 +632,7 @@ func (h Handler) updateElasticSearch() {
 
 // Logs out the score in a readable way
 func (h *Handler) logScore() {
-	fmt.Printf("[#%v] %v (#%v) | Map: #%v | Rating: %.2f | Accuracy: %.2f%% | PB: %v \n", 
+	fmt.Printf("[#%v] %v (#%v) | Map: #%v | Rating: %.2f | Accuracy: %.2f%% | PB: %v \n",
 		h.newScoreId, h.user.Username, h.user.Id, h.mapData.Id, h.rating.Rating, h.scoreData.Accuracy,
 		h.isPersonalBestScore())
 }
@@ -640,17 +640,34 @@ func (h *Handler) logScore() {
 // Converts the incoming score's to a db score.
 func (h *Handler) convertToDbScore() db.Score {
 	return db.Score{
-		Id: 			   int(h.newScoreId),
-		UserId:            h.user.Id,
-		MapMD5:            h.mapData.MD5,
-		ReplayMD5:         h.scoreData.ReplayMD5,
-		Mode:              h.scoreData.GameMode,
-		PersonalBest:      h.isPersonalBestScore(),
-		PerformanceRating: h.rating.Rating,
-		Mods:              h.scoreData.Mods,
-		Failed:            h.scoreData.Failed,
-		TotalScore:        h.scoreData.TotalScore,
-		Accuracy:          h.scoreData.Accuracy,
-		MaxCombo: 		   int(h.scoreData.MaxCombo),
+		Id:                          int(h.newScoreId),
+		UserId:                      h.user.Id,
+		MapMD5:                      h.mapData.MD5,
+		ReplayMD5:                   h.scoreData.ReplayMD5,
+		Mode:                        h.scoreData.GameMode,
+		PersonalBest:                h.isPersonalBestScore(),
+		PerformanceRating:           h.rating.Rating,
+		Mods:                        h.scoreData.Mods,
+		Failed:                      h.scoreData.Failed,
+		TotalScore:                  h.scoreData.TotalScore,
+		Accuracy:                    h.scoreData.Accuracy,
+		MaxCombo:                    int(h.scoreData.MaxCombo),
+		CountMarv:                   int(h.scoreData.CountMarv),
+		CountPerf:                   int(h.scoreData.CountMarv),
+		CountGreat:                  int(h.scoreData.CountMarv),
+		CountGood:                   int(h.scoreData.CountMarv),
+		CountOkay:                   int(h.scoreData.CountMarv),
+		CountMiss:                   int(h.scoreData.CountMarv),
+		Grade:                       common.GetGradeFromAccuracy(h.scoreData.Accuracy, h.scoreData.Failed),
+		ScrollSpeed:                 int(h.scoreData.ScrollSpeed),
+		TimePlayStart:               h.scoreData.TimePlayStart,
+		TimePlayEnd:                 h.scoreData.TimePlayEnded,
+		ExecutingAssembly:           h.scoreData.ExecutingAssemblyMD5,
+		EntryAssembly:               h.scoreData.EntryAssemblyMD5,
+		QuaverVersion:               h.scoreData.ReplayVersion,
+		PauseCount:                  int(h.scoreData.PauseCount),
+		PerformanceProcessorVersion: h.rating.Version,
+		DifficultyProcessorVersion:  h.difficulty.Result.Version,
+		IsDonatorScore:              h.mapData.RankedStatus != common.StatusRanked,
 	}
 }
