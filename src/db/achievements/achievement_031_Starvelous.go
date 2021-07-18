@@ -10,6 +10,7 @@ type AchievementStarvelous Achievement
 func NewAchievementStarvelous() AchievementStarvelous {
 	return AchievementStarvelous{
 		Id: 31,
+		Name: "Starvelous",
 		SteamAPIName: "STARVELOUS",
 	}
 }

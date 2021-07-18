@@ -9,6 +9,7 @@ type AchievementClickTheArrows Achievement
 func NewAchievementClickTheArrows() AchievementClickTheArrows {
 	return AchievementClickTheArrows{
 		Id: 27,
+		Name: "Click. The. Arrows!",
 		SteamAPIName: "CLICK_THE_ARROWS",
 	}
 }

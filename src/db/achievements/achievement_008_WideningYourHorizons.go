@@ -7,6 +7,7 @@ type AchievementWideningYourHorizons Achievement
 func NewAchievementWideningYourHorizons() AchievementWideningYourHorizons {
 	return AchievementWideningYourHorizons{
 		Id: 8,
+		Name: "Widening Your Horizons",
 		SteamAPIName: "WIDENING_YOUR_HORIZONS",
 	}
 }

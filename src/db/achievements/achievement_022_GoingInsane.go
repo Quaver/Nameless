@@ -10,6 +10,7 @@ type AchievementGoingInsane Achievement
 func NewAchievementGoingInsane() AchievementGoingInsane {
 	return AchievementGoingInsane{
 		Id: 22,
+		Name: "Going Insane",
 		SteamAPIName: "GOING_INSANE",
 	}
 }

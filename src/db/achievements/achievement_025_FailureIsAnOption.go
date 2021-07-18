@@ -9,6 +9,7 @@ type AchievementFailureIsAnOption Achievement
 func NewAchievementFailureIsAnOption() AchievementFailureIsAnOption {
 	return AchievementFailureIsAnOption{
 		Id: 25,
+		Name: "Failure Is An Option",
 		SteamAPIName: "FAILURE_IS_AN_OPTION",
 	}
 }

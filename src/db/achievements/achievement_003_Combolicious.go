@@ -10,6 +10,7 @@ type AchievementCombolicious Achievement
 func NewAchievementCombolicious() AchievementCombolicious {
 	return AchievementCombolicious{
 		Id: 3,
+		Name: "Combolicious",
 		SteamAPIName: "COMBOLICIOUS",
 	}
 }

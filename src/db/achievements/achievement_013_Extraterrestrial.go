@@ -7,6 +7,7 @@ type AchievementExtraterrestrial Achievement
 func NewAchievementAExtraterrestrial() AchievementExtraterrestrial {
 	return AchievementExtraterrestrial{
 		Id: 13,
+		Name: "Extraterrestrial",
 		SteamAPIName: "EXTRATERRESTRIAL",
 	}
 }

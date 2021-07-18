@@ -10,6 +10,7 @@ type AchievementBabySteps Achievement
 func NewAchievementBabySteps() AchievementBabySteps {
 	return AchievementBabySteps {
 		Id: 1,
+		Name: "Baby Steps",
 		SteamAPIName: "BABY_STEPS",
 	}
 }

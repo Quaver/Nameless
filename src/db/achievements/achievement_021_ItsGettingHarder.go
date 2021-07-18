@@ -10,6 +10,7 @@ type AchievementItsGettingHarder Achievement
 func NewAchievementItsGettingHarder() AchievementItsGettingHarder {
 	return AchievementItsGettingHarder{
 		Id: 21,
+		Name: "It's Getting Harder",
 		SteamAPIName: "ITS_GETTING_HARDER",
 	}
 }

@@ -7,6 +7,7 @@ type AchievementHumbleBeginnings Achievement
 func NewAchievementHumbleBeginnings() AchievementHumbleBeginnings {
 	return AchievementHumbleBeginnings{
 		Id: 6,
+		Name: "Humble Beginnings",
 		SteamAPIName: "HUMBLE_BEGINNINGS",
 	}
 }

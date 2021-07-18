@@ -7,6 +7,7 @@ type AchievementSteppingUpTheLadder Achievement
 func NewAchievementSteppingUpTheLadder() AchievementSteppingUpTheLadder {
 	return AchievementSteppingUpTheLadder{
 		Id: 7,
+		Name: "Stepping Up The Ladder",
 		SteamAPIName: "STEPPING_UP_THE_LADDER",
 	}
 }

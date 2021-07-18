@@ -11,6 +11,7 @@ type AchievementApproachingTheBlueZenith Achievement
 func NewAchievementApproachingTheBlueZenith() AchievementApproachingTheBlueZenith {
 	return AchievementApproachingTheBlueZenith{
 		Id: 26,
+		Name: "Approaching The Blue Zenith",
 		SteamAPIName: "APPROACHING_THE_BLUE_ZENITH",
 	}
 }

@@ -10,6 +10,7 @@ type AchievementBeginnersLuck Achievement
 func NewAchievementBeginnersLuck() AchievementBeginnersLuck {
 	return AchievementBeginnersLuck{
 		Id: 20,
+		Name: "Beginner's Luck",
 		SteamAPIName: "BEGINNERS_LUCK",
 	}
 }

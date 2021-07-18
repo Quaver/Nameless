@@ -7,6 +7,7 @@ type AchievementOutOfThisWorld Achievement
 func NewAchievementOutOfThisWorld() AchievementOutOfThisWorld {
 	return AchievementOutOfThisWorld{
 		Id: 10,
+		Name: "Out Of This World",
 		SteamAPIName: "OUT_OF_THIS_WORLD",
 	}
 }

@@ -10,6 +10,7 @@ type AchievementQuombo Achievement
 func NewAchievementQuombo() AchievementQuombo {
 	return AchievementQuombo{
 		Id: 15,
+		Name: "Quombo",
 		SteamAPIName: "QUOMBO",
 	}
 }

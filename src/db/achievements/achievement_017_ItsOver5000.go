@@ -10,6 +10,7 @@ type AchievementItsOver5000 Achievement
 func NewAchievementItsOver5000() AchievementItsOver5000 {
 	return AchievementItsOver5000{
 		Id: 17,
+		Name: "It's Over 5000!",
 		SteamAPIName: "ITS_OVER_5000",
 	}
 }

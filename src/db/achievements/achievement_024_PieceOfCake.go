@@ -10,6 +10,7 @@ type AchievementPieceOfCake Achievement
 func NewAchievementPieceOfCake() AchievementPieceOfCake {
 	return AchievementPieceOfCake{
 		Id: 24,
+		Name: "Piece Of Cake",
 		SteamAPIName: "PIECE_OF_CAKE",
 	}
 }

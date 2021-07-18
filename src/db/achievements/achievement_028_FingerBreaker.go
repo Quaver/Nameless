@@ -9,6 +9,7 @@ type AchievementFingerBreaker Achievement
 func NewAchievementFingerBreaker() AchievementFingerBreaker {
 	return AchievementFingerBreaker{
 		Id: 28,
+		Name: "Finger Breaker",
 		SteamAPIName: "FINGER_BREAKER",
 	}
 }

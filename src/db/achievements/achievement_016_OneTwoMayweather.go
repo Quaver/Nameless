@@ -10,6 +10,7 @@ type AchievementOneTwoMayweather Achievement
 func NewAchievementOneTwoMayweather() AchievementOneTwoMayweather {
 	return AchievementOneTwoMayweather{
 		Id: 16,
+		Name: "One-Two Mayweather",
 		SteamAPIName: "ONE_TWO_MAYWEATHER",
 	}
 }

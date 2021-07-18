@@ -10,6 +10,7 @@ type AchievementAbsolutelyMarvelous Achievement
 func NewAchievementAbsolutelyMarvelous() AchievementAbsolutelyMarvelous {
 	return AchievementAbsolutelyMarvelous{
 		Id: 2,
+		Name: "Absolutely Marvelous",
 		SteamAPIName: "ABSOLUTELY_MARVELOUS",
 	}
 }

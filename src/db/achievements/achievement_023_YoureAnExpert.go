@@ -10,6 +10,7 @@ type AchievementYoureAnExpert Achievement
 func NewAchievementYoureAnExpert() AchievementYoureAnExpert {
 	return AchievementYoureAnExpert{
 		Id: 23,
+		Name: "You're An Expert",
 		SteamAPIName: "YOURE_AN_EXPERT",
 	}
 }

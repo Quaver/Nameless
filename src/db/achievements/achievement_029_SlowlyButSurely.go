@@ -12,6 +12,7 @@ type AchievementSlowlyButSurely Achievement
 func NewAchievementSlowlyButSurely() AchievementSlowlyButSurely {
 	return AchievementSlowlyButSurely{
 		Id: 29,
+		Name: "Slowly But Surely",
 		SteamAPIName: "SLOWLY_BUT_SURELY",
 	}
 }

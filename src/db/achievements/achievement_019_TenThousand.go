@@ -10,6 +10,7 @@ type AchievementTenThousand Achievement
 func NewAchievementTenThousand() AchievementTenThousand {
 	return AchievementTenThousand{
 		Id: 19,
+		Name: "Ten Thousand",
 		SteamAPIName: "TEN_THOUSAND",
 	}
 }

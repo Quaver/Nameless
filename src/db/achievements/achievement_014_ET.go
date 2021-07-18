@@ -7,6 +7,7 @@ type AchievementET Achievement
 func NewAchievementET() AchievementET {
 	return AchievementET{
 		Id: 14,
+		Name: "ET",
 		SteamAPIName: "ET",
 	}
 }

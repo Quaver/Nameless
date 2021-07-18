@@ -9,6 +9,7 @@ type AchievementKeptYouPlayingHuh Achievement
 func NewAchievementKeptYouPlayingHuh() AchievementKeptYouPlayingHuh {
 	return AchievementKeptYouPlayingHuh{
 		Id: 5,
+		Name: "Kept You Playing Huh?",
 		SteamAPIName: "KEPT_YOU_PLAYING_HUH",
 	}
 }

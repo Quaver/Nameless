@@ -10,6 +10,7 @@ type AchievementPerfectionist Achievement
 func NewAchievementPerfectionist() AchievementPerfectionist {
 	return AchievementPerfectionist{
 		Id: 4,
+		Name: "Perfectionist",
 		SteamAPIName: "PERFECTIONIST",
 	}
 }
