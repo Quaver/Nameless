@@ -2,6 +2,7 @@ package config
 
 import (
 	"encoding/json"
+	"fmt"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"os"
@@ -53,8 +54,11 @@ func InitializeConfig(dir string) {
 	if Data != (Configuration{}) {
 		return
 	}
+
+	path := filepath.Join(dir, "config.json")
+	log.Info(fmt.Sprintf("Loading configuration file at: %v", path))
 	
-	file, err := os.Open(filepath.Join(dir, "config.json"))
+	file, err := os.Open(path)
 	
 	defer func(file *os.File) {
 		err := file.Close()
