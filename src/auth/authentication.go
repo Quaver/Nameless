@@ -67,13 +67,13 @@ func getUserIdFromToken(token string) (int, error) {
 	userId, err := db.Redis.Get(db.RedisCtx, key).Result()
 
 	if err != nil {
-		return -1, errors.New("an online session with that token could not be found")
+		return -1, err
 	}
 
 	id, err := strconv.Atoi(userId)
 
 	if err != nil {
-		return -1, errors.New("failed to parse user id from online session")
+		return -1, err
 	}
 
 	return id, nil
