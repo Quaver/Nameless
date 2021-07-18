@@ -2,9 +2,9 @@ package db
 
 import (
 	"context"
-	"fmt"
 	"github.com/Swan/Nameless/src/config"
 	"github.com/go-redis/redis/v8"
+	log "github.com/sirupsen/logrus"
 )
 
 var Redis *redis.Client
@@ -18,5 +18,5 @@ func InitializeRedis() {
 		DB:       config.Data.Redis.DB,
 	})
 
-	fmt.Println("Redis Client has been initialized.")
+	log.Info("Successfully connected to Redis!")
 }

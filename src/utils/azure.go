@@ -10,6 +10,7 @@ import (
 	"github.com/Swan/Nameless/src/common"
 	"github.com/Swan/Nameless/src/config"
 	"github.com/Swan/Nameless/src/db"
+	log "github.com/sirupsen/logrus"
 	"io"
 	"io/fs"
 	"io/ioutil"
@@ -49,6 +50,8 @@ func InitializeAzure() {
 
 	client.pipe = azblob.NewPipeline(client.credential, azblob.PipelineOptions{})
 	AzureClient = client
+	
+	log.Info("Successfully created Azure client!")
 }
 
 // Create a ContainerURL object to be able to make requests on that container
@@ -120,7 +123,7 @@ func CacheQuaFile(m db.Map) (string, error) {
 	err := os.MkdirAll(folder, os.ModePerm)
 
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Error(fmt.Sprintf("Failed to cache qua file #%v - %v", m.Id, err))
 		return "", err
 	}
 

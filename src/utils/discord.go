@@ -7,6 +7,7 @@ import (
 	"github.com/Swan/Nameless/src/db"
 	"github.com/andersfylling/snowflake"
 	"github.com/nickname32/discordhook"
+	log "github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -17,9 +18,12 @@ func InitializeDiscordWebhooks() {
 	
 	fp := config.Data.DiscordWebhookFirstPlace
 	FirstPlace, err = discordhook.NewWebhookAPI(snowflake.Snowflake(fp.Id), fp.Secret, true, nil)
+	
 	if err != nil {
 		panic(err)
 	}
+	
+	log.Info("Successfully initialized First Place Discord Webhook!")
 }
 
 // SendFirstPlaceWebhook Sends a first place webhook

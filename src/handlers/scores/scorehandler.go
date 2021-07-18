@@ -12,6 +12,7 @@ import (
 	"github.com/Swan/Nameless/src/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 	"time"
 )
@@ -30,12 +31,13 @@ type Handler struct {
 }
 
 func (h Handler) SubmitPOST(c *gin.Context) {
+	timeStart := time.Now()
+	
 	var err error
-
 	h.user, err = auth.GetInGameUser(c)
 
 	if err != nil {
-		fmt.Printf("Could not authenticate user - %v\n", err.Error())
+		log.Errorf("Could not authenticate user - %v\n", err)
 		handlers.ReturnError(c, http.StatusForbidden, err.Error())
 		return
 	}
@@ -43,7 +45,7 @@ func (h Handler) SubmitPOST(c *gin.Context) {
 	h.scoreData, err = parseScoreSubmissionData(c)
 
 	if err != nil {
-		fmt.Printf("Invalid score data - %v\n", err.Error())
+		h.logIgnoringScore(fmt.Sprintf("Invalid score data - %v", err))
 		handlers.Return400(c)
 		return
 	}
@@ -51,7 +53,7 @@ func (h Handler) SubmitPOST(c *gin.Context) {
 	hasRankedMods := common.IsModComboRanked(h.scoreData.Mods)
 
 	if !hasRankedMods {
-		fmt.Printf("Unranked mods - %v\n", h.scoreData.Mods)
+		h.logIgnoringScore(fmt.Sprintf("unranked modifiers -%v", common.GetModsString(h.scoreData.Mods)))
 		handlers.Return400(c)
 		return
 	}
@@ -59,23 +61,23 @@ func (h Handler) SubmitPOST(c *gin.Context) {
 	h.mapData, err = db.GetMapByMD5(h.scoreData.MapMD5)
 
 	if err != nil {
-		fmt.Printf("Failed to fetch map from db - %v\n", err.Error())
-		handlers.Return400(c)
+		h.logError(fmt.Sprintf("Failure fetching map `%v` - %v", h.scoreData.MapMD5, err))
+		handlers.Return500(c)
 		return
 	}
 
 	err = h.scoreData.validateGameMode(&h.mapData)
 
 	if err != nil {
-		fmt.Printf("Non-matching game modes: - %v\n", err.Error())
+		h.logIgnoringScore(fmt.Sprintf("non-matching game modes - %v", err))
 		handlers.Return400(c)
 		return
 	}
 
 	h.mapPath, err = utils.CacheQuaFile(h.mapData)
-
+	
 	if err != nil {
-		fmt.Printf("unable to cache map file - %v\n", err.Error())
+		h.logError(fmt.Sprintf("Unable to catch map file `%v` - %v", h.mapData.Id, err))
 		handlers.Return500(c)
 		return
 	}
@@ -83,7 +85,7 @@ func (h Handler) SubmitPOST(c *gin.Context) {
 	h.stats, err = db.GetUserStats(h.user.Id, h.scoreData.GameMode)
 
 	if err != nil {
-		fmt.Printf("error fetching user stats - %v", err.Error())
+		h.logError(fmt.Sprintf("Failed to fetch user stats - %v", err))
 		handlers.Return500(c)
 		return
 	}
@@ -92,12 +94,12 @@ func (h Handler) SubmitPOST(c *gin.Context) {
 
 	// Responses are given to the player inside of handleSubmission, so it's not needed here
 	if err != nil {
-		fmt.Printf("unable to submit score - %v\n", err.Error())
+		h.logError(fmt.Sprintf("Failed to submit score - `%v", err))
 		return
 	}
-
-	h.logScore()
+	
 	handlers.ReturnMessage(c, http.StatusOK, "OK")
+	h.logScore(time.Since(timeStart))
 }
 
 // Handles submitting the score into the database, achievements, leaderboards, etc
@@ -304,11 +306,11 @@ func (h *Handler) insertScore(c *gin.Context) error {
 		h.scoreData.TimePlayEnded, utils.GetIpFromRequest(c), h.scoreData.ExecutingAssemblyMD5,
 		h.scoreData.EntryAssemblyMD5, h.scoreData.ReplayVersion, h.scoreData.PauseCount, h.rating.Version,
 		h.difficulty.Result.Version, isDonorScore, h.scoreData.GameId)
-
-	const errStr = "error while inserting score - %v\n"
-
+	
+	errStr := "Failed to insert score - %v"
+	
 	if err != nil {
-		fmt.Printf(errStr, err)
+		h.logError(fmt.Sprintf(errStr, err))
 		handlers.Return500(c)
 		return err
 	}
@@ -316,7 +318,7 @@ func (h *Handler) insertScore(c *gin.Context) error {
 	h.newScoreId, err = result.LastInsertId()
 
 	if err != nil {
-		fmt.Printf(errStr, err)
+		h.logError(fmt.Sprintf(errStr, err))
 		handlers.Return500(c)
 		return err
 	}
@@ -324,7 +326,7 @@ func (h *Handler) insertScore(c *gin.Context) error {
 	_, err = db.Redis.Incr(db.RedisCtx, "quaver:total_scores").Result()
 
 	if err != nil {
-		fmt.Printf("Failed to increment total scores in redis - %v\n", err)
+		h.logError(fmt.Sprintf("Failed to increment total scores in redis - %v", err))
 		handlers.Return500(c)
 		return err
 	}
@@ -337,7 +339,7 @@ func (h *Handler) updateUserLatestActivity(c *gin.Context) error {
 	err := db.UpdateUserLatestActivity(h.user.Id)
 
 	if err != nil {
-		fmt.Printf("error while updating user latest activity - %v", err)
+		h.logError(fmt.Sprintf("Failed to update user latest activity - %v", err))
 		handlers.Return500(c)
 		return err
 	}
@@ -356,7 +358,7 @@ func (h *Handler) uploadReplay(c *gin.Context) error {
 	err := utils.AzureClient.UploadFile("replays", fileName, h.scoreData.RawReplayData)
 
 	if err != nil {
-		fmt.Printf("error while uploading replay to azure - %v", err.Error())
+		h.logError(fmt.Sprintf("Failed to upload replay to azure - %v", err))
 		handlers.Return500(c)
 		return err
 	}
@@ -369,7 +371,7 @@ func (h *Handler) updateMapPlayCount(c *gin.Context) error {
 	err := db.IncrementMapPlayCount(h.mapData.Id, h.scoreData.Failed)
 
 	if err != nil {
-		fmt.Printf("error while incrementing map play count - %v", err)
+		h.logError(fmt.Sprintf("Failed to increment map play count - %v", err))
 		handlers.Return500(c)
 		return err
 	}
@@ -389,7 +391,7 @@ func (h *Handler) updateUserTotalHits(c *gin.Context) error {
 	err := h.stats.UpdateDatabase()
 
 	if err != nil {
-		fmt.Printf("error while updating user stats in db - %v\n", err.Error())
+		h.logError(fmt.Sprintf("Failed to update user stats in DB - %v", err))
 		handlers.Return500(c)
 		return err
 	}
@@ -407,7 +409,7 @@ func (h *Handler) updateUserTotalHits(c *gin.Context) error {
 	otherModeStats, err := db.GetUserStats(h.user.Id, otherMode)
 
 	if err != nil {
-		fmt.Printf("error while fetching user stats for %v - %v", otherMode, err.Error())
+		h.logError(fmt.Sprintf("Failed to fetch user stats - %v", err))
 		handlers.Return500(c)
 		return err
 	}
@@ -420,7 +422,7 @@ func (h *Handler) updateUserTotalHits(c *gin.Context) error {
 	}).Err()
 
 	if err != nil {
-		fmt.Printf("error while updating total hits in redis - %v\n", err.Error())
+		h.logError(fmt.Sprintf("Failed to update total hits in redis - %v", err))
 		handlers.Return500(c)
 		return err
 	}
@@ -453,7 +455,7 @@ func (h *Handler) updateUserStats(c *gin.Context) error {
 		scores, err := db.GetUserTopScores(h.user.Id, h.scoreData.GameMode)
 
 		if err != nil {
-			fmt.Printf("error while fetching user top scores - %v", err)
+			h.logError(fmt.Sprintf("Failed to fetch user top scores - %v", err))
 			handlers.Return500(c)
 			return err
 		}
@@ -465,7 +467,7 @@ func (h *Handler) updateUserStats(c *gin.Context) error {
 	err := h.stats.UpdateDatabase()
 
 	if err != nil {
-		fmt.Printf("error while updating stats - %v\n", err.Error())
+		h.logError(fmt.Sprintf("Failed to update user stats - %v", err))
 		handlers.Return500(c)
 		return err
 	}
@@ -483,7 +485,7 @@ func (h *Handler) updateScoreboardCache(c *gin.Context) error {
 	err := db.UpdateScoreboardCache(&score, &h.mapData)
 
 	if err != nil {
-		fmt.Printf("error while updating scoreboard cache - %v\n", err.Error())
+		h.logError(fmt.Sprintf("Failed to update scoreboard cache - %v", err))
 		handlers.Return500(c)
 		return err
 	}
@@ -496,7 +498,7 @@ func (h *Handler) updateLeaderboards(c *gin.Context) error {
 	err := db.UpdateGlobalLeaderboard(&h.user, h.mapData.GameMode, h.stats.OverallRating)
 
 	if err != nil {
-		fmt.Printf("error updating global leaderboard - %v", err.Error())
+		h.logError(fmt.Sprintf("Failed to update global leaderboard - %v", err))
 		handlers.Return500(c)
 		return err
 	}
@@ -504,7 +506,7 @@ func (h *Handler) updateLeaderboards(c *gin.Context) error {
 	err = db.UpdateCountryLeaderboard(&h.user, h.mapData.GameMode, h.stats.OverallRating)
 
 	if err != nil {
-		fmt.Printf("error updating country leaderboard -%v", err.Error())
+		h.logError(fmt.Sprintf("Failed to update country leaderboard - %v", err))
 		handlers.Return500(c)
 		return err
 	}
@@ -527,14 +529,14 @@ func (h *Handler) handleFirstPlaceScore(c *gin.Context) error {
 			err := h.insertFirstPlaceScore()
 
 			if err != nil {
-				fmt.Printf("error while inserting first place existingFp - %v", err.Error())
+				h.logError(fmt.Sprintf("Failed to insert first place score - %v", err))
 				handlers.Return500(c)
 				return err
 			}
 
 			gainedFirstPlace = true
 		default:
-			fmt.Printf("error while fetching existing first place existingFp - %v", err.Error())
+			h.logError(fmt.Sprintf("Failed to fetch existing first place score - %v", err))
 			handlers.Return500(c)
 			return nil
 		}
@@ -542,7 +544,7 @@ func (h *Handler) handleFirstPlaceScore(c *gin.Context) error {
 		err := h.updateFirstPlaceScore(&existingFp)
 
 		if err != nil {
-			fmt.Printf("error while updating first place existingFp - %v", err.Error())
+			h.logError(fmt.Sprintf("Failed to update existing first place score -%v", err))
 			handlers.Return500(c)
 			return err
 		}
@@ -560,7 +562,7 @@ func (h *Handler) handleFirstPlaceScore(c *gin.Context) error {
 	err = db.InsertActivityFeed(h.user.Id, db.ActivityFeedAchievedFirstPlace, mapStr, h.mapData.MapsetId)
 
 	if err != nil {
-		fmt.Printf("error while inserting first place winner feed - %v", err.Error())
+		h.logError(fmt.Sprintf("Failed to insert first place winner activity feed - %v", err))
 		handlers.Return500(c)
 		return err
 	}
@@ -570,7 +572,7 @@ func (h *Handler) handleFirstPlaceScore(c *gin.Context) error {
 		err = db.InsertActivityFeed(existingFp.UserId, db.ActivityFeedLostFirstPlace, mapStr, h.mapData.MapsetId)
 
 		if err != nil {
-			fmt.Printf("error while inserting first place loser feed - %v", err.Error())
+			h.logError(fmt.Sprintf("Failed to insert first place loser activity feed - %v", err))
 			handlers.Return500(c)
 			return err
 		}
@@ -580,7 +582,7 @@ func (h *Handler) handleFirstPlaceScore(c *gin.Context) error {
 	oldUser, err = db.GetUserById(existingFp.UserId)
 
 	if err != nil && err != sql.ErrNoRows {
-		fmt.Printf("error while fetching existing first place from db - %v", err.Error())
+		h.logError(fmt.Sprintf("Failed to fetch existing first place - %v", err))
 		handlers.Return500(c)
 		return err
 	}
@@ -590,7 +592,7 @@ func (h *Handler) handleFirstPlaceScore(c *gin.Context) error {
 
 	// No need to return a 500 here, that could be an issue on Discord's end, it's not crucial to log webhooks.
 	if err != nil {
-		fmt.Printf("error while sending first place score - %v", err.Error())
+		h.logError(fmt.Sprintf("Failed to send first place score to Discord - %v", err))
 	}
 
 	return nil
@@ -634,7 +636,7 @@ func (h *Handler) unlockAchievements(c *gin.Context) error {
 	h.unlockedAchievements, err = achievements.CheckAchievementsWithNewScore(&h.user, &score, &h.stats)
 	
 	if err != nil {
-		fmt.Printf("error while unlocking achievements - %v", err.Error())
+		h.logError(fmt.Sprintf("Failed while unlocking achievements - %v", err))
 		handlers.Return500(c)
 		return err
 	}
@@ -649,16 +651,15 @@ func (h *Handler) updateElasticSearch() {
 		err := utils.UpdateElasticSearchMapset(h.mapData.MapsetId)
 
 		if err != nil {
-			fmt.Printf("error updating elasticsearch - %v\n", err.Error())
+			h.logError(fmt.Sprintf("Failed while updating ElasticSearch - %v", err))
 		}
 	}()
 }
 
 // Logs out the score in a readable way
-func (h *Handler) logScore() {
-	fmt.Printf("[#%v] %v (#%v) | Map: #%v | Rating: %.2f | Accuracy: %.2f%% | PB: %v \n",
-		h.newScoreId, h.user.Username, h.user.Id, h.mapData.Id, h.rating.Rating, h.scoreData.Accuracy,
-		h.isPersonalBestScore())
+func (h *Handler) logScore(d time.Duration) {
+	log.Info(fmt.Sprintf("Score: #%v | User: %v (#%v) | Map: #%v | PR: %.2f | Acc: %.2f%% | Time: %vs",
+		h.newScoreId, h.user.Username, h.user.Id, h.mapData.Id, h.rating.Rating, h.scoreData.Accuracy, d.Seconds()))
 }
 
 // Converts the incoming score's to a db score.
@@ -694,4 +695,12 @@ func (h *Handler) convertToDbScore() db.Score {
 		DifficultyProcessorVersion:  h.difficulty.Result.Version,
 		IsDonatorScore:              h.mapData.RankedStatus != common.StatusRanked,
 	}
+}
+
+func (h *Handler) logIgnoringScore(reason string) {
+	log.Warning(fmt.Sprintf("Ignoring score from %v: %v", h.user.ToString(), reason))
+}
+
+func (h *Handler) logError(reason string) {
+	log.Errorf(fmt.Sprintf("Error submitting score from %v: %v", h.user.ToString(), reason))
 }

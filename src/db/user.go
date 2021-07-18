@@ -45,12 +45,14 @@ func UpdateUserLatestActivity(id int) error {
 	_, err := SQL.Exec("UPDATE users SET latest_activity = ? WHERE id = ?", timestamp, id)
 	
 	if err != nil {
-		fmt.Printf("Failed to update latest_activity for user %v", id)
 		return err
 	}
 	
 	return err
 }
 
+func (u *User) ToString() string {
+	return fmt.Sprintf("%v (#%v)", u.Username, u.Id)
+}
 
 

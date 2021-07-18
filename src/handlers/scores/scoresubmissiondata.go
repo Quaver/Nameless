@@ -7,6 +7,7 @@ import (
 	"github.com/Swan/Nameless/src/db"
 	"github.com/Swan/Nameless/src/utils"
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 )
 
 type scoreSubmissionData struct {
@@ -49,16 +50,15 @@ func parseScoreSubmissionData(c *gin.Context) (scoreSubmissionData, error) {
 	err := c.BindJSON(&data)
 
 	if err != nil {
-		fmt.Printf("Failed to deserialize score submission data - %v\n", err.Error())
+		log.Errorf("Failed to deserialize score submission data - %v\n", err.Error())
 		return scoreSubmissionData{}, err
 	}
 
-	failures, ok := data.validate()
+	detections, ok := data.validate()
 
+	// TODO: Log To Discord
 	if !ok {
-		// TODO: Log to discord
-		fmt.Println(failures)
-		return scoreSubmissionData{}, fmt.Errorf("failed to validate score submission data")
+		return scoreSubmissionData{}, fmt.Errorf("%v", detections)
 	}
 
 	return data, nil

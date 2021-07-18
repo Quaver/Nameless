@@ -2,8 +2,8 @@ package config
 
 import (
 	"encoding/json"
+	log "github.com/sirupsen/logrus"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 )
@@ -78,4 +78,6 @@ func InitializeConfig(dir string) {
 	if err != nil {
 		panic(err)
 	}
+	
+	log.Info("Configuration file was successfully read!")
 }

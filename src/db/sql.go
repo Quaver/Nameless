@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/Swan/Nameless/src/config"
 	_ "github.com/go-sql-driver/mysql"
+	log "github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -35,7 +36,7 @@ func InitializeSQL() {
 
 	SQL = db
 
-	fmt.Println("SQL Database connection has been established.")
+	log.Info("Successfully connected to SQL Database!")
 }
 
 // CloseSQLConnection Closes the existing SQL connection
@@ -50,6 +51,6 @@ func CloseSQLConnection() {
 		return
 	}
 
-	fmt.Println("SQL Database connection has been closed.")
+	log.Info("SQL Database connection has been closed")
 	SQL = nil
 }
