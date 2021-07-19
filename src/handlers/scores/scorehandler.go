@@ -61,6 +61,12 @@ func (h Handler) SubmitPOST(c *gin.Context) {
 	h.mapData, err = db.GetMapByMD5(h.scoreData.MapMD5)
 
 	if err != nil {
+		if err == sql.ErrNoRows {
+			h.logIgnoringScore(fmt.Sprintf("Unknown Map - `%v`", h.scoreData.MapMD5))
+			handlers.Return400(c)
+			return 
+		}
+		
 		h.logError(fmt.Sprintf("Failure fetching map `%v` - %v", h.scoreData.MapMD5, err))
 		handlers.Return500(c)
 		return
