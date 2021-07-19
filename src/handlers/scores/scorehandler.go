@@ -541,7 +541,7 @@ func (h *Handler) handleFirstPlaceScore(c *gin.Context) error {
 			return nil
 		}
 	} else {
-		err := h.updateFirstPlaceScore(&existingFp)
+		ok, err := h.updateFirstPlaceScore(&existingFp)
 
 		if err != nil {
 			h.logError(fmt.Sprintf("Failed to update existing first place score -%v", err))
@@ -549,7 +549,9 @@ func (h *Handler) handleFirstPlaceScore(c *gin.Context) error {
 			return err
 		}
 
-		gainedFirstPlace = true
+		if ok {
+			gainedFirstPlace = true	
+		}
 	}
 
 	if !gainedFirstPlace {
@@ -611,10 +613,11 @@ func (h *Handler) insertFirstPlaceScore() error {
 	return nil
 }
 
-// Updates an existing first place score to the new user
-func (h *Handler) updateFirstPlaceScore(score *db.FirstPlaceScore) error {
+// Updates an existing first place score to the new user. Returns if a user beat the first place score
+// or not
+func (h *Handler) updateFirstPlaceScore(score *db.FirstPlaceScore) (bool, error){
 	if h.rating.Rating < score.PerformanceRating {
-		return nil
+		return false, nil
 	}
 
 	fp := db.NewFirstPlaceScore(h.mapData.MD5, h.user.Id, int(h.newScoreId), h.rating.Rating)
@@ -622,10 +625,10 @@ func (h *Handler) updateFirstPlaceScore(score *db.FirstPlaceScore) error {
 	err := fp.Update()
 
 	if err != nil {
-		return err
+		return false, err
 	}
 
-	return nil
+	return true, err
 }
 
 // Checks and unlocks achievements
