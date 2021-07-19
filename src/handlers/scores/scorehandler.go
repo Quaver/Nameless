@@ -661,6 +661,22 @@ func (h *Handler) updateElasticSearch() {
 
 // After submitting a score, this will send the user a 200 response
 func (h *Handler) sendSuccessfulResponse(c *gin.Context) {
+	globalRank, err := h.user.GetGlobalRank(h.mapData.GameMode)
+	
+	if err != nil {
+		h.logError(fmt.Sprintf("Failed to retrieve user global rank - %v", err))
+		handlers.Return500(c)
+		return
+	}
+	
+	countryRank, err := h.user.GetCountryRank(h.mapData.GameMode)
+
+	if err != nil {
+		h.logError(fmt.Sprintf("Failed to retrieve user country rank - %v", err))
+		handlers.Return500(c)
+		return
+	}
+	
 	status := http.StatusOK
 	
 	c.JSON(status, gin.H {
@@ -672,8 +688,8 @@ func (h *Handler) sendSuccessfulResponse(c *gin.Context) {
 			"md5": h.mapData.MD5,
 		},
 		"stats": gin.H {
-			"new_global_rank": 1234,
-			"new_country_rank": 5678,
+			"new_global_rank": globalRank,
+			"new_country_rank": countryRank,
 			"total_score": h.stats.TotalScore,
 			"ranked_score": h.stats.RankedScore,
 			"overall_accuracy": h.stats.OverallAccuracy,
