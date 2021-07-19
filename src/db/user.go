@@ -2,6 +2,9 @@ package db
 
 import (
 	"fmt"
+	"github.com/Swan/Nameless/src/common"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -49,6 +52,30 @@ func UpdateUserLatestActivity(id int) error {
 	}
 	
 	return err
+}
+
+// GetGlobalRank Retrieves a user's global rank for a specific game mode
+func (u *User) GetGlobalRank(mode common.Mode) (int64, error) {
+	key := fmt.Sprintf("quaver:leaderboard:%v", mode)
+	result, err := Redis.ZRevRank(RedisCtx, key, strconv.Itoa(u.Id)).Result()
+
+	if err != nil {
+		return -1, err
+	}
+
+	return result + 1, nil
+}
+
+// GetCountryRank Retrieves a user's country rank for a specific game mode
+func (u *User) GetCountryRank(mode common.Mode) (int64, error) {
+	key := fmt.Sprintf("quaver:country_leaderboard:%v:%v", strings.ToLower(u.Country), mode)
+	result, err := Redis.ZRevRank(RedisCtx, key, strconv.Itoa(u.Id)).Result()
+
+	if err != nil {
+		return -1, err
+	}
+
+	return result + 1, nil
 }
 
 func (u *User) ToString() string {
