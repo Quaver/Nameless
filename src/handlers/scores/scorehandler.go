@@ -98,7 +98,7 @@ func (h Handler) SubmitPOST(c *gin.Context) {
 		return
 	}
 	
-	handlers.ReturnMessage(c, http.StatusOK, "OK")
+	h.sendSuccessfulResponse(c)
 	h.logScore(time.Since(timeStart))
 }
 
@@ -657,6 +657,36 @@ func (h *Handler) updateElasticSearch() {
 			h.logError(fmt.Sprintf("Failed while updating ElasticSearch - %v", err))
 		}
 	}()
+}
+
+// After submitting a score, this will send the user a 200 response
+func (h *Handler) sendSuccessfulResponse(c *gin.Context) {
+	status := http.StatusOK
+	
+	c.JSON(status, gin.H {
+		"status": status,
+		"timestamp": time.Now().UnixNano() / int64(time.Millisecond),
+		"game_mode": h.mapData.GameMode,
+		"map": gin.H {
+			"id": h.mapData.Id,
+			"md5": h.mapData.MD5,
+		},
+		"stats": gin.H {
+			"new_global_rank": 1234,
+			"new_country_rank": 5678,
+			"total_score": h.stats.TotalScore,
+			"ranked_score": h.stats.RankedScore,
+			"overall_accuracy": h.stats.OverallAccuracy,
+			"overall_performance_rating": h.stats.OverallRating,
+			"play_count": h.stats.PlayCount,
+		},
+		"score": gin.H {
+			"personal_best": h.isPersonalBestScore(),
+			"performance_rating": h.rating.Rating,
+			"rank": -1,
+		},
+		"achievements": h.unlockedAchievements,
+	})
 }
 
 // Logs out the score in a readable way
