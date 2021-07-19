@@ -5,8 +5,8 @@ import (
 )
 
 type Achievement struct {
-	Id int `json:"id"`
-	Name string `json:"name"`
+	Id           int    `json:"id"`
+	Name         string `json:"name"`
 	SteamAPIName string `json:"steam_api_name"`
 }
 
@@ -23,32 +23,32 @@ func CheckAchievementsWithNewScore(user *db.User, score *db.Score, stats *db.Use
 	}
 
 	locked, err := GetUserLockedAchievements(user.Id)
-	
+
 	if err != nil {
 		return []Achievement{}, nil
 	}
-	
+
 	for _, achievement := range locked {
 		a := getAchievementFromId(achievement.Id)
 		ok, err := a.Check(user, score, stats)
-		
+
 		if err != nil {
 			return []Achievement{}, err
 		}
-		
+
 		if !ok {
 			continue
 		}
-		
+
 		unlocked = append(unlocked, achievement)
-		
+
 		// Give user the achievement
 		_, err = db.SQL.Exec("INSERT INTO user_achievements VALUES (?, ?)", user.Id, achievement.Id)
-		
+
 		if err != nil {
 			return []Achievement{}, err
 		}
-		
+
 		// Display the unlocked achievement in their activity feed
 		err = db.InsertActivityFeed(user.Id, db.ActivityFeedUnlockedAchievement, achievement.Name, -1)
 
@@ -56,16 +56,16 @@ func CheckAchievementsWithNewScore(user *db.User, score *db.Score, stats *db.Use
 			return []Achievement{}, err
 		}
 	}
-	
+
 	// Now that the user's achievements have been checked, we no longer need to do database lookups.
 	if !user.CheckedPreviousAchievements {
-		_, err = db.SQL.Exec("UPDATE users SET checked_previous_achievements = 1 WHERE user_id = ?", user.Id)	
-		
+		_, err = db.SQL.Exec("UPDATE users SET checked_previous_achievements = 1 WHERE id = ?", user.Id)
+
 		if err != nil {
 			return []Achievement{}, err
 		}
 	}
-	
+
 	return unlocked, nil
 }
 
@@ -73,7 +73,7 @@ func CheckAchievementsWithNewScore(user *db.User, score *db.Score, stats *db.Use
 func GetUserUnlockedAchievements(id int) ([]Achievement, error) {
 	query := "SELECT id, name, steam_api_name FROM achievements WHERE id IN " +
 		"(SELECT achievement_id FROM user_achievements WHERE user_id = ?)"
-	
+
 	rows, err := db.SQL.Query(query, id)
 
 	if err != nil {
@@ -106,27 +106,27 @@ func GetUserUnlockedAchievements(id int) ([]Achievement, error) {
 
 // GetUserLockedAchievements Retrieves all of the user's currently locked achievements
 func GetUserLockedAchievements(id int) ([]Achievement, error) {
-	q :=  "SELECT id, name, steam_api_name FROM achievements WHERE id NOT IN " +
+	q := "SELECT id, name, steam_api_name FROM achievements WHERE id NOT IN " +
 		"(SELECT achievement_id FROM user_achievements WHERE user_id = ?)"
-	
+
 	rows, err := db.SQL.Query(q, id)
-	
+
 	if err != nil {
 		return []Achievement{}, err
 	}
-	
+
 	defer rows.Close()
-	
+
 	var achievements []Achievement
-	
+
 	for rows.Next() {
 		var a Achievement
 		err = rows.Scan(&a.Id, &a.Name, &a.SteamAPIName)
-		
+
 		if err != nil {
 			return []Achievement{}, err
 		}
-		
+
 		err = rows.Err()
 
 		if err != nil {
@@ -135,7 +135,7 @@ func GetUserLockedAchievements(id int) ([]Achievement, error) {
 
 		achievements = append(achievements, a)
 	}
-	
+
 	return achievements, nil
 }
 
@@ -205,6 +205,6 @@ func getAchievementFromId(id int) AchievementChecker {
 	case 31:
 		return NewAchievementStarvelous()
 	}
-	
+
 	return nil
 }
