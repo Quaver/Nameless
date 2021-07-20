@@ -13,6 +13,7 @@ import (
 
 var FirstPlace *discordhook.WebhookAPI
 var ScoreSubmissionErrors *discordhook.WebhookAPI
+var Anticheat *discordhook.WebhookAPI
 
 func InitializeDiscordWebhooks() {
 	var err error
@@ -24,6 +25,8 @@ func InitializeDiscordWebhooks() {
 	if err != nil {
 		panic(err)
 	}
+	
+	log.Info("Successfully initialized First Place Discord Webhook!")
 
 	// Score Submission Errors
 	score := config.Data.DiscordWebhookSubmissionErrors
@@ -32,8 +35,18 @@ func InitializeDiscordWebhooks() {
 	if err != nil {
 		panic(err)
 	}
-	
-	log.Info("Successfully initialized First Place Discord Webhook!")
+
+	log.Info("Successfully initialized Score Submission Error Discord Webhook!")
+
+	// Anti-cheat
+	ac := config.Data.DiscordWebhookAnticheat
+	Anticheat, err = discordhook.NewWebhookAPI(snowflake.Snowflake(ac.Id), ac.Secret, true, nil)
+
+	if err != nil {
+		panic(err)
+	}
+
+	log.Info("Successfully initialized Anti-cheat Discord Webhook!")
 }
 
 // SendFirstPlaceWebhook Sends a first place webhook
@@ -144,4 +157,72 @@ func SendScoreSubmissionErrorWebhook(user *db.User, reason string) error {
 	}
 	
 	return nil	
+}
+
+// SendAnticheatWebhook Sends an anti-cheat related webhook to Discord
+func SendAnticheatWebhook(user *db.User, mapData *db.Map, scoreId int, isPersonalBest bool, reason string) error {
+	t := time.Now().UTC()
+
+	// Initial Actions that are on every 
+	actions := fmt.Sprintf("[View profile](%v/user/%v)", config.Data.WebsiteUrl, user.Id)
+	actions += fmt.Sprintf(" | [Ban User](https://a.quavergame.com/ban/%v)", user.Id)
+	actions += fmt.Sprintf(" | [Edit User](https://a.quavergame.com/edituser/%v)", user.Id)
+	
+	if mapData != nil {
+		actions += fmt.Sprintf(" | [Download Map](%v/download/mapset/%v)", config.Data.WebsiteUrl, mapData.MapsetId)	
+	}
+	
+	if isPersonalBest {
+		actions += fmt.Sprintf(" | [Download Replay](%v/download/replay/%v)", config.Data.WebsiteUrl, scoreId)
+	}
+
+	var fields []*discordhook.EmbedField
+	
+	if mapData != nil {
+		fields = append(fields, &discordhook.EmbedField {
+			Name: "Map",
+			Inline: false,
+			Value: fmt.Sprintf("[%v - %v [%v]](%v/mapset/map/%v)",
+				mapData.Artist, mapData.Title, mapData.DifficultyName, config.Data.WebsiteUrl, mapData.Id),
+		})
+	}
+	
+	fields = append(fields, &discordhook.EmbedField{
+		Name: "Detected Issues",
+		Value: reason,
+		Inline: false,
+	})
+	
+	fields = append(fields, &discordhook.EmbedField{
+		Name: "Admin Actions",
+		Value: actions,
+		Inline: false,
+	})
+
+	_, err := Anticheat.Execute(nil, &discordhook.WebhookExecuteParams{
+		Embeds: []*discordhook.Embed{
+			{
+				Author: &discordhook.EmbedAuthor{
+					Name: user.Username,
+					URL: fmt.Sprintf("%v/user/%v", config.Data.WebsiteUrl, user.Id),
+					IconURL: user.AvatarURL,
+				},
+				Description: "❌ **Anti-cheat Triggered!**",
+				Fields: fields,
+				Timestamp: &t,
+				Thumbnail: &discordhook.EmbedThumbnail{URL: config.Data.QuaverAvatar},
+				Footer: &discordhook.EmbedFooter{
+					Text:         "Quaver",
+					IconURL:      config.Data.QuaverAvatar,
+				},
+				Color: 0xFF0000,
+			},
+		},
+	}, nil, "")
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

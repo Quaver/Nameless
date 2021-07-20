@@ -67,6 +67,26 @@ func TestSendScoreSubmissionErrorWebhook(t *testing.T) {
 	}
 }
 
+func TestSendAnticheatWebhook(t *testing.T) {
+	user, err := db.GetUserById(1)
+
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	mapData, err := db.GetMapById(2)
+
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	err = SendAnticheatWebhook(&user, &mapData, 0, true, "Test")
+
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+}
+
 func TestCloseDiscord(t *testing.T) {
 	db.CloseSQLConnection()
 }

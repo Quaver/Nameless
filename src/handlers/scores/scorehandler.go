@@ -42,7 +42,7 @@ func (h Handler) SubmitPOST(c *gin.Context) {
 		return
 	}
 
-	h.scoreData, err = parseScoreSubmissionData(c)
+	h.scoreData, err = parseScoreSubmissionData(&h.user, c)
 
 	if err != nil {
 		h.logError(fmt.Sprintf("Invalid score data - %v", err))
@@ -164,6 +164,9 @@ func (h *Handler) handleSubmission(c *gin.Context) error {
 		return err
 	}
 
+	// Check if the score is suspicious for possible cheats.
+	isCleanScore := h.scoreData.checkSuspiciousScores(h)
+	
 	// Anything below this point requires the map to be ranked
 	// since there will be updating leaderboards, handling achievements, etc.
 	if h.mapData.RankedStatus != common.StatusRanked {
@@ -181,8 +184,8 @@ func (h *Handler) handleSubmission(c *gin.Context) error {
 	if err != nil {
 		return err
 	}
-
-	err = h.handleFirstPlaceScore(c)
+	
+	err = h.handleFirstPlaceScore(c, isCleanScore)
 
 	if err != nil {
 		return err
@@ -521,7 +524,7 @@ func (h *Handler) updateLeaderboards(c *gin.Context) error {
 }
 
 // Checks if the user has a first place score and sends it to discord/albatross
-func (h *Handler) handleFirstPlaceScore(c *gin.Context) error {
+func (h *Handler) handleFirstPlaceScore(c *gin.Context, isCleanScore bool) error {
 	if !h.isPersonalBestScore() {
 		return nil
 	}
@@ -595,6 +598,11 @@ func (h *Handler) handleFirstPlaceScore(c *gin.Context) error {
 		return err
 	}
 
+	// Don't send non-clean scores to discord webhook
+	if !isCleanScore {
+		return nil
+	}
+	
 	dbScore := h.convertToDbScore()
 	err = utils.SendFirstPlaceWebhook(&h.user, &dbScore, &h.mapData, &oldUser)
 

@@ -44,7 +44,7 @@ type scoreSubmissionData struct {
 }
 
 // Handles the parsing of incoming score submission scoreData.
-func parseScoreSubmissionData(c *gin.Context) (scoreSubmissionData, error) {
+func parseScoreSubmissionData(user *db.User, c *gin.Context) (scoreSubmissionData, error) {
 	data := scoreSubmissionData{}
 
 	err := c.BindJSON(&data)
@@ -55,18 +55,24 @@ func parseScoreSubmissionData(c *gin.Context) (scoreSubmissionData, error) {
 	}
 
 	detections, ok := data.validate()
-
-	// TODO: Log To Discord
+	
 	if !ok {
-		return scoreSubmissionData{}, fmt.Errorf("%v", detections)
+		dString := detectionListToString(detections)
+		err = utils.SendAnticheatWebhook(user, nil, 0, false, dString)
+		
+		if err != nil {
+			log.Errorf("Error sending anti-cheat log to discord - %v", err)
+		}
+		
+		return scoreSubmissionData{}, fmt.Errorf("\n%v", dString)
 	}
 
 	return data, nil
 }
 
 // Validates incoming score submission data
-func (data *scoreSubmissionData) validate() ([]invalidScoreDetections, bool) {
-	detections := make([]invalidScoreDetections, 0)
+func (data *scoreSubmissionData) validate() ([]string, bool) {
+	detections := make([]string, 0)
 	detections = data.validateReplayData(detections)
 	detections = data.validateMD5Values(detections)
 	detections = data.validateScoreData(detections)
@@ -80,15 +86,15 @@ func (data *scoreSubmissionData) validate() ([]invalidScoreDetections, bool) {
 
 // Makes sure we're getting replay data with only passing scores &
 // makes sure the replay data passed is valid data
-func (data *scoreSubmissionData) validateReplayData(d []invalidScoreDetections) []invalidScoreDetections {
+func (data *scoreSubmissionData) validateReplayData(d []string) []string {
 	// Player stated that they passed, but did not provide replay data.
 	if !data.Failed && data.ReplayData == "" {
-		d = append(d, detectPassNoReplayData)
+		d = append(d, "Player passed but did not provide replay data")
 	}
 
 	// Player stated that they failed, but gave us replay data
 	if data.Failed && data.ReplayData != "" {
-		d = append(d, detectFailWithReplayData)
+		d = append(d, "Player failed but provided replay data")
 	}
 
 	var err error
@@ -96,69 +102,69 @@ func (data *scoreSubmissionData) validateReplayData(d []invalidScoreDetections) 
 	data.RawReplayData, err = base64.StdEncoding.DecodeString(data.ReplayData)
 
 	if err != nil {
-		d = append(d, detectReplayDecodeError)
+		d = append(d, "Failed to decode replay data")
 	}
 
 	return d
 }
 
 // Makes sure that values where an MD5 hash are expected are valid
-func (data *scoreSubmissionData) validateMD5Values(d []invalidScoreDetections) []invalidScoreDetections {
+func (data *scoreSubmissionData) validateMD5Values(d []string) []string {
 	if !utils.IsValidMD5(data.ReplayMD5) {
-		d = append(d, detectInvalidReplayMD5)
+		d = append(d, fmt.Sprintf("Replay MD5 was not a valid hash - %v", data.ReplayMD5))
 	}
 
 	if !utils.IsValidMD5(data.ExecutingAssemblyMD5) {
-		d = append(d, detectInvalidExecutingAssemblyMD5)
+		d = append(d, fmt.Sprintf("Executing Assembly MD5 was not a valid hash - %v", data.ExecutingAssemblyMD5))
 	}
 
 	if !utils.IsValidMD5(data.EntryAssemblyMD5) {
-		d = append(d, detectInvalidEntryAssemblyMD5)
+		d = append(d, fmt.Sprintf("Entry assembly MD5 was not a valid hash - %v", data.EntryAssemblyMD5))
 	}
 
 	if !utils.IsValidMD5(data.MapMD5) {
-		d = append(d, detectInvalidMapMD5)
+		d = append(d, fmt.Sprintf("Map MD5 was not a valid hash - %v", data.MapMD5))
 	}
 
 	if !utils.IsValidMD5(data.MapMD5Replay) {
-		d = append(d, detectInvalidMapReplayMD5)
+		d = append(d, fmt.Sprintf("Map Replay MD5 was not a valid hash - %v", data.MapMD5Replay))
 	}
 
 	return d
 }
 
 // Validates score-related data to make sure there are no discrepancies.
-func (data *scoreSubmissionData) validateScoreData(d []invalidScoreDetections) []invalidScoreDetections {
+func (data *scoreSubmissionData) validateScoreData(d []string) []string {
 	const maxScore int32 = 1000000
 
 	if data.TotalScore > maxScore || data.TotalScore < 0 {
-		d = append(d, detectInvalidTotalScore)
+		d = append(d, fmt.Sprintf("Invalid total score provided - %v", data.TotalScore))
 	}
 
 	if data.TotalScore >= maxScore && data.Failed {
-		d = append(d, detectMaxTotalScoreWithFailure)
+		d = append(d, "Max total score with a failing score provided")
 	}
 
 	if data.AudioPlaybackRate < 0.5 || data.AudioPlaybackRate > 2.0 {
-		d = append(d, detectInvalidAudioPlaybackRate)
+		d = append(d, fmt.Sprintf("Invalid audio playback rate provided - %v", data.AudioPlaybackRate))
 	}
 
 	nonMiss := data.CountMarv + data.CountPerf + data.CountGreat + data.CountGood + data.CountOkay
 
 	if data.MaxCombo > nonMiss {
-		d = append(d, detectInvalidMaxComboForJudgements)
+		d = append(d, fmt.Sprintf("Invalid Max Combo for non-miss judgements: %v vs. %v", data.MaxCombo, nonMiss))
 	}
 
 	if data.ComboAtEnd > data.MaxCombo {
-		d = append(d, detectMaxComboAndEndMismatch)
+		d = append(d, fmt.Sprintf("Combo @ End > than Max Combo - %v vs %v", data.ComboAtEnd, data.MaxCombo))
 	}
 
 	if data.Failed && data.HealthAtEnd != 0 {
-		d = append(d, detectFailWithNonZeroHealth)
+		d = append(d, "Player provided a failing score without zero health")
 	}
 
 	if !data.Failed && data.HealthAtEnd == 0 {
-		d = append(d, detectPassWithZeroHealth)
+		d = append(d, "Player provided a passing score with zero health")
 	}
 
 	return d
@@ -176,4 +182,57 @@ func (data *scoreSubmissionData) validateGameMode(m *db.Map) error {
 // Returns if the score has valid total score
 func (data *scoreSubmissionData) isValidTotalScore() bool {
 	return !(data.Failed && data.TotalScore == 0)
+}
+
+// Checks the score for anything suspicious about the score and returns it to Discord.
+// Returns if the score is clean or not.
+func (data *scoreSubmissionData) checkSuspiciousScores(h *Handler) bool {
+	// Disregard failed scores
+	if h.scoreData.Failed {
+		return true
+	}
+	
+	var detections []string
+	
+	// Detect extremely high ratio (potential autoplay)
+	var ratio = data.getMARatio()
+	if h.difficulty.Result.OverallDifficulty >= 10 && ratio >= 100 {
+		detections = append(detections, fmt.Sprintf("Abnormally high ratio on score achieved: **%v** (Autoplay)", ratio))
+	}
+	
+	if len(detections) == 0 {
+		return true
+	}
+	
+	// Send webhook to discord
+	err := utils.SendAnticheatWebhook(&h.user, &h.mapData, int(h.newScoreId), h.isPersonalBestScore(), 
+		detectionListToString(detections))
+	
+	if err != nil {
+		log.Errorf("Failed to send anticheat webhook to Discord - %v", err)
+	}
+	
+	return false
+}
+
+// Returns the Marvelous:Perfect ratio
+func (data *scoreSubmissionData) getMARatio() float32 {
+	perfects := data.CountPerf
+
+	if perfects == 0 {
+		perfects = 1
+	}
+	
+	return float32(data.CountMarv / perfects)
+}
+
+// Converts a list of detections to a readable string
+func detectionListToString(d []string) string {
+	str := ""
+	
+	for _, detection := range d {
+		str += fmt.Sprintf("• %v\n", detection)
+	}
+	
+	return str
 }
