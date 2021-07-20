@@ -165,7 +165,7 @@ func (h *Handler) handleSubmission(c *gin.Context) error {
 	}
 
 	// Check if the score is suspicious for possible cheats.
-	isCleanScore := h.scoreData.checkSuspiciousScores(h)
+	isCleanScore := h.scoreData.checkSuspiciousScore(h)
 	
 	// Anything below this point requires the map to be ranked
 	// since there will be updating leaderboards, handling achievements, etc.

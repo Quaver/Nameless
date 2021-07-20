@@ -186,7 +186,7 @@ func (data *scoreSubmissionData) isValidTotalScore() bool {
 
 // Checks the score for anything suspicious about the score and returns it to Discord.
 // Returns if the score is clean or not.
-func (data *scoreSubmissionData) checkSuspiciousScores(h *Handler) bool {
+func (data *scoreSubmissionData) checkSuspiciousScore(h *Handler) bool {
 	// Disregard failed scores
 	if h.scoreData.Failed {
 		return true
@@ -196,8 +196,10 @@ func (data *scoreSubmissionData) checkSuspiciousScores(h *Handler) bool {
 	
 	// Detect extremely high ratio (potential autoplay)
 	var ratio = data.getMARatio()
+	
 	if h.difficulty.Result.OverallDifficulty >= 10 && ratio >= 100 {
-		detections = append(detections, fmt.Sprintf("Abnormally high ratio on score achieved: **%v** (Autoplay)", ratio))
+		d := fmt.Sprintf("Abnormally high ratio on score achieved: **%v** (Autoplay)", ratio)
+		detections = append(detections, d)
 	}
 	
 	if len(detections) == 0 {
