@@ -53,6 +53,20 @@ func TestSendFirstPlaceWebhook(t *testing.T) {
 	}
 }
 
+func TestSendScoreSubmissionErrorWebhook(t *testing.T) {
+	user, err := db.GetUserById(1)
+
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	
+	err = SendScoreSubmissionErrorWebhook(&user, "Failure getting stats")
+
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+}
+
 func TestCloseDiscord(t *testing.T) {
 	db.CloseSQLConnection()
 }

@@ -97,3 +97,41 @@ func SendFirstPlaceWebhook(user *db.User, score *db.Score, m *db.Map,  oldUser *
 	
 	return nil
 }
+
+// SendScoreSubmissionErrorWebhook Sends a message to Discord that score submission has failed.
+func SendScoreSubmissionErrorWebhook(user *db.User, reason string) error {
+	t := time.Now().UTC()
+
+	_, err := FirstPlace.Execute(nil, &discordhook.WebhookExecuteParams{
+		Embeds: []*discordhook.Embed{
+			{
+				Author: &discordhook.EmbedAuthor{
+					Name: user.Username,
+					URL: fmt.Sprintf("%v/user/%v", config.Data.WebsiteUrl, user.Id),
+					IconURL: user.AvatarURL,
+				},
+				Description: "❌ **Score Submission Failed!**",
+				Fields: []*discordhook.EmbedField {
+					{
+						Name: "Reason",
+						Value: reason,
+						Inline: false,
+					},
+				},
+				Timestamp: &t,
+				Thumbnail: &discordhook.EmbedThumbnail{URL: config.Data.QuaverAvatar},
+				Footer: &discordhook.EmbedFooter{
+					Text:         "Quaver",
+					IconURL:      config.Data.QuaverAvatar,
+				},
+				Color: 0xFF0000,
+			},
+		},
+	}, nil, "")
+
+	if err != nil {
+		return err
+	}
+	
+	return nil	
+}
