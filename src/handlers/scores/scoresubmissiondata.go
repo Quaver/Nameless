@@ -122,6 +122,8 @@ func (data *scoreSubmissionData) validateMD5Values(d []string) []string {
 		d = append(d, fmt.Sprintf("Entry assembly MD5 was not a valid hash - %v", data.EntryAssemblyMD5))
 	}
 
+	/*
+	//  StepMania doesn't use MD5 hashes for their charts, but instead a "Chart Key", so skip this check.
 	if !utils.IsValidMD5(data.MapMD5) {
 		d = append(d, fmt.Sprintf("Map MD5 was not a valid hash - %v", data.MapMD5))
 	}
@@ -129,6 +131,7 @@ func (data *scoreSubmissionData) validateMD5Values(d []string) []string {
 	if !utils.IsValidMD5(data.MapMD5Replay) {
 		d = append(d, fmt.Sprintf("Map Replay MD5 was not a valid hash - %v", data.MapMD5Replay))
 	}
+	*/
 
 	return d
 }
@@ -202,6 +205,7 @@ func (data *scoreSubmissionData) checkSuspiciousScore(h *Handler) bool {
 		detections = append(detections, d)
 	}
 	
+	// Nothing suspicious has been detected
 	if len(detections) == 0 {
 		return true
 	}
