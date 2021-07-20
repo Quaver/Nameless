@@ -20,7 +20,7 @@ type Configuration struct {
 	QuaverAPIPath string `json:"quaver_api_path"`
 	MapCacheDir string `json:"map_cache_dir"`
 	DiscordWebhookFirstPlace ConfigurationDiscordWebhook `json:"discord_webhook_first_place"`
-	DiscordWebhookSubmissionErrors ConfigurationDiscordWebhook `json:"discord-webhook_submission_errors"`
+	DiscordWebhookSubmissionErrors ConfigurationDiscordWebhook `json:"discord_webhook_submission_errors"`
 	APIBaseUrl string `json:"api_base_url"`
 	APISecretKey string `json:"api_secret_key"`
 }

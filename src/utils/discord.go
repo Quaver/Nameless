@@ -12,13 +12,23 @@ import (
 )
 
 var FirstPlace *discordhook.WebhookAPI
+var ScoreSubmissionErrors *discordhook.WebhookAPI
 
 func InitializeDiscordWebhooks() {
 	var err error
 	
+	// First Places
 	fp := config.Data.DiscordWebhookFirstPlace
 	FirstPlace, err = discordhook.NewWebhookAPI(snowflake.Snowflake(fp.Id), fp.Secret, true, nil)
 	
+	if err != nil {
+		panic(err)
+	}
+
+	// Score Submission Errors
+	score := config.Data.DiscordWebhookSubmissionErrors
+	ScoreSubmissionErrors, err = discordhook.NewWebhookAPI(snowflake.Snowflake(score.Id), score.Secret, true, nil)
+
 	if err != nil {
 		panic(err)
 	}
@@ -102,7 +112,7 @@ func SendFirstPlaceWebhook(user *db.User, score *db.Score, m *db.Map,  oldUser *
 func SendScoreSubmissionErrorWebhook(user *db.User, reason string) error {
 	t := time.Now().UTC()
 
-	_, err := FirstPlace.Execute(nil, &discordhook.WebhookExecuteParams{
+	_, err := ScoreSubmissionErrors.Execute(nil, &discordhook.WebhookExecuteParams{
 		Embeds: []*discordhook.Embed{
 			{
 				Author: &discordhook.EmbedAuthor{
