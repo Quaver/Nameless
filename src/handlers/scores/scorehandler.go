@@ -45,7 +45,7 @@ func (h Handler) SubmitPOST(c *gin.Context) {
 	h.scoreData, err = parseScoreSubmissionData(c)
 
 	if err != nil {
-		h.logIgnoringScore(fmt.Sprintf("Invalid score data - %v", err))
+		h.logError(fmt.Sprintf("Invalid score data - %v", err))
 		handlers.Return400(c)
 		return
 	}
@@ -756,4 +756,10 @@ func (h *Handler) logIgnoringScore(reason string) {
 
 func (h *Handler) logError(reason string) {
 	log.Errorf(fmt.Sprintf("Error submitting score from %v: %v", h.user.ToString(), reason))
+	
+	err := utils.SendScoreSubmissionErrorWebhook(&h.user, reason)
+	
+	if err != nil {
+		log.Errorf("Failed to send score submission error webhook - %v\n", err)
+	}
 }
