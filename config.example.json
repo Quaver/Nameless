@@ -24,6 +24,10 @@
     "id": -1,
     "secret": ""
   },
+  "discord_webhook_submission_errors": {
+    "id": -1,
+    "secret": ""
+  },
   "api_secret_key": "",
   "api_base_url": "http://localhost:8082"
 }
