@@ -671,16 +671,14 @@ func (h *Handler) sendSuccessfulResponse(c *gin.Context) {
 	
 	if err != nil {
 		h.logError(fmt.Sprintf("Failed to retrieve user global rank - %v", err))
-		handlers.Return500(c)
-		return
+		globalRank = -1
 	}
 	
 	countryRank, err := h.user.GetCountryRank(h.mapData.GameMode)
 
 	if err != nil {
 		h.logError(fmt.Sprintf("Failed to retrieve user country rank - %v", err))
-		handlers.Return500(c)
-		return
+		countryRank = -1
 	}
 	
 	status := http.StatusOK
