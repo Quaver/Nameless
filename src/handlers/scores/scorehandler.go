@@ -83,13 +83,13 @@ func (h Handler) SubmitPOST(c *gin.Context) {
 	h.mapPath, err = utils.CacheQuaFile(h.mapData)
 	
 	if err != nil {
+		h.logError(fmt.Sprintf("Unable to cache map file - %v - %v", h.mapData.Id, err))
+		
 		if err == utils.ErrAzureMismatchedMD5 {
-			h.logError(fmt.Sprintf("Unable to cache map file - %v - %v", h.mapData.Id, err))
 			handlers.Return400(c)
 			return
 		}
 		
-		h.logError(fmt.Sprintf("Unable to cache map file `%v` - %v", h.mapData.Id, err))
 		handlers.Return500(c)
 		return
 	}
