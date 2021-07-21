@@ -725,8 +725,8 @@ func (h *Handler) sendSuccessfulResponse(c *gin.Context) {
 
 // Logs out the score in a readable way
 func (h *Handler) logScore(d time.Duration) {
-	log.Info(fmt.Sprintf("Score: #%v | User: %v (#%v) | Map: #%v | PR: %.2f | Acc: %.2f%% | Time: %vs",
-		h.newScoreId, h.user.Username, h.user.Id, h.mapData.Id, h.rating.Rating, h.scoreData.Accuracy, d.Seconds()))
+	log.Info(fmt.Sprintf("Score: #%v | User: %v (#%v) | Map: #%v | PR: %.2f | Acc: %.2f%%",
+		h.newScoreId, h.user.Username, h.user.Id, h.mapData.Id, h.rating.Rating, h.scoreData.Accuracy))
 }
 
 // Converts the incoming score's to a db score.
