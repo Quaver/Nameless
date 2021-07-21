@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"context"
+	"errors"
 	"fmt"
 	"github.com/Azure/azure-pipeline-go/pipeline"
 	"github.com/Azure/azure-storage-blob-go/azblob"
@@ -28,6 +29,7 @@ type AzureStorageClient struct {
 // AzureClient Global storage client used throughout the application.
 // Must call InitializeAzure to create
 var AzureClient AzureStorageClient
+var ErrAzureMismatchedMD5 = errors.New("MD5 hash of cached file mismatches database")
 
 // InitializeAzure Initializes the azure storage client
 func InitializeAzure() {
@@ -172,7 +174,7 @@ func CacheQuaFile(m db.Map) (string, error) {
 		}
 
 		if md5 != m.MD5 {
-			return "", fmt.Errorf("md5 hash mismatch `%v` vs `%v`", md5, m.MD5)
+			return "", ErrAzureMismatchedMD5
 		}
 
 		return path, nil
