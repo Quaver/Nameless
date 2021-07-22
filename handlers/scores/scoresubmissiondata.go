@@ -3,9 +3,9 @@ package scores
 import (
 	"encoding/base64"
 	"fmt"
-	common2 "github.com/Swan/Nameless/common"
-	db2 "github.com/Swan/Nameless/db"
-	utils2 "github.com/Swan/Nameless/utils"
+	common "github.com/Swan/Nameless/common"
+	db "github.com/Swan/Nameless/db"
+	utils "github.com/Swan/Nameless/utils"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 )
@@ -23,8 +23,8 @@ type scoreSubmissionData struct {
 	TimePlayEnded        int64        `json:"time_play_ended"`
 	AudioPlaybackRate    float32      `json:"audio_playback_rate"`
 	ScrollSpeed          int16        `json:"scroll_speed"`
-	GameMode             common2.Mode `json:"game_mode"`
-	Mods                 common2.Mods `json:"mods"`
+	GameMode             common.Mode `json:"game_mode"`
+	Mods                 common.Mods `json:"mods"`
 	Failed               bool         `json:"failed"`
 	TotalScore           int32        `json:"total_score"`
 	Accuracy             float32      `json:"accuracy"`
@@ -44,7 +44,7 @@ type scoreSubmissionData struct {
 }
 
 // Handles the parsing of incoming score submission scoreData.
-func parseScoreSubmissionData(user *db2.User, c *gin.Context) (scoreSubmissionData, error) {
+func parseScoreSubmissionData(user *db.User, c *gin.Context) (scoreSubmissionData, error) {
 	data := scoreSubmissionData{}
 
 	err := c.BindJSON(&data)
@@ -58,7 +58,7 @@ func parseScoreSubmissionData(user *db2.User, c *gin.Context) (scoreSubmissionDa
 	
 	if !ok {
 		dString := detectionListToString(detections)
-		err = utils2.SendAnticheatWebhook(user, nil, 0, false, dString)
+		err = utils.SendAnticheatWebhook(user, nil, 0, false, dString)
 		
 		if err != nil {
 			log.Errorf("Error sending anti-cheat log to discord - %v", err)
@@ -110,15 +110,15 @@ func (data *scoreSubmissionData) validateReplayData(d []string) []string {
 
 // Makes sure that values where an MD5 hash are expected are valid
 func (data *scoreSubmissionData) validateMD5Values(d []string) []string {
-	if !utils2.IsValidMD5(data.ReplayMD5) {
+	if !utils.IsValidMD5(data.ReplayMD5) {
 		d = append(d, fmt.Sprintf("Replay MD5 was not a valid hash - %v", data.ReplayMD5))
 	}
 
-	if !utils2.IsValidMD5(data.ExecutingAssemblyMD5) {
+	if !utils.IsValidMD5(data.ExecutingAssemblyMD5) {
 		d = append(d, fmt.Sprintf("Executing Assembly MD5 was not a valid hash - %v", data.ExecutingAssemblyMD5))
 	}
 
-	if !utils2.IsValidMD5(data.EntryAssemblyMD5) {
+	if !utils.IsValidMD5(data.EntryAssemblyMD5) {
 		d = append(d, fmt.Sprintf("Entry assembly MD5 was not a valid hash - %v", data.EntryAssemblyMD5))
 	}
 
@@ -174,7 +174,7 @@ func (data *scoreSubmissionData) validateScoreData(d []string) []string {
 }
 
 // Returns if the game mode the user provided matches what is in the database
-func (data *scoreSubmissionData) validateGameMode(m *db2.Map) error {
+func (data *scoreSubmissionData) validateGameMode(m *db.Map) error {
 	if data.GameMode != m.GameMode {
 		return fmt.Errorf("provided game mode does not match DB: %v vs %v", data.GameMode, m.GameMode)
 	}
@@ -211,7 +211,7 @@ func (data *scoreSubmissionData) checkSuspiciousScore(h *Handler) bool {
 	}
 	
 	// Send webhook to discord
-	err := utils2.SendAnticheatWebhook(&h.user, &h.mapData, int(h.newScoreId), h.isPersonalBestScore(), 
+	err := utils.SendAnticheatWebhook(&h.user, &h.mapData, int(h.newScoreId), h.isPersonalBestScore(), 
 		detectionListToString(detections))
 	
 	if err != nil {

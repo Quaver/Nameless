@@ -2,7 +2,7 @@ package processors
 
 import (
 	"encoding/json"
-	common2 "github.com/Swan/Nameless/common"
+	common "github.com/Swan/Nameless/common"
 	"os/exec"
 	"strconv"
 )
@@ -17,7 +17,7 @@ type DifficultyProcessorMetadata struct {
 	Title          string       `json:"Title"`
 	DifficultyName string       `json:"DifficultyName"`
 	Creator        string       `json:"Creator"`
-	Mode           common2.Mode `json:"Mode"`
+	Mode           common.Mode `json:"Mode"`
 	Length         int          `json:"Length"`
 	MapId          int          `json:"MapId"`
 	MapSetId       int          `json:"MapSetId"`
@@ -30,7 +30,7 @@ type DifficultyProcessorResult struct {
 }
 
 // CalcDifficulty Calculates the difficulty rating of a local .qua file
-func CalcDifficulty(path string, mods common2.Mods) (DifficultyProcessor, error) {
+func CalcDifficulty(path string, mods common.Mods) (DifficultyProcessor, error) {
 	modsStr := strconv.Itoa(int(mods))
 	output, err := exec.Command("dotnet", getQuaverToolsDllPath(), "-calcdiff", path, modsStr).Output()
 

@@ -3,8 +3,8 @@ package achievements
 import (
 	"database/sql"
 	"fmt"
-	common2 "github.com/Swan/Nameless/common"
-	db2 "github.com/Swan/Nameless/db"
+	common "github.com/Swan/Nameless/common"
+	db "github.com/Swan/Nameless/db"
 )
 
 type AchievementSlowlyButSurely Achievement
@@ -17,8 +17,8 @@ func NewAchievementSlowlyButSurely() AchievementSlowlyButSurely {
 	}
 }
 
-func (a AchievementSlowlyButSurely) Check(user *db2.User, score *db2.Score, stats *db2.UserStats) (bool, error) {
-	if !score.Failed && !score.IsDonatorScore && common2.IsModActivated(score.Mods, common2.ModSpeed05X) {
+func (a AchievementSlowlyButSurely) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
+	if !score.Failed && !score.IsDonatorScore && common.IsModActivated(score.Mods, common.ModSpeed05X) {
 		return true, nil
 	}
 
@@ -26,9 +26,9 @@ func (a AchievementSlowlyButSurely) Check(user *db2.User, score *db2.Score, stat
 		return false, nil
 	}
 
-	var dbScore db2.Score
+	var dbScore db.Score
 	q := "SELECT id FROM scores WHERE mods & %v != 0 AND user_id = ? AND is_donator_score = 0 AND failed = 0 LIMIT 1"
-	err := db2.SQL.QueryRow(fmt.Sprintf(q, common2.ModSpeed05X), user.Id).Scan(&dbScore.Id)
+	err := db.SQL.QueryRow(fmt.Sprintf(q, common.ModSpeed05X), user.Id).Scan(&dbScore.Id)
 
 	if err != nil {
 		if err == sql.ErrNoRows {

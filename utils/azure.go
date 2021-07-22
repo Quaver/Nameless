@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"github.com/Azure/azure-pipeline-go/pipeline"
 	"github.com/Azure/azure-storage-blob-go/azblob"
-	common2 "github.com/Swan/Nameless/common"
-	config2 "github.com/Swan/Nameless/config"
-	db2 "github.com/Swan/Nameless/db"
+	common "github.com/Swan/Nameless/common"
+	config "github.com/Swan/Nameless/config"
+	db "github.com/Swan/Nameless/db"
 	log "github.com/sirupsen/logrus"
 	"io"
 	"io/fs"
@@ -40,8 +40,8 @@ func InitializeAzure() {
 	var err error
 	
 	client := AzureStorageClient{
-		accountName: config2.Data.Azure.AccountName,
-		accountKey:  config2.Data.Azure.AccountKey,
+		accountName: config.Data.Azure.AccountName,
+		accountKey:  config.Data.Azure.AccountKey,
 	}
 	
 	client.credential, err = azblob.NewSharedKeyCredential(client.accountName, client.accountKey)
@@ -120,8 +120,8 @@ func (c *AzureStorageClient) DownloadFile(container string, name string, path st
 }
 
 // CacheQuaFile Downloads a .qua file from the API to disk
-func CacheQuaFile(m db2.Map) (string, error) {
-	folder := config2.Data.MapCacheDir
+func CacheQuaFile(m db.Map) (string, error) {
+	folder := config.Data.MapCacheDir
 	err := os.MkdirAll(folder, os.ModePerm)
 
 	if err != nil {
@@ -156,7 +156,7 @@ func CacheQuaFile(m db2.Map) (string, error) {
 		}
 		
 		// Maps are that are uploaded by donors are gzipped, so we need to unpack and rewrite the file
-		if m.RankedStatus == common2.StatusNotSubmitted {
+		if m.RankedStatus == common.StatusNotSubmitted {
 			err = ungzipFile(&buffer, path)
 			
 			if err != nil {
@@ -165,7 +165,7 @@ func CacheQuaFile(m db2.Map) (string, error) {
 		}
 	}
 	
-	if m.RankedStatus == common2.StatusNotSubmitted {
+	if m.RankedStatus == common.StatusNotSubmitted {
 		return path, nil
 	}
 	

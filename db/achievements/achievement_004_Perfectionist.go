@@ -2,7 +2,7 @@ package achievements
 
 import (
 	"database/sql"
-	db2 "github.com/Swan/Nameless/db"
+	db "github.com/Swan/Nameless/db"
 )
 
 type AchievementPerfectionist Achievement
@@ -15,7 +15,7 @@ func NewAchievementPerfectionist() AchievementPerfectionist {
 	}
 }
 
-func (a AchievementPerfectionist) Check(user *db2.User, score *db2.Score, stats *db2.UserStats) (bool, error) {
+func (a AchievementPerfectionist) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
 	if !score.Failed && !score.IsDonatorScore &&
 		score.CountGreat == 0 && score.CountGood == 0 && score.CountOkay == 0 && score.CountMiss == 0 {
 		return true, nil
@@ -25,13 +25,13 @@ func (a AchievementPerfectionist) Check(user *db2.User, score *db2.Score, stats 
 		return false, nil
 	}
 
-	var dbScore db2.Score
+	var dbScore db.Score
 	
 	q := "SELECT id FROM scores WHERE failed = 0 AND is_donator_score = 0 " +
 		"AND count_great = 0 AND count_good = 0 AND count_okay = 0 AND count_miss = 0 " +
 		"AND user_id = ? LIMIT 1"
 	
-	err := db2.SQL.QueryRow(q, user.Id).Scan(&dbScore.Id)
+	err := db.SQL.QueryRow(q, user.Id).Scan(&dbScore.Id)
 	
 	if err != nil {
 		if err == sql.ErrNoRows {

@@ -2,7 +2,7 @@ package utils
 
 import (
 	"fmt"
-	config2 "github.com/Swan/Nameless/config"
+	config "github.com/Swan/Nameless/config"
 	"github.com/imroc/req"
 	"net/http"
 )
@@ -11,11 +11,11 @@ import (
 func UpdateElasticSearchMapset(id int) error {
 	header := req.Header{"Accept": "application/json"}
 	param := req.Param{
-		"key": config2.Data.APISecretKey,
+		"key": config.Data.APISecretKey,
 		"id":  id,
 	}
 	
-	r, err := req.Post(fmt.Sprintf("%v/v1/mapsets/elastic", config2.Data.APIBaseUrl), header, param)
+	r, err := req.Post(fmt.Sprintf("%v/v1/mapsets/elastic", config.Data.APIBaseUrl), header, param)
 	
 	if err != nil {
 		return err

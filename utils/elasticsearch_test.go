@@ -1,14 +1,14 @@
 package utils
 
 import (
-	config2 "github.com/Swan/Nameless/config"
-	db2 "github.com/Swan/Nameless/db"
+	config "github.com/Swan/Nameless/config"
+	db "github.com/Swan/Nameless/db"
 	"testing"
 )
 
 func TestInitializeElasticSearch(t *testing.T) {
-	config2.InitializeConfig("../")
-	db2.InitializeSQL()
+	config.InitializeConfig("../")
+	db.InitializeSQL()
 	InitializeDiscordWebhooks()
 }
 
@@ -21,5 +21,5 @@ func TestUpdateElasticSearch(t *testing.T) {
 }
 
 func TestCloseElasticSearch(t *testing.T) {
-	db2.CloseSQLConnection()
+	db.CloseSQLConnection()
 }

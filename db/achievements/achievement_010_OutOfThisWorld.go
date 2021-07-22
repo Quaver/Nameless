@@ -1,7 +1,7 @@
 package achievements
 
 import (
-	db2 "github.com/Swan/Nameless/db"
+	db "github.com/Swan/Nameless/db"
 )
 
 type AchievementOutOfThisWorld Achievement
@@ -14,7 +14,7 @@ func NewAchievementOutOfThisWorld() AchievementOutOfThisWorld {
 	}
 }
 
-func (a AchievementOutOfThisWorld) Check(user *db2.User, score *db2.Score, stats *db2.UserStats) (bool, error) {
+func (a AchievementOutOfThisWorld) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
 	if stats.OverallRating >= 600 {
 		return true, nil
 	}

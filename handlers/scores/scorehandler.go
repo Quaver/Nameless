@@ -3,13 +3,13 @@ package scores
 import (
 	"database/sql"
 	"fmt"
-	auth2 "github.com/Swan/Nameless/auth"
-	common2 "github.com/Swan/Nameless/common"
-	db2 "github.com/Swan/Nameless/db"
-	achievements2 "github.com/Swan/Nameless/db/achievements"
-	handlers2 "github.com/Swan/Nameless/handlers"
-	processors2 "github.com/Swan/Nameless/processors"
-	utils2 "github.com/Swan/Nameless/utils"
+	auth "github.com/Swan/Nameless/auth"
+	common "github.com/Swan/Nameless/common"
+	db "github.com/Swan/Nameless/db"
+	achievements "github.com/Swan/Nameless/db/achievements"
+	handlers "github.com/Swan/Nameless/handlers"
+	processors "github.com/Swan/Nameless/processors"
+	utils "github.com/Swan/Nameless/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
 	log "github.com/sirupsen/logrus"
@@ -19,26 +19,26 @@ import (
 
 type Handler struct {
 	scoreData            scoreSubmissionData
-	user                 db2.User
-	mapData              db2.Map
+	user                 db.User
+	mapData              db.Map
 	mapPath              string
-	stats                db2.UserStats
-	difficulty           processors2.DifficultyProcessor
-	rating               processors2.RatingProcessor
-	oldPersonalBest      db2.Score
+	stats                db.UserStats
+	difficulty           processors.DifficultyProcessor
+	rating               processors.RatingProcessor
+	oldPersonalBest      db.Score
 	newScoreId           int64
-	unlockedAchievements []achievements2.Achievement
+	unlockedAchievements []achievements.Achievement
 }
 
 func (h Handler) SubmitPOST(c *gin.Context) {
 	timeStart := time.Now()
 	
 	var err error
-	h.user, err = auth2.GetInGameUser(c)
+	h.user, err = auth.GetInGameUser(c)
 
 	if err != nil {
 		log.Errorf("Could not authenticate user - %v\n", err)
-		handlers2.ReturnError(c, http.StatusForbidden, err.Error())
+		handlers.ReturnError(c, http.StatusForbidden, err.Error())
 		return
 	}
 
@@ -46,29 +46,29 @@ func (h Handler) SubmitPOST(c *gin.Context) {
 
 	if err != nil {
 		h.logError(fmt.Sprintf("Invalid score data - %v", err))
-		handlers2.Return400(c)
+		handlers.Return400(c)
 		return
 	}
 
-	hasRankedMods := common2.IsModComboRanked(h.scoreData.Mods)
+	hasRankedMods := common.IsModComboRanked(h.scoreData.Mods)
 
 	if !hasRankedMods {
-		h.logIgnoringScore(fmt.Sprintf("unranked modifiers -%v", common2.GetModsString(h.scoreData.Mods)))
-		handlers2.Return400(c)
+		h.logIgnoringScore(fmt.Sprintf("unranked modifiers -%v", common.GetModsString(h.scoreData.Mods)))
+		handlers.Return400(c)
 		return
 	}
 
-	h.mapData, err = db2.GetMapByMD5(h.scoreData.MapMD5)
+	h.mapData, err = db.GetMapByMD5(h.scoreData.MapMD5)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
 			h.logIgnoringScore(fmt.Sprintf("Unknown Map - `%v`", h.scoreData.MapMD5))
-			handlers2.Return400(c)
+			handlers.Return400(c)
 			return 
 		}
 		
 		h.logError(fmt.Sprintf("Failure fetching map `%v` - %v", h.scoreData.MapMD5, err))
-		handlers2.Return500(c)
+		handlers.Return500(c)
 		return
 	}
 
@@ -76,29 +76,29 @@ func (h Handler) SubmitPOST(c *gin.Context) {
 
 	if err != nil {
 		h.logIgnoringScore(fmt.Sprintf("non-matching game modes - %v", err))
-		handlers2.Return400(c)
+		handlers.Return400(c)
 		return
 	}
 
-	h.mapPath, err = utils2.CacheQuaFile(h.mapData)
+	h.mapPath, err = utils.CacheQuaFile(h.mapData)
 	
 	if err != nil {
 		h.logError(fmt.Sprintf("Unable to cache map file - %v - %v", h.mapData.Id, err))
 		
-		if err == utils2.ErrAzureMismatchedMD5 {
-			handlers2.Return400(c)
+		if err == utils.ErrAzureMismatchedMD5 {
+			handlers.Return400(c)
 			return
 		}
 		
-		handlers2.Return500(c)
+		handlers.Return500(c)
 		return
 	}
 
-	h.stats, err = db2.GetUserStats(h.user.Id, h.scoreData.GameMode)
+	h.stats, err = db.GetUserStats(h.user.Id, h.scoreData.GameMode)
 
 	if err != nil {
 		h.logError(fmt.Sprintf("Failed to fetch user stats - %v", err))
-		handlers2.Return500(c)
+		handlers.Return500(c)
 		return
 	}
 
@@ -180,7 +180,7 @@ func (h *Handler) handleSubmission(c *gin.Context) error {
 	
 	// Anything below this point requires the map to be ranked
 	// since there will be updating leaderboards, handling achievements, etc.
-	if h.mapData.RankedStatus != common2.StatusRanked {
+	if h.mapData.RankedStatus != common.StatusRanked {
 		return nil
 	}
 
@@ -218,7 +218,7 @@ func (h *Handler) handleSubmission(c *gin.Context) error {
 func (h *Handler) checkValidTotalScore(c *gin.Context) bool {
 	if !h.scoreData.isValidTotalScore() {
 		h.logIgnoringScore("ignoring submitted score with 0 total score")
-		handlers2.Return400(c)
+		handlers.Return400(c)
 		return false
 	}
 
@@ -229,12 +229,12 @@ func (h *Handler) checkValidTotalScore(c *gin.Context) bool {
 // This checks if the score is a duplicate, and will return a 400 if it is.
 // Returns if everything is OK
 func (h *Handler) checkDuplicateScore(c *gin.Context) (bool, error) {
-	s, err := db2.GetScoreByReplayMD5(&h.user, h.scoreData.ReplayMD5)
+	s, err := db.GetScoreByReplayMD5(&h.user, h.scoreData.ReplayMD5)
 
 	// No error returned, which means a duplicate score was found
 	if err == nil {
 		h.logIgnoringScore(fmt.Sprintf("duplicate submitted score found - `#%v`\n", s.Id))
-		handlers2.Return400(c)
+		handlers.Return400(c)
 		return false, nil
 	}
 
@@ -243,7 +243,7 @@ func (h *Handler) checkDuplicateScore(c *gin.Context) (bool, error) {
 		return true, nil
 	}
 
-	handlers2.Return500(c)
+	handlers.Return500(c)
 	return false, fmt.Errorf("error while attempting to fetch duplicate score - %v\n", err)
 }
 
@@ -251,15 +251,15 @@ func (h *Handler) checkDuplicateScore(c *gin.Context) (bool, error) {
 func (h *Handler) calculatePerformanceRating(c *gin.Context) error {
 	var err error
 
-	h.difficulty, err = processors2.CalcDifficulty(h.mapPath, h.scoreData.Mods)
+	h.difficulty, err = processors.CalcDifficulty(h.mapPath, h.scoreData.Mods)
 
 	if err != nil {
-		handlers2.Return500(c)
+		handlers.Return500(c)
 		return fmt.Errorf("error while calculating difficulty rating - %v", err)
 	}
 
 	diffVal := h.difficulty.Result.OverallDifficulty
-	h.rating, err = processors2.CalcPerformance(diffVal, h.scoreData.Accuracy, h.scoreData.Failed)
+	h.rating, err = processors.CalcPerformance(diffVal, h.scoreData.Accuracy, h.scoreData.Failed)
 
 	return nil
 }
@@ -268,7 +268,7 @@ func (h *Handler) calculatePerformanceRating(c *gin.Context) error {
 func (h *Handler) updateOldPersonalBest(c *gin.Context) error {
 	var err error
 
-	h.oldPersonalBest, err = db2.GetPersonalBestScore(&h.user, &h.mapData)
+	h.oldPersonalBest, err = db.GetPersonalBestScore(&h.user, &h.mapData)
 
 	// Existing personal best score was found,
 	if err == nil {
@@ -286,7 +286,7 @@ func (h *Handler) updateOldPersonalBest(c *gin.Context) error {
 		return nil
 	}
 
-	handlers2.Return500(c)
+	handlers.Return500(c)
 	return fmt.Errorf("error while fetching old personal best - %v", err)
 }
 
@@ -297,7 +297,7 @@ func (h *Handler) unsetOldPersonalBest() error {
 	}
 
 	const query string = "UPDATE scores SET personal_best = 0 WHERE id = ?"
-	_, err := db2.SQL.Exec(query, h.oldPersonalBest.Id)
+	_, err := db.SQL.Exec(query, h.oldPersonalBest.Id)
 
 	if err != nil {
 		return err
@@ -316,17 +316,17 @@ func (h *Handler) insertScore(c *gin.Context) error {
 	const query string = "INSERT INTO scores VALUES " +
 		"(NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 
-	grade := common2.GetGradeFromAccuracy(h.scoreData.Accuracy, h.scoreData.Failed)
-	isDonorScore := h.mapData.RankedStatus != common2.StatusRanked
+	grade := common.GetGradeFromAccuracy(h.scoreData.Accuracy, h.scoreData.Failed)
+	isDonorScore := h.mapData.RankedStatus != common.StatusRanked
 	timestamp := time.Now().UnixNano() / int64(time.Millisecond)
 
-	result, err := db2.SQL.Exec(query,
+	result, err := db.SQL.Exec(query,
 		h.user.Id, h.mapData.MD5, h.scoreData.ReplayMD5, timestamp, h.scoreData.GameMode,
 		h.isPersonalBestScore(), h.rating.Rating, h.scoreData.Mods, h.scoreData.Failed,
 		h.scoreData.TotalScore, h.scoreData.Accuracy, h.scoreData.MaxCombo, h.scoreData.CountMarv,
 		h.scoreData.CountPerf, h.scoreData.CountGreat, h.scoreData.CountGood, h.scoreData.CountOkay,
 		h.scoreData.CountMiss, grade, h.scoreData.ScrollSpeed, h.scoreData.TimePlayStart,
-		h.scoreData.TimePlayEnded, utils2.GetIpFromRequest(c), h.scoreData.ExecutingAssemblyMD5,
+		h.scoreData.TimePlayEnded, utils.GetIpFromRequest(c), h.scoreData.ExecutingAssemblyMD5,
 		h.scoreData.EntryAssemblyMD5, h.scoreData.ReplayVersion, h.scoreData.PauseCount, h.rating.Version,
 		h.difficulty.Result.Version, isDonorScore, h.scoreData.GameId)
 	
@@ -334,7 +334,7 @@ func (h *Handler) insertScore(c *gin.Context) error {
 	
 	if err != nil {
 		h.logError(fmt.Sprintf(errStr, err))
-		handlers2.Return500(c)
+		handlers.Return500(c)
 		return err
 	}
 
@@ -342,15 +342,15 @@ func (h *Handler) insertScore(c *gin.Context) error {
 
 	if err != nil {
 		h.logError(fmt.Sprintf(errStr, err))
-		handlers2.Return500(c)
+		handlers.Return500(c)
 		return err
 	}
 
-	_, err = db2.Redis.Incr(db2.RedisCtx, "quaver:total_scores").Result()
+	_, err = db.Redis.Incr(db.RedisCtx, "quaver:total_scores").Result()
 
 	if err != nil {
 		h.logError(fmt.Sprintf("Failed to increment total scores in redis - %v", err))
-		handlers2.Return500(c)
+		handlers.Return500(c)
 		return err
 	}
 
@@ -359,11 +359,11 @@ func (h *Handler) insertScore(c *gin.Context) error {
 
 // Updates the user's latest activity in the database
 func (h *Handler) updateUserLatestActivity(c *gin.Context) error {
-	err := db2.UpdateUserLatestActivity(h.user.Id)
+	err := db.UpdateUserLatestActivity(h.user.Id)
 
 	if err != nil {
 		h.logError(fmt.Sprintf("Failed to update user latest activity - %v", err))
-		handlers2.Return500(c)
+		handlers.Return500(c)
 		return err
 	}
 
@@ -378,11 +378,11 @@ func (h *Handler) uploadReplay(c *gin.Context) error {
 
 	fileName := fmt.Sprintf("%v.qr", h.newScoreId)
 
-	err := utils2.AzureClient.UploadFile("replays", fileName, h.scoreData.RawReplayData)
+	err := utils.AzureClient.UploadFile("replays", fileName, h.scoreData.RawReplayData)
 
 	if err != nil {
 		h.logError(fmt.Sprintf("Failed to upload replay to azure - %v", err))
-		handlers2.Return500(c)
+		handlers.Return500(c)
 		return err
 	}
 
@@ -391,11 +391,11 @@ func (h *Handler) uploadReplay(c *gin.Context) error {
 
 // Updates the play + fail count of the map
 func (h *Handler) updateMapPlayCount(c *gin.Context) error {
-	err := db2.IncrementMapPlayCount(h.mapData.Id, h.scoreData.Failed)
+	err := db.IncrementMapPlayCount(h.mapData.Id, h.scoreData.Failed)
 
 	if err != nil {
 		h.logError(fmt.Sprintf("Failed to increment map play count - %v", err))
-		handlers2.Return500(c)
+		handlers.Return500(c)
 		return err
 	}
 
@@ -415,38 +415,38 @@ func (h *Handler) updateUserTotalHits(c *gin.Context) error {
 
 	if err != nil {
 		h.logError(fmt.Sprintf("Failed to update user stats in DB - %v", err))
-		handlers2.Return500(c)
+		handlers.Return500(c)
 		return err
 	}
 
 	// Fetch stats of the other game mode, so it can be totaled up and added to the total hits leaderboard
-	var otherMode common2.Mode
+	var otherMode common.Mode
 
 	switch h.stats.Mode {
-	case common2.ModeKeys4:
-		otherMode = common2.ModeKeys7
-	case common2.ModeKeys7:
-		otherMode = common2.ModeKeys4
+	case common.ModeKeys4:
+		otherMode = common.ModeKeys7
+	case common.ModeKeys7:
+		otherMode = common.ModeKeys4
 	}
 
-	otherModeStats, err := db2.GetUserStats(h.user.Id, otherMode)
+	otherModeStats, err := db.GetUserStats(h.user.Id, otherMode)
 
 	if err != nil {
 		h.logError(fmt.Sprintf("Failed to fetch user stats - %v", err))
-		handlers2.Return500(c)
+		handlers.Return500(c)
 		return err
 	}
 
 	total := h.stats.GetTotalHits() + otherModeStats.GetTotalHits()
 
-	err = db2.Redis.ZAdd(db2.RedisCtx, "quaver:leaderboard:total_hits_global", &redis.Z{
+	err = db.Redis.ZAdd(db.RedisCtx, "quaver:leaderboard:total_hits_global", &redis.Z{
 		Score:  float64(total),
 		Member: h.user.Id,
 	}).Err()
 
 	if err != nil {
 		h.logError(fmt.Sprintf("Failed to update total hits in redis - %v", err))
-		handlers2.Return500(c)
+		handlers.Return500(c)
 		return err
 	}
 
@@ -470,28 +470,28 @@ func (h *Handler) updateUserStats(c *gin.Context) error {
 		// Update ranked score. If beating old personal best, take the difference between old and new score
 		h.stats.RankedScore += int64(h.scoreData.TotalScore)
 
-		if h.oldPersonalBest != (db2.Score{}) {
+		if h.oldPersonalBest != (db.Score{}) {
 			h.stats.RankedScore -= int64(h.oldPersonalBest.TotalScore)
 		}
 
 		// Update Overall Rating & Acc
-		scores, err := db2.GetUserTopScores(h.user.Id, h.scoreData.GameMode)
+		scores, err := db.GetUserTopScores(h.user.Id, h.scoreData.GameMode)
 
 		if err != nil {
 			h.logError(fmt.Sprintf("Failed to fetch user top scores - %v", err))
-			handlers2.Return500(c)
+			handlers.Return500(c)
 			return err
 		}
 
-		h.stats.OverallRating = db2.CalculateOverallRating(scores)
-		h.stats.OverallAccuracy = db2.CalculateOverallAccuracy(scores)
+		h.stats.OverallRating = db.CalculateOverallRating(scores)
+		h.stats.OverallAccuracy = db.CalculateOverallAccuracy(scores)
 	}
 
 	err := h.stats.UpdateDatabase()
 
 	if err != nil {
 		h.logError(fmt.Sprintf("Failed to update user stats - %v", err))
-		handlers2.Return500(c)
+		handlers.Return500(c)
 		return err
 	}
 
@@ -505,11 +505,11 @@ func (h *Handler) updateScoreboardCache(c *gin.Context) error {
 	}
 
 	score := h.convertToDbScore()
-	err := db2.UpdateScoreboardCache(&score, &h.mapData)
+	err := db.UpdateScoreboardCache(&score, &h.mapData)
 
 	if err != nil {
 		h.logError(fmt.Sprintf("Failed to update scoreboard cache - %v", err))
-		handlers2.Return500(c)
+		handlers.Return500(c)
 		return err
 	}
 
@@ -518,19 +518,19 @@ func (h *Handler) updateScoreboardCache(c *gin.Context) error {
 
 // Updates the global and country leaderboards for the user.
 func (h *Handler) updateLeaderboards(c *gin.Context) error {
-	err := db2.UpdateGlobalLeaderboard(&h.user, h.mapData.GameMode, h.stats.OverallRating)
+	err := db.UpdateGlobalLeaderboard(&h.user, h.mapData.GameMode, h.stats.OverallRating)
 
 	if err != nil {
 		h.logError(fmt.Sprintf("Failed to update global leaderboard - %v", err))
-		handlers2.Return500(c)
+		handlers.Return500(c)
 		return err
 	}
 
-	err = db2.UpdateCountryLeaderboard(&h.user, h.mapData.GameMode, h.stats.OverallRating)
+	err = db.UpdateCountryLeaderboard(&h.user, h.mapData.GameMode, h.stats.OverallRating)
 
 	if err != nil {
 		h.logError(fmt.Sprintf("Failed to update country leaderboard - %v", err))
-		handlers2.Return500(c)
+		handlers.Return500(c)
 		return err
 	}
 
@@ -543,7 +543,7 @@ func (h *Handler) handleFirstPlaceScore(c *gin.Context, isCleanScore bool) error
 		return nil
 	}
 
-	existingFp, err := db2.GetFirstPlaceScore(h.mapData.MD5)
+	existingFp, err := db.GetFirstPlaceScore(h.mapData.MD5)
 	gainedFirstPlace := false
 
 	if err != nil {
@@ -553,14 +553,14 @@ func (h *Handler) handleFirstPlaceScore(c *gin.Context, isCleanScore bool) error
 
 			if err != nil {
 				h.logError(fmt.Sprintf("Failed to insert first place score - %v", err))
-				handlers2.Return500(c)
+				handlers.Return500(c)
 				return err
 			}
 
 			gainedFirstPlace = true
 		default:
 			h.logError(fmt.Sprintf("Failed to fetch existing first place score - %v", err))
-			handlers2.Return500(c)
+			handlers.Return500(c)
 			return nil
 		}
 	} else {
@@ -568,7 +568,7 @@ func (h *Handler) handleFirstPlaceScore(c *gin.Context, isCleanScore bool) error
 
 		if err != nil {
 			h.logError(fmt.Sprintf("Failed to update existing first place score -%v", err))
-			handlers2.Return500(c)
+			handlers.Return500(c)
 			return err
 		}
 
@@ -584,31 +584,31 @@ func (h *Handler) handleFirstPlaceScore(c *gin.Context, isCleanScore bool) error
 	mapStr := h.mapData.GetString()
 
 	// Update Activity Feed For First Place Winner
-	err = db2.InsertActivityFeed(h.user.Id, db2.ActivityFeedAchievedFirstPlace, mapStr, h.mapData.MapsetId)
+	err = db.InsertActivityFeed(h.user.Id, db.ActivityFeedAchievedFirstPlace, mapStr, h.mapData.MapsetId)
 
 	if err != nil {
 		h.logError(fmt.Sprintf("Failed to insert first place winner activity feed - %v", err))
-		handlers2.Return500(c)
+		handlers.Return500(c)
 		return err
 	}
 
 	// Update activity feed for the first place loser
-	if existingFp != (db2.FirstPlaceScore{}) && existingFp.UserId != h.user.Id {
-		err = db2.InsertActivityFeed(existingFp.UserId, db2.ActivityFeedLostFirstPlace, mapStr, h.mapData.MapsetId)
+	if existingFp != (db.FirstPlaceScore{}) && existingFp.UserId != h.user.Id {
+		err = db.InsertActivityFeed(existingFp.UserId, db.ActivityFeedLostFirstPlace, mapStr, h.mapData.MapsetId)
 
 		if err != nil {
 			h.logError(fmt.Sprintf("Failed to insert first place loser activity feed - %v", err))
-			handlers2.Return500(c)
+			handlers.Return500(c)
 			return err
 		}
 	}
 
-	var oldUser db2.User
-	oldUser, err = db2.GetUserById(existingFp.UserId)
+	var oldUser db.User
+	oldUser, err = db.GetUserById(existingFp.UserId)
 
 	if err != nil && err != sql.ErrNoRows {
 		h.logError(fmt.Sprintf("Failed to fetch existing first place - %v", err))
-		handlers2.Return500(c)
+		handlers.Return500(c)
 		return err
 	}
 
@@ -618,7 +618,7 @@ func (h *Handler) handleFirstPlaceScore(c *gin.Context, isCleanScore bool) error
 	}
 	
 	dbScore := h.convertToDbScore()
-	err = utils2.SendFirstPlaceWebhook(&h.user, &dbScore, &h.mapData, &oldUser)
+	err = utils.SendFirstPlaceWebhook(&h.user, &dbScore, &h.mapData, &oldUser)
 
 	// No need to return a 500 here, that could be an issue on Discord's end, it's not crucial to log webhooks.
 	if err != nil {
@@ -630,7 +630,7 @@ func (h *Handler) handleFirstPlaceScore(c *gin.Context, isCleanScore bool) error
 
 // Inserts a new first place score into the database.
 func (h *Handler) insertFirstPlaceScore() error {
-	fp := db2.NewFirstPlaceScore(h.mapData.MD5, h.user.Id, int(h.newScoreId), h.rating.Rating)
+	fp := db.NewFirstPlaceScore(h.mapData.MD5, h.user.Id, int(h.newScoreId), h.rating.Rating)
 
 	err := fp.Insert()
 
@@ -643,12 +643,12 @@ func (h *Handler) insertFirstPlaceScore() error {
 
 // Updates an existing first place score to the new user. Returns if a user beat the first place score
 // or not
-func (h *Handler) updateFirstPlaceScore(score *db2.FirstPlaceScore) (bool, error){
+func (h *Handler) updateFirstPlaceScore(score *db.FirstPlaceScore) (bool, error){
 	if h.rating.Rating <= score.PerformanceRating {
 		return false, nil
 	}
 
-	fp := db2.NewFirstPlaceScore(h.mapData.MD5, h.user.Id, int(h.newScoreId), h.rating.Rating)
+	fp := db.NewFirstPlaceScore(h.mapData.MD5, h.user.Id, int(h.newScoreId), h.rating.Rating)
 
 	err := fp.Update()
 
@@ -664,11 +664,11 @@ func (h *Handler) unlockAchievements(c *gin.Context) error {
 	score := h.convertToDbScore()
 	
 	var err error
-	h.unlockedAchievements, err = achievements2.CheckAchievementsWithNewScore(&h.user, &score, &h.stats)
+	h.unlockedAchievements, err = achievements.CheckAchievementsWithNewScore(&h.user, &score, &h.stats)
 	
 	if err != nil {
 		h.logError(fmt.Sprintf("Failed while unlocking achievements - %v", err))
-		handlers2.Return500(c)
+		handlers.Return500(c)
 		return err
 	}
 	
@@ -679,7 +679,7 @@ func (h *Handler) unlockAchievements(c *gin.Context) error {
 // isn't important enough to block score submission.
 func (h *Handler) updateElasticSearch() {
 	go func() {
-		err := utils2.UpdateElasticSearchMapset(h.mapData.MapsetId)
+		err := utils.UpdateElasticSearchMapset(h.mapData.MapsetId)
 
 		if err != nil {
 			h.logError(fmt.Sprintf("Failed while updating ElasticSearch - %v", err))
@@ -738,8 +738,8 @@ func (h *Handler) logScore(d time.Duration) {
 }
 
 // Converts the incoming score's to a db score.
-func (h *Handler) convertToDbScore() db2.Score {
-	return db2.Score{
+func (h *Handler) convertToDbScore() db.Score {
+	return db.Score{
 		Id:                          int(h.newScoreId),
 		UserId:                      h.user.Id,
 		MapMD5:                      h.mapData.MD5,
@@ -758,7 +758,7 @@ func (h *Handler) convertToDbScore() db2.Score {
 		CountGood:                   int(h.scoreData.CountMarv),
 		CountOkay:                   int(h.scoreData.CountMarv),
 		CountMiss:                   int(h.scoreData.CountMarv),
-		Grade:                       common2.GetGradeFromAccuracy(h.scoreData.Accuracy, h.scoreData.Failed),
+		Grade:                       common.GetGradeFromAccuracy(h.scoreData.Accuracy, h.scoreData.Failed),
 		ScrollSpeed:                 int(h.scoreData.ScrollSpeed),
 		TimePlayStart:               h.scoreData.TimePlayStart,
 		TimePlayEnd:                 h.scoreData.TimePlayEnded,
@@ -768,7 +768,7 @@ func (h *Handler) convertToDbScore() db2.Score {
 		PauseCount:                  int(h.scoreData.PauseCount),
 		PerformanceProcessorVersion: h.rating.Version,
 		DifficultyProcessorVersion:  h.difficulty.Result.Version,
-		IsDonatorScore:              h.mapData.RankedStatus != common2.StatusRanked,
+		IsDonatorScore:              h.mapData.RankedStatus != common.StatusRanked,
 	}
 }
 
@@ -783,7 +783,7 @@ func (h *Handler) logWarning(reason string) {
 func (h *Handler) logError(reason string) {
 	log.Errorf(fmt.Sprintf("Error submitting score from %v: %v", h.user.ToString(), reason))
 	
-	err := utils2.SendScoreSubmissionErrorWebhook(&h.user, reason)
+	err := utils.SendScoreSubmissionErrorWebhook(&h.user, reason)
 	
 	if err != nil {
 		log.Errorf("Failed to send score submission error webhook - %v\n", err)

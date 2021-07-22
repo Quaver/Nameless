@@ -2,7 +2,7 @@ package achievements
 
 import (
 	"fmt"
-	db2 "github.com/Swan/Nameless/db"
+	db "github.com/Swan/Nameless/db"
 	"strconv"
 )
 
@@ -16,9 +16,9 @@ func NewAchievementApproachingTheBlueZenith() AchievementApproachingTheBlueZenit
 	}
 }
 
-func (a AchievementApproachingTheBlueZenith) Check(user *db2.User, score *db2.Score, stats *db2.UserStats) (bool, error) {
+func (a AchievementApproachingTheBlueZenith) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
 	key := fmt.Sprintf("quaver:leaderboard:%v", score.Mode)
-	result, err := db2.Redis.ZRevRank(db2.RedisCtx, key, strconv.Itoa(user.Id)).Result()
+	result, err := db.Redis.ZRevRank(db.RedisCtx, key, strconv.Itoa(user.Id)).Result()
 	
 	if err != nil {
 		return false, err

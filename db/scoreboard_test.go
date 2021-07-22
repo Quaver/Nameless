@@ -1,12 +1,12 @@
 package db
 
 import (
-	config2 "github.com/Swan/Nameless/config"
+	config "github.com/Swan/Nameless/config"
 	"testing"
 )
 
 func TestInitializeScoreboard(t *testing.T) {
-	config2.InitializeConfig("../")
+	config.InitializeConfig("../")
 	InitializeSQL()
 	InitializeRedis()
 }

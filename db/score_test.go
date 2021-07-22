@@ -2,13 +2,13 @@ package db
 
 import (
 	"database/sql"
-	common2 "github.com/Swan/Nameless/common"
-	config2 "github.com/Swan/Nameless/config"
+	common "github.com/Swan/Nameless/common"
+	config "github.com/Swan/Nameless/config"
 	"testing"
 )
 
 func TestInitializeScore(t *testing.T) {
-	config2.InitializeConfig("../")
+	config.InitializeConfig("../")
 	InitializeSQL()
 }
 
@@ -77,7 +77,7 @@ func TestGetNoPersonalBestScore(t *testing.T) {
 }
 
 func TestGetUserTopScores(t *testing.T) {
-	_, err := GetUserTopScores(1, common2.ModeKeys4)
+	_, err := GetUserTopScores(1, common.ModeKeys4)
 	
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -86,7 +86,7 @@ func TestGetUserTopScores(t *testing.T) {
 
 
 func TestCalculateOverallRating(t *testing.T) {
-	scores, err := GetUserTopScores(1, common2.ModeKeys4)
+	scores, err := GetUserTopScores(1, common.ModeKeys4)
 
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -96,7 +96,7 @@ func TestCalculateOverallRating(t *testing.T) {
 }
 
 func TestCalculateOverallAccuracy(t *testing.T) {
-	scores, err := GetUserTopScores(1, common2.ModeKeys4)
+	scores, err := GetUserTopScores(1, common.ModeKeys4)
 
 	if err != nil {
 		t.Fatalf(err.Error())

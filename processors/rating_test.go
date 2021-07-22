@@ -2,12 +2,12 @@ package processors
 
 import (
 	"fmt"
-	config2 "github.com/Swan/Nameless/config"
+	config "github.com/Swan/Nameless/config"
 	"testing"
 )
 
 func TestCalculateRating(t *testing.T) {
-	config2.InitializeConfig("../")
+	config.InitializeConfig("../")
 	r, err := CalcPerformance(30.25, 100, false)
 
 	if err != nil {

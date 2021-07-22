@@ -1,7 +1,7 @@
 package achievements
 
 import (
-	db2 "github.com/Swan/Nameless/db"
+	db "github.com/Swan/Nameless/db"
 )
 
 type AchievementKeptYouPlayingHuh Achievement
@@ -14,7 +14,7 @@ func NewAchievementKeptYouPlayingHuh() AchievementKeptYouPlayingHuh {
 	}
 }
 
-func (a AchievementKeptYouPlayingHuh) Check(user *db2.User, score *db2.Score, stats *db2.UserStats) (bool, error) {
+func (a AchievementKeptYouPlayingHuh) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
 	if stats.PlayCount >= 1000 {
 		return true, nil
 	}

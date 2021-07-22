@@ -2,7 +2,7 @@ package achievements
 
 import (
 	"database/sql"
-	db2 "github.com/Swan/Nameless/db"
+	db "github.com/Swan/Nameless/db"
 )
 
 type Achievement7500Deep Achievement
@@ -15,7 +15,7 @@ func NewAchievement7500Deep() Achievement7500Deep {
 	}
 }
 
-func (a Achievement7500Deep) Check(user *db2.User, score *db2.Score, stats *db2.UserStats) (bool, error) {
+func (a Achievement7500Deep) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
 	if score.MaxCombo >= 7500 && !score.Failed && !score.IsDonatorScore {
 		return true, nil
 	}
@@ -24,9 +24,9 @@ func (a Achievement7500Deep) Check(user *db2.User, score *db2.Score, stats *db2.
 		return false, nil
 	}
 
-	var dbScore db2.Score
+	var dbScore db.Score
 	q := "SELECT id FROM scores WHERE max_combo >= 7500 AND is_donator_score = 0 AND failed = 0 AND user_id = ? LIMIT 1"
-	err := db2.SQL.QueryRow(q, user.Id).Scan(&dbScore.Id)
+	err := db.SQL.QueryRow(q, user.Id).Scan(&dbScore.Id)
 
 	if err != nil {
 		if err == sql.ErrNoRows {

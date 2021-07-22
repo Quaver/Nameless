@@ -1,7 +1,7 @@
 package achievements
 
 import (
-	db2 "github.com/Swan/Nameless/db"
+	db "github.com/Swan/Nameless/db"
 )
 
 type AchievementFailureIsAnOption Achievement
@@ -14,7 +14,7 @@ func NewAchievementFailureIsAnOption() AchievementFailureIsAnOption {
 	}
 }
 
-func (a AchievementFailureIsAnOption) Check(user *db2.User, score *db2.Score, stats *db2.UserStats) (bool, error) {
+func (a AchievementFailureIsAnOption) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
 	if stats.FailCount >= 1000 {
 		return true, nil
 	}

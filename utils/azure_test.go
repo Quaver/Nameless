@@ -1,14 +1,14 @@
 package utils
 
 import (
-	config2 "github.com/Swan/Nameless/config"
-	db2 "github.com/Swan/Nameless/db"
+	config "github.com/Swan/Nameless/config"
+	db "github.com/Swan/Nameless/db"
 	"testing"
 )
 
 func TestInitialize(t *testing.T) {
-	config2.InitializeConfig("../")
-	db2.InitializeSQL()
+	config.InitializeConfig("../")
+	db.InitializeSQL()
 	InitializeAzure()
 }
 
@@ -22,7 +22,7 @@ func TestUploadFile(t *testing.T) {
 
 func TestDownloadMap(t *testing.T) {
 	const id int32 = 41104
-	m, err := db2.GetMapById(id)
+	m, err := db.GetMapById(id)
 
 	if err != nil {
 		t.Fatalf("Could not fetch map `%v` in the databse", id)
@@ -38,5 +38,5 @@ func TestDownloadMap(t *testing.T) {
 }
 
 func TestDispose(t *testing.T) {
-	defer db2.CloseSQLConnection()
+	defer db.CloseSQLConnection()
 }

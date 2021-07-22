@@ -1,7 +1,7 @@
 package achievements
 
 import (
-	db2 "github.com/Swan/Nameless/db"
+	db "github.com/Swan/Nameless/db"
 )
 
 type AchievementFingerBreaker Achievement
@@ -14,6 +14,6 @@ func NewAchievementFingerBreaker() AchievementFingerBreaker {
 	}
 }
 
-func (a AchievementFingerBreaker) Check(user *db2.User, score *db2.Score, stats *db2.UserStats) (bool, error) {
+func (a AchievementFingerBreaker) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
 	return stats.RankedScore >= 100000000, nil
 }

@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	handlers2 "github.com/Swan/Nameless/handlers"
-	scores2 "github.com/Swan/Nameless/handlers/scores"
+	handlers "github.com/Swan/Nameless/handlers"
+	scores "github.com/Swan/Nameless/handlers/scores"
 	"github.com/gin-gonic/gin"
 	logger "github.com/sirupsen/logrus"
 	"log"
@@ -18,10 +18,10 @@ func (s server) Start(port int) {
 	router := gin.New()
 	router.Use(gin.Recovery())
 
-	router.POST("/submit", scores2.Handler{}.SubmitPOST)
+	router.POST("/submit", scores.Handler{}.SubmitPOST)
 
 	router.NoRoute(func(c *gin.Context) {
-		handlers2.ReturnError(c, http.StatusNotFound, "Not Found")
+		handlers.ReturnError(c, http.StatusNotFound, "Not Found")
 		return
 	})
 

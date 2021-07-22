@@ -3,7 +3,7 @@ package db
 import (
 	"database/sql"
 	"fmt"
-	config2 "github.com/Swan/Nameless/config"
+	config "github.com/Swan/Nameless/config"
 	_ "github.com/go-sql-driver/mysql"
 	log "github.com/sirupsen/logrus"
 	"time"
@@ -21,8 +21,8 @@ func InitializeSQL() {
 		return
 	}
 
-	connStr := fmt.Sprintf("%v:%v@tcp(%v)/%v", config2.Data.SQL.Username, config2.Data.SQL.Password,
-		config2.Data.SQL.Host, config2.Data.SQL.Database)
+	connStr := fmt.Sprintf("%v:%v@tcp(%v)/%v", config.Data.SQL.Username, config.Data.SQL.Password,
+		config.Data.SQL.Host, config.Data.SQL.Database)
 	
 	db, err := sql.Open("mysql", connStr)
 

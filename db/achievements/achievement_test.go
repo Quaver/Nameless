@@ -1,16 +1,16 @@
 package achievements
 
 import (
-	common2 "github.com/Swan/Nameless/common"
-	config2 "github.com/Swan/Nameless/config"
-	db2 "github.com/Swan/Nameless/db"
+	common "github.com/Swan/Nameless/common"
+	config "github.com/Swan/Nameless/config"
+	db "github.com/Swan/Nameless/db"
 	"testing"
 )
 
 func TestInitializeAchievement(t *testing.T) {
-	config2.InitializeConfig("../../")
-	db2.InitializeSQL()
-	db2.InitializeRedis()
+	config.InitializeConfig("../../")
+	db.InitializeSQL()
+	db.InitializeRedis()
 }
 
 func TestGetUserUnlockedAchievements(t *testing.T) {
@@ -38,14 +38,14 @@ func TestGetUserLockedAchievements(t *testing.T) {
 }
 
 func TestCheckAchievementWithNewScore(t *testing.T) {
-	user, stats, err := getUser(1, common2.ModeKeys4)
+	user, stats, err := getUser(1, common.ModeKeys4)
 	
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 	
 	user.CheckedPreviousAchievements = true
-	achievements, err := CheckAchievementsWithNewScore(&user, &db2.Score{ Failed: true }, &stats) 
+	achievements, err := CheckAchievementsWithNewScore(&user, &db.Score{ Failed: true }, &stats) 
 	
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -57,14 +57,14 @@ func TestCheckAchievementWithNewScore(t *testing.T) {
 }
 
 func TestBabySteps(t *testing.T) {
-	user, stats, err := getUser(1, common2.ModeKeys4)
+	user, stats, err := getUser(1, common.ModeKeys4)
 	
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 	
 	a := NewAchievementBabySteps()
-	ok, err := a.Check(&user, &db2.Score{ Failed: true }, &stats)
+	ok, err := a.Check(&user, &db.Score{ Failed: true }, &stats)
 	
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -76,14 +76,14 @@ func TestBabySteps(t *testing.T) {
 }
 
 func TestAbsolutelyMarvelous(t *testing.T) {
-	user, stats, err := getUser(1, common2.ModeKeys4)
+	user, stats, err := getUser(1, common.ModeKeys4)
 
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
 	a := NewAchievementAbsolutelyMarvelous()
-	ok, err := a.Check(&user, &db2.Score{ Failed: true }, &stats)
+	ok, err := a.Check(&user, &db.Score{ Failed: true }, &stats)
 
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -95,14 +95,14 @@ func TestAbsolutelyMarvelous(t *testing.T) {
 }
 
 func TestCombolicious(t *testing.T) {
-	user, stats, err := getUser(1, common2.ModeKeys4)
+	user, stats, err := getUser(1, common.ModeKeys4)
 
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
 	a := NewAchievementCombolicious()
-	ok, err := a.Check(&user, &db2.Score{ Failed: true }, &stats)
+	ok, err := a.Check(&user, &db.Score{ Failed: true }, &stats)
 
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -114,14 +114,14 @@ func TestCombolicious(t *testing.T) {
 }
 
 func TestPerfectionist(t *testing.T) {
-	user, stats, err := getUser(1, common2.ModeKeys4)
+	user, stats, err := getUser(1, common.ModeKeys4)
 
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
 	a := NewAchievementPerfectionist()
-	ok, err := a.Check(&user, &db2.Score{ Failed: true }, &stats)
+	ok, err := a.Check(&user, &db.Score{ Failed: true }, &stats)
 
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -133,14 +133,14 @@ func TestPerfectionist(t *testing.T) {
 }
 
 func TestKeptYouPlayingHuh(t *testing.T) {
-	user, stats, err := getUser(1, common2.ModeKeys4)
+	user, stats, err := getUser(1, common.ModeKeys4)
 
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
 	a := NewAchievementKeptYouPlayingHuh()
-	ok, err := a.Check(&user, &db2.Score{}, &stats)
+	ok, err := a.Check(&user, &db.Score{}, &stats)
 
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -152,14 +152,14 @@ func TestKeptYouPlayingHuh(t *testing.T) {
 }
 
 func TestHumbleBeginnings(t *testing.T) {
-	user, stats, err := getUser(1, common2.ModeKeys4)
+	user, stats, err := getUser(1, common.ModeKeys4)
 
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
 	a := NewAchievementHumbleBeginnings()
-	ok, err := a.Check(&user, &db2.Score{}, &stats)
+	ok, err := a.Check(&user, &db.Score{}, &stats)
 
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -171,14 +171,14 @@ func TestHumbleBeginnings(t *testing.T) {
 }
 
 func TestSteppingUpTheLadder(t *testing.T) {
-	user, stats, err := getUser(1, common2.ModeKeys4)
+	user, stats, err := getUser(1, common.ModeKeys4)
 
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
 	a := NewAchievementSteppingUpTheLadder()
-	ok, err := a.Check(&user, &db2.Score{}, &stats)
+	ok, err := a.Check(&user, &db.Score{}, &stats)
 
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -190,14 +190,14 @@ func TestSteppingUpTheLadder(t *testing.T) {
 }
 
 func TestWideningYourHorizons(t *testing.T) {
-	user, stats, err := getUser(1, common2.ModeKeys4)
+	user, stats, err := getUser(1, common.ModeKeys4)
 
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
 	a := NewAchievementWideningYourHorizons()
-	ok, err := a.Check(&user, &db2.Score{}, &stats)
+	ok, err := a.Check(&user, &db.Score{}, &stats)
 
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -209,14 +209,14 @@ func TestWideningYourHorizons(t *testing.T) {
 }
 
 func TestReachingNewHeights(t *testing.T) {
-	user, stats, err := getUser(1, common2.ModeKeys4)
+	user, stats, err := getUser(1, common.ModeKeys4)
 
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
 	a := NewAchievementReachingNewHeights()
-	ok, err := a.Check(&user, &db2.Score{}, &stats)
+	ok, err := a.Check(&user, &db.Score{}, &stats)
 
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -228,14 +228,14 @@ func TestReachingNewHeights(t *testing.T) {
 }
 
 func TestOutOfThisWorld(t *testing.T) {
-	user, stats, err := getUser(1, common2.ModeKeys4)
+	user, stats, err := getUser(1, common.ModeKeys4)
 
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
 	a := NewAchievementOutOfThisWorld()
-	ok, err := a.Check(&user, &db2.Score{}, &stats)
+	ok, err := a.Check(&user, &db.Score{}, &stats)
 
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -247,14 +247,14 @@ func TestOutOfThisWorld(t *testing.T) {
 }
 
 func TestArea51(t *testing.T) {
-	user, stats, err := getUser(608, common2.ModeKeys4)
+	user, stats, err := getUser(608, common.ModeKeys4)
 
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
 	a := NewAchievementArea51()
-	ok, err := a.Check(&user, &db2.Score{}, &stats)
+	ok, err := a.Check(&user, &db.Score{}, &stats)
 
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -266,14 +266,14 @@ func TestArea51(t *testing.T) {
 }
 
 func TestAlien(t *testing.T) {
-	user, stats, err := getUser(608, common2.ModeKeys4)
+	user, stats, err := getUser(608, common.ModeKeys4)
 
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
 	a := NewAchievementAlien()
-	ok, err := a.Check(&user, &db2.Score{}, &stats)
+	ok, err := a.Check(&user, &db.Score{}, &stats)
 
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -285,14 +285,14 @@ func TestAlien(t *testing.T) {
 }
 
 func TestExtraterrestrial(t *testing.T) {
-	user, stats, err := getUser(36960, common2.ModeKeys7)
+	user, stats, err := getUser(36960, common.ModeKeys7)
 
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
 	a := NewAchievementAExtraterrestrial()
-	ok, err := a.Check(&user, &db2.Score{}, &stats)
+	ok, err := a.Check(&user, &db.Score{}, &stats)
 
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -304,14 +304,14 @@ func TestExtraterrestrial(t *testing.T) {
 }
 
 func TestET(t *testing.T) {
-	user, stats, err := getUser(36960, common2.ModeKeys7)
+	user, stats, err := getUser(36960, common.ModeKeys7)
 
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
 	a := NewAchievementET()
-	ok, err := a.Check(&user, &db2.Score{}, &stats)
+	ok, err := a.Check(&user, &db.Score{}, &stats)
 
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -323,14 +323,14 @@ func TestET(t *testing.T) {
 }
 
 func TestQuombo(t *testing.T) {
-	user, stats, err := getUser(1, common2.ModeKeys7)
+	user, stats, err := getUser(1, common.ModeKeys7)
 
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
 	a := NewAchievementQuombo()
-	ok, err := a.Check(&user, &db2.Score{}, &stats)
+	ok, err := a.Check(&user, &db.Score{}, &stats)
 
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -342,14 +342,14 @@ func TestQuombo(t *testing.T) {
 }
 
 func TestOneTwoMayweather(t *testing.T) {
-	user, stats, err := getUser(1, common2.ModeKeys7)
+	user, stats, err := getUser(1, common.ModeKeys7)
 
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
 	a := NewAchievementOneTwoMayweather()
-	ok, err := a.Check(&user, &db2.Score{}, &stats)
+	ok, err := a.Check(&user, &db.Score{}, &stats)
 
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -361,14 +361,14 @@ func TestOneTwoMayweather(t *testing.T) {
 }
 
 func TestItsOver5000(t *testing.T) {
-	user, stats, err := getUser(608, common2.ModeKeys7)
+	user, stats, err := getUser(608, common.ModeKeys7)
 
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
 	a := NewAchievementItsOver5000()
-	ok, err := a.Check(&user, &db2.Score{}, &stats)
+	ok, err := a.Check(&user, &db.Score{}, &stats)
 
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -380,14 +380,14 @@ func TestItsOver5000(t *testing.T) {
 }
 
 func Test7500Deep(t *testing.T) {
-	user, stats, err := getUser(608, common2.ModeKeys7)
+	user, stats, err := getUser(608, common.ModeKeys7)
 
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
 	a := NewAchievement7500Deep()
-	ok, err := a.Check(&user, &db2.Score{}, &stats)
+	ok, err := a.Check(&user, &db.Score{}, &stats)
 
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -399,14 +399,14 @@ func Test7500Deep(t *testing.T) {
 }
 
 func TestTenThousand(t *testing.T) {
-	user, stats, err := getUser(608, common2.ModeKeys7)
+	user, stats, err := getUser(608, common.ModeKeys7)
 
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
 	a := NewAchievementTenThousand()
-	ok, err := a.Check(&user, &db2.Score{}, &stats)
+	ok, err := a.Check(&user, &db.Score{}, &stats)
 
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -418,14 +418,14 @@ func TestTenThousand(t *testing.T) {
 }
 
 func TestBeginnersLuck(t *testing.T) {
-	user, stats, err := getUser(1, common2.ModeKeys7)
+	user, stats, err := getUser(1, common.ModeKeys7)
 
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
 	a := NewAchievementBeginnersLuck()
-	ok, err := a.Check(&user, &db2.Score{}, &stats)
+	ok, err := a.Check(&user, &db.Score{}, &stats)
 
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -437,14 +437,14 @@ func TestBeginnersLuck(t *testing.T) {
 }
 
 func TestItsGettingHarder(t *testing.T) {
-	user, stats, err := getUser(1, common2.ModeKeys7)
+	user, stats, err := getUser(1, common.ModeKeys7)
 
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
 	a := NewAchievementItsGettingHarder()
-	ok, err := a.Check(&user, &db2.Score{}, &stats)
+	ok, err := a.Check(&user, &db.Score{}, &stats)
 
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -456,14 +456,14 @@ func TestItsGettingHarder(t *testing.T) {
 }
 
 func TestGoingInsane(t *testing.T) {
-	user, stats, err := getUser(1, common2.ModeKeys7)
+	user, stats, err := getUser(1, common.ModeKeys7)
 
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
 	a := NewAchievementGoingInsane()
-	ok, err := a.Check(&user, &db2.Score{}, &stats)
+	ok, err := a.Check(&user, &db.Score{}, &stats)
 
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -475,14 +475,14 @@ func TestGoingInsane(t *testing.T) {
 }
 
 func TestYoureAnExpert(t *testing.T) {
-	user, stats, err := getUser(1, common2.ModeKeys7)
+	user, stats, err := getUser(1, common.ModeKeys7)
 
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
 	a := NewAchievementYoureAnExpert()
-	ok, err := a.Check(&user, &db2.Score{}, &stats)
+	ok, err := a.Check(&user, &db.Score{}, &stats)
 
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -494,14 +494,14 @@ func TestYoureAnExpert(t *testing.T) {
 }
 
 func TestPieceOfCake(t *testing.T) {
-	user, stats, err := getUser(1, common2.ModeKeys7)
+	user, stats, err := getUser(1, common.ModeKeys7)
 
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
 	a := NewAchievementPieceOfCake()
-	ok, err := a.Check(&user, &db2.Score{}, &stats)
+	ok, err := a.Check(&user, &db.Score{}, &stats)
 
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -513,14 +513,14 @@ func TestPieceOfCake(t *testing.T) {
 }
 
 func TestFailureIsAnOption(t *testing.T) {
-	user, stats, err := getUser(170, common2.ModeKeys4)
+	user, stats, err := getUser(170, common.ModeKeys4)
 
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
 	a := NewAchievementFailureIsAnOption()
-	ok, err := a.Check(&user, &db2.Score{}, &stats)
+	ok, err := a.Check(&user, &db.Score{}, &stats)
 
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -532,14 +532,14 @@ func TestFailureIsAnOption(t *testing.T) {
 }
 
 func TestApproachingTheBlueZenith(t *testing.T) {
-	user, stats, err := getUser(1, common2.ModeKeys4)
+	user, stats, err := getUser(1, common.ModeKeys4)
 
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
 	a := NewAchievementApproachingTheBlueZenith()
-	ok, err := a.Check(&user, &db2.Score{ Mode: common2.ModeKeys4}, &stats)
+	ok, err := a.Check(&user, &db.Score{ Mode: common.ModeKeys4}, &stats)
 
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -551,14 +551,14 @@ func TestApproachingTheBlueZenith(t *testing.T) {
 }
 
 func TestClickTheArrows(t *testing.T) {
-	user, stats, err := getUser(1, common2.ModeKeys4)
+	user, stats, err := getUser(1, common.ModeKeys4)
 
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
 	a := NewAchievementClickTheArrows()
-	ok, err := a.Check(&user, &db2.Score{ Mode: common2.ModeKeys4}, &stats)
+	ok, err := a.Check(&user, &db.Score{ Mode: common.ModeKeys4}, &stats)
 
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -570,14 +570,14 @@ func TestClickTheArrows(t *testing.T) {
 }
 
 func TestFingerBreaker(t *testing.T) {
-	user, stats, err := getUser(5, common2.ModeKeys4)
+	user, stats, err := getUser(5, common.ModeKeys4)
 
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
 	a := NewAchievementFingerBreaker()
-	ok, err := a.Check(&user, &db2.Score{ Mode: common2.ModeKeys4}, &stats)
+	ok, err := a.Check(&user, &db.Score{ Mode: common.ModeKeys4}, &stats)
 
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -589,14 +589,14 @@ func TestFingerBreaker(t *testing.T) {
 }
 
 func TestSlowlyButSurely(t *testing.T) {
-	user, stats, err := getUser(1, common2.ModeKeys4)
+	user, stats, err := getUser(1, common.ModeKeys4)
 
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
 	a := NewAchievementSlowlyButSurely()
-	ok, err := a.Check(&user, &db2.Score{ Mode: common2.ModeKeys4}, &stats)
+	ok, err := a.Check(&user, &db.Score{ Mode: common.ModeKeys4}, &stats)
 
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -608,14 +608,14 @@ func TestSlowlyButSurely(t *testing.T) {
 }
 
 func TestHeWasNumberOne(t *testing.T) {
-	user, stats, err := getUser(1, common2.ModeKeys4)
+	user, stats, err := getUser(1, common.ModeKeys4)
 
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
 	a := NewAchievementHeWasNumberOne()
-	ok, err := a.Check(&user, &db2.Score{ Mode: common2.ModeKeys4}, &stats)
+	ok, err := a.Check(&user, &db.Score{ Mode: common.ModeKeys4}, &stats)
 
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -627,14 +627,14 @@ func TestHeWasNumberOne(t *testing.T) {
 }
 
 func TestStarvelous(t *testing.T) {
-	user, stats, err := getUser(608, common2.ModeKeys4)
+	user, stats, err := getUser(608, common.ModeKeys4)
 
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
 	a := NewAchievementStarvelous()
-	ok, err := a.Check(&user, &db2.Score{ Mode: common2.ModeKeys4, CountMarv: 1 }, &stats)
+	ok, err := a.Check(&user, &db.Score{ Mode: common.ModeKeys4, CountMarv: 1 }, &stats)
 
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -646,21 +646,21 @@ func TestStarvelous(t *testing.T) {
 }
 
 func TestCloseAchievement(t *testing.T) {
-	db2.CloseSQLConnection()
+	db.CloseSQLConnection()
 }
 
-func getUser(id int, mode common2.Mode) (db2.User, db2.UserStats, error) {
-	user, err := db2.GetUserById(id)
+func getUser(id int, mode common.Mode) (db.User, db.UserStats, error) {
+	user, err := db.GetUserById(id)
 	
 	if err != nil {
-		return db2.User{}, db2.UserStats{}, err
+		return db.User{}, db.UserStats{}, err
 	}
 	
 	user.CheckedPreviousAchievements = false
-	stats, err := db2.GetUserStats(id, mode)
+	stats, err := db.GetUserStats(id, mode)
 
 	if err != nil {
-		return db2.User{}, db2.UserStats{}, err
+		return db.User{}, db.UserStats{}, err
 	}
 	
 	return user, stats, nil

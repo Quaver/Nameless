@@ -2,11 +2,11 @@ package db
 
 import (
 	"fmt"
-	common2 "github.com/Swan/Nameless/common"
+	common "github.com/Swan/Nameless/common"
 )
 
 type UserStats struct {
-	Mode            common2.Mode
+	Mode            common.Mode
 	UserId          int
 	TotalScore      int64
 	RankedScore     int64
@@ -29,7 +29,7 @@ type UserStats struct {
 }
 
 // GetUserStats Retrieves a user's stats for a game mode
-func GetUserStats(id int, mode common2.Mode) (UserStats, error){
+func GetUserStats(id int, mode common.Mode) (UserStats, error){
 	query := fmt.Sprintf("SELECT * FROM %v WHERE user_id = ? LIMIT 1", getTableName(mode))
 	
 	stats := UserStats{
@@ -79,7 +79,7 @@ func (s *UserStats) GetTotalHits() int32 {
 }
 
 // Returns the name of the table depending on the game mode
-func getTableName(mode common2.Mode) string {
-	modeStr, _ := common2.GetModeString(mode)
+func getTableName(mode common.Mode) string {
+	modeStr, _ := common.GetModeString(mode)
 	return fmt.Sprintf("user_stats_%v", modeStr)
 }

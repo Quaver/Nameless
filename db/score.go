@@ -2,7 +2,7 @@ package db
 
 import (
 	"database/sql"
-	common2 "github.com/Swan/Nameless/common"
+	common "github.com/Swan/Nameless/common"
 	"math"
 )
 
@@ -12,10 +12,10 @@ type Score struct {
 	MapMD5                      string
 	ReplayMD5                   string
 	Timestamp                   int64
-	Mode                        common2.Mode
+	Mode                        common.Mode
 	PersonalBest                bool
 	PerformanceRating           float64
-	Mods                        common2.Mods
+	Mods                        common.Mods
 	Failed                      bool
 	TotalScore                  int32
 	Accuracy                    float32
@@ -26,7 +26,7 @@ type Score struct {
 	CountGood                   int
 	CountOkay                   int
 	CountMiss                   int
-	Grade                       common2.Grade
+	Grade                       common.Grade
 	ScrollSpeed                 int
 	TimePlayStart               int64
 	TimePlayEnd                 int64
@@ -76,7 +76,7 @@ func GetPersonalBestScore(u *User, m *Map) (Score, error) {
 }
 
 // GetUserTopScores Fetches a user's top 500 scores
-func GetUserTopScores(id int, mode common2.Mode) ([]Score, error) {
+func GetUserTopScores(id int, mode common.Mode) ([]Score, error) {
 	query := "SELECT * FROM scores " +
 		"WHERE user_id = ? AND mode = ? AND personal_best = 1 AND is_donator_score = 0 " +
 		"ORDER BY performance_rating DESC LIMIT 500"

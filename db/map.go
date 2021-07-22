@@ -3,7 +3,7 @@ package db
 import (
 	"database/sql"
 	"fmt"
-	common2 "github.com/Swan/Nameless/common"
+	common "github.com/Swan/Nameless/common"
 )
 
 type Map struct {
@@ -13,8 +13,8 @@ type Map struct {
 	AlternativeMD5   sql.NullString
 	CreatorId        int
 	CreatorUsername  string
-	GameMode         common2.Mode
-	RankedStatus     common2.RankedStatus
+	GameMode         common.Mode
+	RankedStatus     common.RankedStatus
 	Length           int32
 	Artist           string
 	Title            string

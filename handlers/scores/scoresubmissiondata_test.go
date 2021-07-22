@@ -1,7 +1,7 @@
 package scores
 
 import (
-	common2 "github.com/Swan/Nameless/common"
+	common "github.com/Swan/Nameless/common"
 	"testing"
 )
 
@@ -19,7 +19,7 @@ func makeSampleScoreSubmissionData() scoreSubmissionData {
 		TimePlayEnded:        1624895393,
 		AudioPlaybackRate:    1.0,
 		ScrollSpeed:          300,
-		GameMode:             common2.ModeKeys4,
+		GameMode:             common.ModeKeys4,
 		Mods:                 0,
 		Failed:               false,
 		TotalScore:           900000,

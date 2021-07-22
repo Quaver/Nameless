@@ -1,7 +1,7 @@
 package achievements
 
 import (
-	db2 "github.com/Swan/Nameless/db"
+	db "github.com/Swan/Nameless/db"
 )
 
 type Achievement struct {
@@ -11,11 +11,11 @@ type Achievement struct {
 }
 
 type AchievementChecker interface {
-	Check(*db2.User, *db2.Score, *db2.UserStats) (bool, error)
+	Check(*db.User, *db.Score, *db.UserStats) (bool, error)
 }
 
 // CheckAchievementsWithNewScore Gets unlocked achievements with an incoming score
-func CheckAchievementsWithNewScore(user *db2.User, score *db2.Score, stats *db2.UserStats) ([]Achievement, error) {
+func CheckAchievementsWithNewScore(user *db.User, score *db.Score, stats *db.UserStats) ([]Achievement, error) {
 	unlocked, err := GetUserUnlockedAchievements(user.Id)
 
 	if err != nil {
@@ -43,14 +43,14 @@ func CheckAchievementsWithNewScore(user *db2.User, score *db2.Score, stats *db2.
 		unlocked = append(unlocked, achievement)
 
 		// Give user the achievement
-		_, err = db2.SQL.Exec("INSERT INTO user_achievements VALUES (?, ?)", user.Id, achievement.Id)
+		_, err = db.SQL.Exec("INSERT INTO user_achievements VALUES (?, ?)", user.Id, achievement.Id)
 
 		if err != nil {
 			return []Achievement{}, err
 		}
 
 		// Display the unlocked achievement in their activity feed
-		err = db2.InsertActivityFeed(user.Id, db2.ActivityFeedUnlockedAchievement, achievement.Name, -1)
+		err = db.InsertActivityFeed(user.Id, db.ActivityFeedUnlockedAchievement, achievement.Name, -1)
 
 		if err != nil {
 			return []Achievement{}, err
@@ -59,7 +59,7 @@ func CheckAchievementsWithNewScore(user *db2.User, score *db2.Score, stats *db2.
 
 	// Now that the user's achievements have been checked, we no longer need to do database lookups.
 	if !user.CheckedPreviousAchievements {
-		_, err = db2.SQL.Exec("UPDATE users SET checked_previous_achievements = 1 WHERE id = ?", user.Id)
+		_, err = db.SQL.Exec("UPDATE users SET checked_previous_achievements = 1 WHERE id = ?", user.Id)
 
 		if err != nil {
 			return []Achievement{}, err
@@ -74,7 +74,7 @@ func GetUserUnlockedAchievements(id int) ([]Achievement, error) {
 	query := "SELECT id, name, steam_api_name FROM achievements WHERE id IN " +
 		"(SELECT achievement_id FROM user_achievements WHERE user_id = ?)"
 
-	rows, err := db2.SQL.Query(query, id)
+	rows, err := db.SQL.Query(query, id)
 
 	if err != nil {
 		return []Achievement{}, err
@@ -109,7 +109,7 @@ func GetUserLockedAchievements(id int) ([]Achievement, error) {
 	q := "SELECT id, name, steam_api_name FROM achievements WHERE id NOT IN " +
 		"(SELECT achievement_id FROM user_achievements WHERE user_id = ?)"
 
-	rows, err := db2.SQL.Query(q, id)
+	rows, err := db.SQL.Query(q, id)
 
 	if err != nil {
 		return []Achievement{}, err

@@ -1,7 +1,7 @@
 package achievements
 
 import (
-	db2 "github.com/Swan/Nameless/db"
+	db "github.com/Swan/Nameless/db"
 )
 
 type AchievementReachingNewHeights Achievement
@@ -14,7 +14,7 @@ func NewAchievementReachingNewHeights() AchievementReachingNewHeights {
 	}
 }
 
-func (a AchievementReachingNewHeights) Check(user *db2.User, score *db2.Score, stats *db2.UserStats) (bool, error) {
+func (a AchievementReachingNewHeights) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
 	if stats.OverallRating >= 500 {
 		return true, nil
 	}

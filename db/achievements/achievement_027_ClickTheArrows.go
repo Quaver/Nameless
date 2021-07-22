@@ -1,7 +1,7 @@
 package achievements
 
 import (
-	db2 "github.com/Swan/Nameless/db"
+	db "github.com/Swan/Nameless/db"
 )
 
 type AchievementClickTheArrows Achievement
@@ -14,6 +14,6 @@ func NewAchievementClickTheArrows() AchievementClickTheArrows {
 	}
 }
 
-func (a AchievementClickTheArrows) Check(user *db2.User, score *db2.Score, stats *db2.UserStats) (bool, error) {
+func (a AchievementClickTheArrows) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
 	return stats.GetTotalHits() >= 1000000, nil
 }

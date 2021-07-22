@@ -2,7 +2,7 @@ package processors
 
 import (
 	"fmt"
-	config2 "github.com/Swan/Nameless/config"
+	config "github.com/Swan/Nameless/config"
 	log "github.com/sirupsen/logrus"
 	"os/exec"
 )
@@ -12,7 +12,7 @@ import (
 func CompileQuaverTools() {
 	log.Info("Compiling Quaver.Tools...")
 	
-	cmd := exec.Command("dotnet", "build", "--configuration", "Release", config2.Data.QuaverAPIPath)
+	cmd := exec.Command("dotnet", "build", "--configuration", "Release", config.Data.QuaverAPIPath)
 	err := cmd.Run()
 
 	if err != nil {
@@ -24,5 +24,5 @@ func CompileQuaverTools() {
 
 // Returns the expected path of the Quaver.Tools.dll file
 func getQuaverToolsDllPath() string {
-	return fmt.Sprintf("%v/Quaver.Tools/bin/Release/netcoreapp3.1/Quaver.Tools.dll", config2.Data.QuaverAPIPath)
+	return fmt.Sprintf("%v/Quaver.Tools/bin/Release/netcoreapp3.1/Quaver.Tools.dll", config.Data.QuaverAPIPath)
 }

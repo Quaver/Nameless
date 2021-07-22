@@ -2,7 +2,7 @@ package achievements
 
 import (
 	"database/sql"
-	db2 "github.com/Swan/Nameless/db"
+	db "github.com/Swan/Nameless/db"
 )
 
 type AchievementAbsolutelyMarvelous Achievement
@@ -15,7 +15,7 @@ func NewAchievementAbsolutelyMarvelous() AchievementAbsolutelyMarvelous {
 	}
 }
 
-func (a AchievementAbsolutelyMarvelous) Check(user *db2.User, score *db2.Score, stats *db2.UserStats) (bool, error) {
+func (a AchievementAbsolutelyMarvelous) Check(user *db.User, score *db.Score, stats *db.UserStats) (bool, error) {
 	if !score.Failed && score.Accuracy == 100 && !score.IsDonatorScore {
 		return true, nil
 	}
@@ -24,9 +24,9 @@ func (a AchievementAbsolutelyMarvelous) Check(user *db2.User, score *db2.Score, 
 		return false, nil
 	}
 	
-	var dbScore db2.Score
+	var dbScore db.Score
 	q := "SELECT id FROM scores WHERE failed = 0 AND accuracy = 100 AND is_donator_score = 0 AND user_id = ? LIMIT 1"
-	err := db2.SQL.QueryRow(q, user.Id).Scan(&dbScore.Id)
+	err := db.SQL.QueryRow(q, user.Id).Scan(&dbScore.Id)
 	
 	if err != nil {
 		if err == sql.ErrNoRows {
