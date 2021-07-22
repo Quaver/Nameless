@@ -122,12 +122,16 @@ func (h *Handler) handleSubmission(c *gin.Context) error {
 		return nil
 	}
 
-	err := h.checkDuplicateScore(c)
+	ok, err := h.checkDuplicateScore(c)
 
-	if err != nil {
-		return err
+	if !ok {
+		if err != nil {
+			return err
+		}
+		
+		return nil
 	}
-
+	
 	err = h.calculatePerformanceRating(c)
 
 	if err != nil {
@@ -222,22 +226,24 @@ func (h *Handler) checkValidTotalScore(c *gin.Context) bool {
 
 // Players can sometimes submit duplicate scores unexpectedly (ex. server restarts, timeouts, etc)
 // This checks if the score is a duplicate, and will return a 400 if it is.
-func (h *Handler) checkDuplicateScore(c *gin.Context) error {
+// Returns if everything is OK
+func (h *Handler) checkDuplicateScore(c *gin.Context) (bool, error) {
 	s, err := db.GetScoreByReplayMD5(&h.user, h.scoreData.ReplayMD5)
 
 	// No error returned, which means a duplicate score was found
 	if err == nil {
+		h.logIgnoringScore(fmt.Sprintf("duplicate submitted score found - `#%v`\n", s.Id))
 		handlers.Return400(c)
-		return fmt.Errorf("duplicate submitted score found - `#%v`\n", s.Id)
+		return false, nil
 	}
 
 	// No duplicate score - everything is OK, so nil is returned here.
 	if err == sql.ErrNoRows {
-		return nil
+		return true, nil
 	}
 
 	handlers.Return500(c)
-	return fmt.Errorf("error while attempting to fetch duplicate score - %v\n", err)
+	return false, fmt.Errorf("error while attempting to fetch duplicate score - %v\n", err)
 }
 
 /// Calculates the difficulty and performance rating of the score and sets them on the handler.
