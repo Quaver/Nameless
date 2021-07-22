@@ -684,14 +684,14 @@ func (h *Handler) sendSuccessfulResponse(c *gin.Context) {
 	globalRank, err := h.user.GetGlobalRank(h.mapData.GameMode)
 	
 	if err != nil {
-		h.logError(fmt.Sprintf("Failed to retrieve user global rank - %v", err))
+		h.logWarning(fmt.Sprintf("Failed to retrieve user global rank - %v", err))
 		globalRank = -1
 	}
 	
 	countryRank, err := h.user.GetCountryRank(h.mapData.GameMode)
 
 	if err != nil {
-		h.logError(fmt.Sprintf("Failed to retrieve user country rank - %v", err))
+		h.logWarning(fmt.Sprintf("Failed to retrieve user country rank - %v", err))
 		countryRank = -1
 	}
 	
@@ -766,6 +766,10 @@ func (h *Handler) convertToDbScore() db.Score {
 
 func (h *Handler) logIgnoringScore(reason string) {
 	log.Warning(fmt.Sprintf("Ignoring score from %v: %v", h.user.ToString(), reason))
+}
+
+func (h *Handler) logWarning(reason string) {
+	log.Warning(fmt.Sprintf("Error submitting score from %v: %v", h.user.ToString(), reason))
 }
 
 func (h *Handler) logError(reason string) {
