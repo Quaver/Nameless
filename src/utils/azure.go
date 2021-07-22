@@ -165,7 +165,7 @@ func CacheQuaFile(m db.Map) (string, error) {
 		}
 	}
 	
-	if m.RankedStatus != common.StatusNotSubmitted {
+	if m.RankedStatus == common.StatusNotSubmitted {
 		return path, nil
 	}
 	
