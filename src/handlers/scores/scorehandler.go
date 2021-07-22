@@ -118,7 +118,7 @@ func (h Handler) SubmitPOST(c *gin.Context) {
 func (h *Handler) handleSubmission(c *gin.Context) error {
 	isValidScore := h.checkValidTotalScore(c)
 	
-	if isValidScore {
+	if !isValidScore {
 		return nil
 	}
 
@@ -126,7 +126,8 @@ func (h *Handler) handleSubmission(c *gin.Context) error {
 
 	if !ok {
 		if err != nil {
-			return err
+			h.logError(err.Error())
+			return nil
 		}
 		
 		return nil

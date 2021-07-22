@@ -69,7 +69,7 @@ func SendFirstPlaceWebhook(user *db.User, score *db.Score, m *db.Map,  oldUser *
 				Author: &discordhook.EmbedAuthor{
 					Name: user.Username, 
 					URL: fmt.Sprintf("%v/user/%v", config.Data.WebsiteUrl, user.Id),
-					IconURL: user.AvatarURL,
+					IconURL: user.GetAvatarURL(),
 				},
 				Description: "🏆 **Achieved a new first place score!**",
 				Fields: []*discordhook.EmbedField {
@@ -131,7 +131,7 @@ func SendScoreSubmissionErrorWebhook(user *db.User, reason string) error {
 				Author: &discordhook.EmbedAuthor{
 					Name: user.Username,
 					URL: fmt.Sprintf("%v/user/%v", config.Data.WebsiteUrl, user.Id),
-					IconURL: user.AvatarURL,
+					IconURL: user.GetAvatarURL(),
 				},
 				Description: "❌ **Score Submission Failed!**",
 				Fields: []*discordhook.EmbedField {
@@ -205,7 +205,7 @@ func SendAnticheatWebhook(user *db.User, mapData *db.Map, scoreId int, isPersona
 				Author: &discordhook.EmbedAuthor{
 					Name: user.Username,
 					URL: fmt.Sprintf("%v/user/%v", config.Data.WebsiteUrl, user.Id),
-					IconURL: user.AvatarURL,
+					IconURL: user.GetAvatarURL(),
 				},
 				Description: "❌ **Anti-cheat Triggered!**",
 				Fields: fields,
