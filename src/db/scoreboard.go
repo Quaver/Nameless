@@ -3,6 +3,7 @@ package db
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/go-redis/redis/v8"
 )
 
 type scoreboardScore struct {
@@ -21,6 +22,11 @@ func UpdateScoreboardCache(s *Score, m *Map) error {
 		str, err := Redis.Get(RedisCtx, key).Result()
 		
 		if err != nil {
+			// The key does not exist anymore. 
+			if err == redis.Nil {
+				return nil
+			}
+			
 			return err
 		}
 		
