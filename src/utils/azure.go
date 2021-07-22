@@ -164,8 +164,12 @@ func CacheQuaFile(m db.Map) (string, error) {
 			}
 		}
 	}
-
-	// Do a final hash check on the downloaded file
+	
+	if m.RankedStatus != common.StatusNotSubmitted {
+		return path, nil
+	}
+	
+	// Do a final Md5 hash check on ranked maps.
 	if _, err := os.Stat(path); err == nil {
 		md5, err := GetFileMD5(path)
 
