@@ -644,7 +644,7 @@ func (h *Handler) insertFirstPlaceScore() error {
 // Updates an existing first place score to the new user. Returns if a user beat the first place score
 // or not
 func (h *Handler) updateFirstPlaceScore(score *db.FirstPlaceScore) (bool, error){
-	if h.rating.Rating < score.PerformanceRating {
+	if h.rating.Rating <= score.PerformanceRating {
 		return false, nil
 	}
 
