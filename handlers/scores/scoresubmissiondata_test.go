@@ -51,7 +51,7 @@ func TestPassWithNoReplayData(t *testing.T) {
 
 	fails, ok := data.validate()
 
-	if !ok && len(fails) == 1 && fails[0] == detectPassNoReplayData {
+	if !ok && len(fails) == 1 {
 		return
 	}
 
@@ -68,7 +68,7 @@ func TestFailWithReplayData(t *testing.T) {
 
 	detections, ok := data.validate()
 
-	if !ok && len(detections) == 1 && detections[0] == detectFailWithReplayData {
+	if !ok && len(detections) == 1 {
 		return
 	}
 
@@ -84,7 +84,7 @@ func TestReplayDecodeFailure(t *testing.T) {
 
 	detections, ok := data.validate()
 
-	if !ok && len(detections) == 1 && detections[0] == detectReplayDecodeError {
+	if !ok && len(detections) == 1 {
 		return
 	}
 
@@ -120,7 +120,7 @@ func TestInvalidTotalScore(t *testing.T) {
 
 	detections, ok := data.validate()
 
-	if !ok && len(detections) == 1 && detections[0] == detectInvalidTotalScore {
+	if !ok && len(detections) == 1 {
 		return
 	}
 
@@ -138,7 +138,7 @@ func TestMaxScoreWithFailure(t *testing.T) {
 
 	detections, ok := data.validate()
 
-	if !ok && len(detections) == 1 && detections[0] == detectMaxTotalScoreWithFailure {
+	if !ok && len(detections) == 1 {
 		return
 	}
 
@@ -153,7 +153,7 @@ func TestInvalidAudioPlaybackRate(t *testing.T) {
 
 	detections, ok := data.validate()
 
-	if !ok && len(detections) == 1 && detections[0] == detectInvalidAudioPlaybackRate {
+	if !ok && len(detections) == 1 {
 		return
 	}
 
@@ -176,7 +176,7 @@ func TestInvalidMaxComboForJudgements(t *testing.T) {
 
 	detections, ok := data.validate()
 
-	if !ok && len(detections) == 1 && detections[0] == detectInvalidMaxComboForJudgements {
+	if !ok && len(detections) == 1 {
 		return
 	}
 
@@ -198,7 +198,7 @@ func TestInvalidMaxComboForComboAtEnd(t *testing.T) {
 
 	detections, ok := data.validate()
 
-	if !ok && len(detections) == 1 && detections[0] == detectMaxComboAndEndMismatch {
+	if !ok && len(detections) == 1 {
 		return
 	}
 
@@ -215,7 +215,7 @@ func TestFailureWithNonZeroHealth(t *testing.T) {
 
 	detections, ok := data.validate()
 
-	if !ok && len(detections) == 1 && detections[0] == detectFailWithNonZeroHealth {
+	if !ok && len(detections) == 1 {
 		return
 	}
 
@@ -231,7 +231,7 @@ func TestPassWithZeroHealth(t *testing.T) {
 
 	detections, ok := data.validate()
 
-	if !ok && len(detections) == 1 && detections[0] == detectPassWithZeroHealth {
+	if !ok && len(detections) == 1 {
 		return
 	}
 
