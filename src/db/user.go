@@ -1,7 +1,6 @@
 package db
 
 import (
-	"database/sql"
 	"fmt"
 	"github.com/Swan/Nameless/src/common"
 	"strconv"
@@ -19,7 +18,7 @@ type User struct {
 	LatestActivity              int64
 	Country                     string
 	CheckedPreviousAchievements bool
-	AvatarURL					sql.NullString
+	AvatarURL					string
 }
 
 // GetUserById Fetches a user object by their id
@@ -83,11 +82,4 @@ func (u *User) ToString() string {
 	return fmt.Sprintf("%v (#%v)", u.Username, u.Id)
 }
 
-func (u *User) GetAvatarURL() string {
-	if !u.AvatarURL.Valid {
-		return ""
-	}
-	
-	return u.AvatarURL.String
-}
 
