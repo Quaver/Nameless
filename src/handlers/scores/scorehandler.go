@@ -116,13 +116,13 @@ func (h Handler) SubmitPOST(c *gin.Context) {
 
 // Handles submitting the score into the database, achievements, leaderboards, etc
 func (h *Handler) handleSubmission(c *gin.Context) error {
-	err := h.checkZeroTotalScore(c)
-
-	if err != nil {
-		return err
+	isValidScore := h.checkValidTotalScore(c)
+	
+	if isValidScore {
+		return nil
 	}
 
-	err = h.checkDuplicateScore(c)
+	err := h.checkDuplicateScore(c)
 
 	if err != nil {
 		return err
@@ -210,13 +210,14 @@ func (h *Handler) handleSubmission(c *gin.Context) error {
 
 // Checks if the score has zero total score (no notes hit whatsoever). These scores
 // are ignored because they are considered useless.
-func (h *Handler) checkZeroTotalScore(c *gin.Context) error {
+func (h *Handler) checkValidTotalScore(c *gin.Context) bool {
 	if !h.scoreData.isValidTotalScore() {
+		h.logIgnoringScore("ignoring submitted score with 0 total score")
 		handlers.Return400(c)
-		return fmt.Errorf("ignoring submitted score with 0 total score")
+		return false
 	}
 
-	return nil
+	return true
 }
 
 // Players can sometimes submit duplicate scores unexpectedly (ex. server restarts, timeouts, etc)
