@@ -208,6 +208,12 @@ func (h *Handler) handleSubmission(c *gin.Context) error {
 		return err
 	}
 
+	err = h.updateMapPlayCount(c)
+	
+	if err != nil {
+		return err
+	}
+	
 	h.updateElasticSearch()
 
 	return nil
