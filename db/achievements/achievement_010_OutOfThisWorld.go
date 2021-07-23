@@ -1,15 +1,15 @@
 package achievements
 
 import (
-	db "github.com/Swan/Nameless/db"
+	"github.com/Swan/Nameless/db"
 )
 
 type AchievementOutOfThisWorld Achievement
 
 func NewAchievementOutOfThisWorld() AchievementOutOfThisWorld {
 	return AchievementOutOfThisWorld{
-		Id: 10,
-		Name: "Out Of This World",
+		Id:           10,
+		Name:         "Out Of This World",
 		SteamAPIName: "OUT_OF_THIS_WORLD",
 	}
 }

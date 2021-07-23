@@ -1,9 +1,9 @@
 package achievements
 
 import (
-	common "github.com/Swan/Nameless/common"
-	config "github.com/Swan/Nameless/config"
-	db "github.com/Swan/Nameless/db"
+	"github.com/Swan/Nameless/common"
+	"github.com/Swan/Nameless/config"
+	"github.com/Swan/Nameless/db"
 	"testing"
 )
 
@@ -19,7 +19,7 @@ func TestGetUserUnlockedAchievements(t *testing.T) {
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
-	
+
 	if len(achievements) != 23 {
 		t.Fatalf("expected 23 achievement count")
 	}
@@ -31,7 +31,7 @@ func TestGetUserLockedAchievements(t *testing.T) {
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
-	
+
 	if len(achievements) != 8 {
 		t.Fatalf("expected 8 achievement count")
 	}
@@ -39,18 +39,18 @@ func TestGetUserLockedAchievements(t *testing.T) {
 
 func TestCheckAchievementWithNewScore(t *testing.T) {
 	user, stats, err := getUser(1, common.ModeKeys4)
-	
+
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
-	
+
 	user.CheckedPreviousAchievements = true
-	achievements, err := CheckAchievementsWithNewScore(&user, &db.Score{ Failed: true }, &stats) 
-	
+	achievements, err := CheckAchievementsWithNewScore(&user, &db.Score{Failed: true}, &stats)
+
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
-	
+
 	if len(achievements) != 23 {
 		t.Fatalf("expected 23 achievements unlocked")
 	}
@@ -58,18 +58,18 @@ func TestCheckAchievementWithNewScore(t *testing.T) {
 
 func TestBabySteps(t *testing.T) {
 	user, stats, err := getUser(1, common.ModeKeys4)
-	
+
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
-	
+
 	a := NewAchievementBabySteps()
-	ok, err := a.Check(&user, &db.Score{ Failed: true }, &stats)
-	
+	ok, err := a.Check(&user, &db.Score{Failed: true}, &stats)
+
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
-	
+
 	if !ok {
 		t.Fatalf("achievement not unlocked")
 	}
@@ -83,7 +83,7 @@ func TestAbsolutelyMarvelous(t *testing.T) {
 	}
 
 	a := NewAchievementAbsolutelyMarvelous()
-	ok, err := a.Check(&user, &db.Score{ Failed: true }, &stats)
+	ok, err := a.Check(&user, &db.Score{Failed: true}, &stats)
 
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -102,7 +102,7 @@ func TestCombolicious(t *testing.T) {
 	}
 
 	a := NewAchievementCombolicious()
-	ok, err := a.Check(&user, &db.Score{ Failed: true }, &stats)
+	ok, err := a.Check(&user, &db.Score{Failed: true}, &stats)
 
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -121,7 +121,7 @@ func TestPerfectionist(t *testing.T) {
 	}
 
 	a := NewAchievementPerfectionist()
-	ok, err := a.Check(&user, &db.Score{ Failed: true }, &stats)
+	ok, err := a.Check(&user, &db.Score{Failed: true}, &stats)
 
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -539,7 +539,7 @@ func TestApproachingTheBlueZenith(t *testing.T) {
 	}
 
 	a := NewAchievementApproachingTheBlueZenith()
-	ok, err := a.Check(&user, &db.Score{ Mode: common.ModeKeys4}, &stats)
+	ok, err := a.Check(&user, &db.Score{Mode: common.ModeKeys4}, &stats)
 
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -558,7 +558,7 @@ func TestClickTheArrows(t *testing.T) {
 	}
 
 	a := NewAchievementClickTheArrows()
-	ok, err := a.Check(&user, &db.Score{ Mode: common.ModeKeys4}, &stats)
+	ok, err := a.Check(&user, &db.Score{Mode: common.ModeKeys4}, &stats)
 
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -577,7 +577,7 @@ func TestFingerBreaker(t *testing.T) {
 	}
 
 	a := NewAchievementFingerBreaker()
-	ok, err := a.Check(&user, &db.Score{ Mode: common.ModeKeys4}, &stats)
+	ok, err := a.Check(&user, &db.Score{Mode: common.ModeKeys4}, &stats)
 
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -596,7 +596,7 @@ func TestSlowlyButSurely(t *testing.T) {
 	}
 
 	a := NewAchievementSlowlyButSurely()
-	ok, err := a.Check(&user, &db.Score{ Mode: common.ModeKeys4}, &stats)
+	ok, err := a.Check(&user, &db.Score{Mode: common.ModeKeys4}, &stats)
 
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -615,7 +615,7 @@ func TestHeWasNumberOne(t *testing.T) {
 	}
 
 	a := NewAchievementHeWasNumberOne()
-	ok, err := a.Check(&user, &db.Score{ Mode: common.ModeKeys4}, &stats)
+	ok, err := a.Check(&user, &db.Score{Mode: common.ModeKeys4}, &stats)
 
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -634,7 +634,7 @@ func TestStarvelous(t *testing.T) {
 	}
 
 	a := NewAchievementStarvelous()
-	ok, err := a.Check(&user, &db.Score{ Mode: common.ModeKeys4, CountMarv: 1 }, &stats)
+	ok, err := a.Check(&user, &db.Score{Mode: common.ModeKeys4, CountMarv: 1}, &stats)
 
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -651,17 +651,17 @@ func TestCloseAchievement(t *testing.T) {
 
 func getUser(id int, mode common.Mode) (db.User, db.UserStats, error) {
 	user, err := db.GetUserById(id)
-	
+
 	if err != nil {
 		return db.User{}, db.UserStats{}, err
 	}
-	
+
 	user.CheckedPreviousAchievements = false
 	stats, err := db.GetUserStats(id, mode)
 
 	if err != nil {
 		return db.User{}, db.UserStats{}, err
 	}
-	
+
 	return user, stats, nil
 }

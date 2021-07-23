@@ -1,15 +1,15 @@
 package achievements
 
 import (
-	db "github.com/Swan/Nameless/db"
+	"github.com/Swan/Nameless/db"
 )
 
 type AchievementHumbleBeginnings Achievement
 
 func NewAchievementHumbleBeginnings() AchievementHumbleBeginnings {
 	return AchievementHumbleBeginnings{
-		Id: 6,
-		Name: "Humble Beginnings",
+		Id:           6,
+		Name:         "Humble Beginnings",
 		SteamAPIName: "HUMBLE_BEGINNINGS",
 	}
 }

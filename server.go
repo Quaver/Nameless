@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	handlers "github.com/Swan/Nameless/handlers"
-	scores "github.com/Swan/Nameless/handlers/scores"
+	"github.com/Swan/Nameless/handlers"
+	"github.com/Swan/Nameless/handlers/scores"
 	"github.com/gin-gonic/gin"
 	logger "github.com/sirupsen/logrus"
 	"log"

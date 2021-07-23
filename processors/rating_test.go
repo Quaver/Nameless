@@ -2,7 +2,7 @@ package processors
 
 import (
 	"fmt"
-	config "github.com/Swan/Nameless/config"
+	"github.com/Swan/Nameless/config"
 	"testing"
 )
 

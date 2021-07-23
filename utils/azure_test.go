@@ -1,8 +1,8 @@
 package utils
 
 import (
-	config "github.com/Swan/Nameless/config"
-	db "github.com/Swan/Nameless/db"
+	"github.com/Swan/Nameless/config"
+	"github.com/Swan/Nameless/db"
 	"testing"
 )
 

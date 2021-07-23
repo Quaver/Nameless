@@ -1,8 +1,8 @@
 package processors
 
 import (
-	common "github.com/Swan/Nameless/common"
-	config "github.com/Swan/Nameless/config"
+	"github.com/Swan/Nameless/common"
+	"github.com/Swan/Nameless/config"
 	"testing"
 )
 

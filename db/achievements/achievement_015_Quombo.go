@@ -2,15 +2,15 @@ package achievements
 
 import (
 	"database/sql"
-	db "github.com/Swan/Nameless/db"
+	"github.com/Swan/Nameless/db"
 )
 
 type AchievementQuombo Achievement
 
 func NewAchievementQuombo() AchievementQuombo {
 	return AchievementQuombo{
-		Id: 15,
-		Name: "Quombo",
+		Id:           15,
+		Name:         "Quombo",
 		SteamAPIName: "QUOMBO",
 	}
 }
@@ -19,7 +19,7 @@ func (a AchievementQuombo) Check(user *db.User, score *db.Score, stats *db.UserS
 	if score.MaxCombo >= 500 && !score.Failed && !score.IsDonatorScore {
 		return true, nil
 	}
-	
+
 	if user.CheckedPreviousAchievements {
 		return false, nil
 	}

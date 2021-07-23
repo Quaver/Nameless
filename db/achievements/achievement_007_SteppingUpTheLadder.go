@@ -1,15 +1,15 @@
 package achievements
 
 import (
-	db "github.com/Swan/Nameless/db"
+	"github.com/Swan/Nameless/db"
 )
 
 type AchievementSteppingUpTheLadder Achievement
 
 func NewAchievementSteppingUpTheLadder() AchievementSteppingUpTheLadder {
 	return AchievementSteppingUpTheLadder{
-		Id: 7,
-		Name: "Stepping Up The Ladder",
+		Id:           7,
+		Name:         "Stepping Up The Ladder",
 		SteamAPIName: "STEPPING_UP_THE_LADDER",
 	}
 }

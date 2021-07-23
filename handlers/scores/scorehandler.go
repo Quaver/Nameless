@@ -3,13 +3,13 @@ package scores
 import (
 	"database/sql"
 	"fmt"
-	auth "github.com/Swan/Nameless/auth"
-	common "github.com/Swan/Nameless/common"
-	db "github.com/Swan/Nameless/db"
-	achievements "github.com/Swan/Nameless/db/achievements"
-	handlers "github.com/Swan/Nameless/handlers"
-	processors "github.com/Swan/Nameless/processors"
-	utils "github.com/Swan/Nameless/utils"
+	"github.com/Swan/Nameless/auth"
+	"github.com/Swan/Nameless/common"
+	"github.com/Swan/Nameless/db"
+	"github.com/Swan/Nameless/db/achievements"
+	"github.com/Swan/Nameless/handlers"
+	"github.com/Swan/Nameless/processors"
+	"github.com/Swan/Nameless/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
 	log "github.com/sirupsen/logrus"
@@ -32,7 +32,7 @@ type Handler struct {
 
 func (h Handler) SubmitPOST(c *gin.Context) {
 	timeStart := time.Now()
-	
+
 	var err error
 	h.user, err = auth.GetInGameUser(c)
 
@@ -64,9 +64,9 @@ func (h Handler) SubmitPOST(c *gin.Context) {
 		if err == sql.ErrNoRows {
 			h.logIgnoringScore(fmt.Sprintf("Unknown Map - `%v`", h.scoreData.MapMD5))
 			handlers.Return400(c)
-			return 
+			return
 		}
-		
+
 		h.logError(fmt.Sprintf("Failure fetching map `%v` - %v", h.scoreData.MapMD5, err))
 		handlers.Return500(c)
 		return
@@ -81,15 +81,15 @@ func (h Handler) SubmitPOST(c *gin.Context) {
 	}
 
 	h.mapPath, err = utils.CacheQuaFile(h.mapData)
-	
+
 	if err != nil {
 		h.logError(fmt.Sprintf("Unable to cache map file - %v - %v", h.mapData.Id, err))
-		
+
 		if err == utils.ErrAzureMismatchedMD5 {
 			handlers.Return400(c)
 			return
 		}
-		
+
 		handlers.Return500(c)
 		return
 	}
@@ -109,7 +109,7 @@ func (h Handler) SubmitPOST(c *gin.Context) {
 		h.logError(fmt.Sprintf("Failed to submit score - `%v", err))
 		return
 	}
-	
+
 	h.sendSuccessfulResponse(c)
 	h.logScore(time.Since(timeStart))
 }
@@ -117,7 +117,7 @@ func (h Handler) SubmitPOST(c *gin.Context) {
 // Handles submitting the score into the database, achievements, leaderboards, etc
 func (h *Handler) handleSubmission(c *gin.Context) error {
 	isValidScore := h.checkValidTotalScore(c)
-	
+
 	if !isValidScore {
 		return nil
 	}
@@ -129,10 +129,10 @@ func (h *Handler) handleSubmission(c *gin.Context) error {
 			h.logError(err.Error())
 			return nil
 		}
-		
+
 		return nil
 	}
-	
+
 	err = h.calculatePerformanceRating(c)
 
 	if err != nil {
@@ -177,7 +177,7 @@ func (h *Handler) handleSubmission(c *gin.Context) error {
 
 	// Check if the score is suspicious for possible cheats.
 	isCleanScore := h.scoreData.checkSuspiciousScore(h)
-	
+
 	// Anything below this point requires the map to be ranked
 	// since there will be updating leaderboards, handling achievements, etc.
 	if h.mapData.RankedStatus != common.StatusRanked {
@@ -195,7 +195,7 @@ func (h *Handler) handleSubmission(c *gin.Context) error {
 	if err != nil {
 		return err
 	}
-	
+
 	err = h.handleFirstPlaceScore(c, isCleanScore)
 
 	if err != nil {
@@ -203,11 +203,11 @@ func (h *Handler) handleSubmission(c *gin.Context) error {
 	}
 
 	err = h.unlockAchievements(c)
-	
+
 	if err != nil {
 		return err
 	}
-	
+
 	h.updateElasticSearch()
 
 	return nil
@@ -329,9 +329,9 @@ func (h *Handler) insertScore(c *gin.Context) error {
 		h.scoreData.TimePlayEnded, utils.GetIpFromRequest(c), h.scoreData.ExecutingAssemblyMD5,
 		h.scoreData.EntryAssemblyMD5, h.scoreData.ReplayVersion, h.scoreData.PauseCount, h.rating.Version,
 		h.difficulty.Result.Version, isDonorScore, h.scoreData.GameId)
-	
+
 	errStr := "Failed to insert score - %v"
-	
+
 	if err != nil {
 		h.logError(fmt.Sprintf(errStr, err))
 		handlers.Return500(c)
@@ -573,7 +573,7 @@ func (h *Handler) handleFirstPlaceScore(c *gin.Context, isCleanScore bool) error
 		}
 
 		if ok {
-			gainedFirstPlace = true	
+			gainedFirstPlace = true
 		}
 	}
 
@@ -616,7 +616,7 @@ func (h *Handler) handleFirstPlaceScore(c *gin.Context, isCleanScore bool) error
 	if !isCleanScore {
 		return nil
 	}
-	
+
 	dbScore := h.convertToDbScore()
 	err = utils.SendFirstPlaceWebhook(&h.user, &dbScore, &h.mapData, &oldUser)
 
@@ -643,7 +643,7 @@ func (h *Handler) insertFirstPlaceScore() error {
 
 // Updates an existing first place score to the new user. Returns if a user beat the first place score
 // or not
-func (h *Handler) updateFirstPlaceScore(score *db.FirstPlaceScore) (bool, error){
+func (h *Handler) updateFirstPlaceScore(score *db.FirstPlaceScore) (bool, error) {
 	if h.rating.Rating <= score.PerformanceRating {
 		return false, nil
 	}
@@ -662,16 +662,16 @@ func (h *Handler) updateFirstPlaceScore(score *db.FirstPlaceScore) (bool, error)
 // Checks and unlocks achievements
 func (h *Handler) unlockAchievements(c *gin.Context) error {
 	score := h.convertToDbScore()
-	
+
 	var err error
 	h.unlockedAchievements, err = achievements.CheckAchievementsWithNewScore(&h.user, &score, &h.stats)
-	
+
 	if err != nil {
 		h.logError(fmt.Sprintf("Failed while unlocking achievements - %v", err))
 		handlers.Return500(c)
 		return err
 	}
-	
+
 	return nil
 }
 
@@ -690,42 +690,42 @@ func (h *Handler) updateElasticSearch() {
 // After submitting a score, this will send the user a 200 response
 func (h *Handler) sendSuccessfulResponse(c *gin.Context) {
 	globalRank, err := h.user.GetGlobalRank(h.mapData.GameMode)
-	
+
 	if err != nil {
 		h.logWarning(fmt.Sprintf("Failed to retrieve user global rank - %v", err))
 		globalRank = -1
 	}
-	
+
 	countryRank, err := h.user.GetCountryRank(h.mapData.GameMode)
 
 	if err != nil {
 		h.logWarning(fmt.Sprintf("Failed to retrieve user country rank - %v", err))
 		countryRank = -1
 	}
-	
+
 	status := http.StatusOK
-	
-	c.JSON(status, gin.H {
-		"status": status,
+
+	c.JSON(status, gin.H{
+		"status":    status,
 		"timestamp": time.Now().UnixNano() / int64(time.Millisecond),
 		"game_mode": h.mapData.GameMode,
-		"map": gin.H {
-			"id": h.mapData.Id,
+		"map": gin.H{
+			"id":  h.mapData.Id,
 			"md5": h.mapData.MD5,
 		},
-		"stats": gin.H {
-			"new_global_rank": globalRank,
-			"new_country_rank": countryRank,
-			"total_score": h.stats.TotalScore,
-			"ranked_score": h.stats.RankedScore,
-			"overall_accuracy": h.stats.OverallAccuracy,
+		"stats": gin.H{
+			"new_global_rank":            globalRank,
+			"new_country_rank":           countryRank,
+			"total_score":                h.stats.TotalScore,
+			"ranked_score":               h.stats.RankedScore,
+			"overall_accuracy":           h.stats.OverallAccuracy,
 			"overall_performance_rating": h.stats.OverallRating,
-			"play_count": h.stats.PlayCount,
+			"play_count":                 h.stats.PlayCount,
 		},
-		"score": gin.H {
-			"personal_best": h.isPersonalBestScore(),
+		"score": gin.H{
+			"personal_best":      h.isPersonalBestScore(),
 			"performance_rating": h.rating.Rating,
-			"rank": -1,
+			"rank":               -1,
 		},
 		"achievements": h.unlockedAchievements,
 	})
@@ -782,9 +782,9 @@ func (h *Handler) logWarning(reason string) {
 
 func (h *Handler) logError(reason string) {
 	log.Errorf(fmt.Sprintf("Error submitting score from %v: %v", h.user.ToString(), reason))
-	
+
 	err := utils.SendScoreSubmissionErrorWebhook(&h.user, reason)
-	
+
 	if err != nil {
 		log.Errorf("Failed to send score submission error webhook - %v\n", err)
 	}

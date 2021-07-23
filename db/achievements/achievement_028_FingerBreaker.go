@@ -1,15 +1,15 @@
 package achievements
 
 import (
-	db "github.com/Swan/Nameless/db"
+	"github.com/Swan/Nameless/db"
 )
 
 type AchievementFingerBreaker Achievement
 
 func NewAchievementFingerBreaker() AchievementFingerBreaker {
 	return AchievementFingerBreaker{
-		Id: 28,
-		Name: "Finger Breaker",
+		Id:           28,
+		Name:         "Finger Breaker",
 		SteamAPIName: "FINGER_BREAKER",
 	}
 }

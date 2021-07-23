@@ -2,15 +2,15 @@ package achievements
 
 import (
 	"database/sql"
-	db "github.com/Swan/Nameless/db"
+	"github.com/Swan/Nameless/db"
 )
 
 type AchievementHeWasNumberOne Achievement
 
 func NewAchievementHeWasNumberOne() AchievementHeWasNumberOne {
 	return AchievementHeWasNumberOne{
-		Id: 30,
-		Name: "He Was Number One",
+		Id:           30,
+		Name:         "He Was Number One",
 		SteamAPIName: "HE_WAS_NUMBER_ONE",
 	}
 }

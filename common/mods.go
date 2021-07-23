@@ -133,6 +133,7 @@ var ModStrings = map[Mods]string{
 	ModHealthAdjust:       "Health Adjustments",
 	ModEnumMaxValue:       "INVALID!",
 }
+
 // IsModActivated Returns if a given mod is activated in a mod combo
 func IsModActivated(modCombo Mods, mod Mods) bool {
 	return modCombo&mod != 0
@@ -180,18 +181,18 @@ func GetModsString(modCombo Mods) string {
 	if modCombo == 0 {
 		return "None"
 	}
-	
+
 	mods := []string{}
-	
+
 	for i := 0; (1 << i) < ModEnumMaxValue-1; i++ {
 		mod := Mods(1 << i)
 
 		if !IsModActivated(modCombo, mod) {
 			continue
 		}
-		
+
 		mods = append(mods, ModStrings[mod])
 	}
-	
+
 	return strings.Join(mods[:], ", ")
 }

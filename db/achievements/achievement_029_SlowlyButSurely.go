@@ -3,16 +3,16 @@ package achievements
 import (
 	"database/sql"
 	"fmt"
-	common "github.com/Swan/Nameless/common"
-	db "github.com/Swan/Nameless/db"
+	"github.com/Swan/Nameless/common"
+	"github.com/Swan/Nameless/db"
 )
 
 type AchievementSlowlyButSurely Achievement
 
 func NewAchievementSlowlyButSurely() AchievementSlowlyButSurely {
 	return AchievementSlowlyButSurely{
-		Id: 29,
-		Name: "Slowly But Surely",
+		Id:           29,
+		Name:         "Slowly But Surely",
 		SteamAPIName: "SLOWLY_BUT_SURELY",
 	}
 }
@@ -37,6 +37,6 @@ func (a AchievementSlowlyButSurely) Check(user *db.User, score *db.Score, stats 
 
 		return false, err
 	}
-	
+
 	return true, nil
 }

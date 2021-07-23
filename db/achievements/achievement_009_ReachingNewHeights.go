@@ -1,15 +1,15 @@
 package achievements
 
 import (
-	db "github.com/Swan/Nameless/db"
+	"github.com/Swan/Nameless/db"
 )
 
 type AchievementReachingNewHeights Achievement
 
 func NewAchievementReachingNewHeights() AchievementReachingNewHeights {
 	return AchievementReachingNewHeights{
-		Id: 9,
-		Name: "Reaching New Heights",
+		Id:           9,
+		Name:         "Reaching New Heights",
 		SteamAPIName: "REACHING_NEW_HEIGHTS",
 	}
 }

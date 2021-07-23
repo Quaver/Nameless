@@ -2,7 +2,7 @@ package db
 
 import (
 	"fmt"
-	common "github.com/Swan/Nameless/common"
+	"github.com/Swan/Nameless/common"
 	"github.com/go-redis/redis/v8"
 	"strings"
 )
@@ -10,28 +10,28 @@ import (
 // UpdateGlobalLeaderboard Updates the global leaderboard for a user in redis
 func UpdateGlobalLeaderboard(u *User, mode common.Mode, rating float64) error {
 	err := Redis.ZAdd(RedisCtx, GetGlobalLeaderboardKey(mode), &redis.Z{
-		Score: rating,
+		Score:  rating,
 		Member: u.Id,
 	}).Err()
 
 	if err != nil {
 		return err
 	}
-	
+
 	return nil
 }
 
 // UpdateCountryLeaderboard Updates the country leaderboard for a given user and game mode
 func UpdateCountryLeaderboard(u *User, mode common.Mode, rating float64) error {
 	err := Redis.ZAdd(RedisCtx, GetCountryLeaderboardKey(u, mode), &redis.Z{
-		Score: rating,
+		Score:  rating,
 		Member: u.Id,
 	}).Err()
 
 	if err != nil {
 		return err
 	}
-	
+
 	return nil
 }
 

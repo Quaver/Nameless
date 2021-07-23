@@ -2,7 +2,7 @@ package processors
 
 import (
 	"fmt"
-	config "github.com/Swan/Nameless/config"
+	"github.com/Swan/Nameless/config"
 	log "github.com/sirupsen/logrus"
 	"os/exec"
 )
@@ -11,14 +11,14 @@ import (
 // Requires .NET Core 3.1 installation
 func CompileQuaverTools() {
 	log.Info("Compiling Quaver.Tools...")
-	
+
 	cmd := exec.Command("dotnet", "build", "--configuration", "Release", config.Data.QuaverAPIPath)
 	err := cmd.Run()
 
 	if err != nil {
 		panic(err)
 	}
-	
+
 	log.Info("Successfully compiled Quaver.Tools!")
 }
 

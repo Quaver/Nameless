@@ -2,7 +2,7 @@ package db
 
 import (
 	"database/sql"
-	common "github.com/Swan/Nameless/common"
+	"github.com/Swan/Nameless/common"
 	"math"
 )
 
@@ -80,13 +80,13 @@ func GetUserTopScores(id int, mode common.Mode) ([]Score, error) {
 	query := "SELECT * FROM scores " +
 		"WHERE user_id = ? AND mode = ? AND personal_best = 1 AND is_donator_score = 0 " +
 		"ORDER BY performance_rating DESC LIMIT 500"
-	
+
 	rows, err := SQL.Query(query, id, mode)
-	
+
 	if err != nil {
 		return []Score{}, nil
 	}
-	
+
 	defer func(rows *sql.Rows) {
 		err := rows.Close()
 		if err != nil {
@@ -95,18 +95,18 @@ func GetUserTopScores(id int, mode common.Mode) ([]Score, error) {
 	}(rows)
 
 	var scores []Score
-	
+
 	for rows.Next() {
 		var score Score
 		err = scanScore(&score, rows)
-		
+
 		if err != nil {
 			return []Score{}, err
 		}
-		
+
 		scores = append(scores, score)
 	}
-	
+
 	return scores, nil
 }
 
@@ -116,13 +116,13 @@ func CalculateOverallRating(scores []Score) float64 {
 	if len(scores) == 0 {
 		return 0
 	}
-	
+
 	sum := 0.00
-	
+
 	for i, score := range scores {
 		sum += score.PerformanceRating * math.Pow(0.95, float64(i))
 	}
-	
+
 	return sum
 }
 
@@ -131,17 +131,17 @@ func CalculateOverallRating(scores []Score) float64 {
 func CalculateOverallAccuracy(scores []Score) float64 {
 	var total float64
 	var divideTotal float64
-	
+
 	for i, score := range scores {
 		add := math.Pow(0.95, float64(i)) * 100
 		total += float64(score.Accuracy) * add
 		divideTotal += add
 	}
-	
+
 	if divideTotal == 0 {
 		return 0
 	}
-	
+
 	return total / divideTotal
 }
 

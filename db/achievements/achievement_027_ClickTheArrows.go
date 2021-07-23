@@ -1,15 +1,15 @@
 package achievements
 
 import (
-	db "github.com/Swan/Nameless/db"
+	"github.com/Swan/Nameless/db"
 )
 
 type AchievementClickTheArrows Achievement
 
 func NewAchievementClickTheArrows() AchievementClickTheArrows {
 	return AchievementClickTheArrows{
-		Id: 27,
-		Name: "Click. The. Arrows!",
+		Id:           27,
+		Name:         "Click. The. Arrows!",
 		SteamAPIName: "CLICK_THE_ARROWS",
 	}
 }

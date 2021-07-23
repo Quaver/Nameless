@@ -1,15 +1,15 @@
 package achievements
 
 import (
-	db "github.com/Swan/Nameless/db"
+	"github.com/Swan/Nameless/db"
 )
 
 type AchievementExtraterrestrial Achievement
 
 func NewAchievementAExtraterrestrial() AchievementExtraterrestrial {
 	return AchievementExtraterrestrial{
-		Id: 13,
-		Name: "Extraterrestrial",
+		Id:           13,
+		Name:         "Extraterrestrial",
 		SteamAPIName: "EXTRATERRESTRIAL",
 	}
 }

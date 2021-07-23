@@ -1,7 +1,7 @@
 package processors
 
 import (
-	config "github.com/Swan/Nameless/config"
+	"github.com/Swan/Nameless/config"
 	"testing"
 )
 

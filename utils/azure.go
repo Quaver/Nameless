@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"github.com/Azure/azure-pipeline-go/pipeline"
 	"github.com/Azure/azure-storage-blob-go/azblob"
-	common "github.com/Swan/Nameless/common"
-	config "github.com/Swan/Nameless/config"
-	db "github.com/Swan/Nameless/db"
+	"github.com/Swan/Nameless/common"
+	"github.com/Swan/Nameless/config"
+	"github.com/Swan/Nameless/db"
 	log "github.com/sirupsen/logrus"
 	"io"
 	"io/fs"
@@ -21,9 +21,9 @@ import (
 
 type AzureStorageClient struct {
 	accountName string
-	accountKey string
-	credential azblob.Credential
-	pipe pipeline.Pipeline
+	accountKey  string
+	credential  azblob.Credential
+	pipe        pipeline.Pipeline
 }
 
 // AzureClient Global storage client used throughout the application.
@@ -36,23 +36,23 @@ func InitializeAzure() {
 	if AzureClient != (AzureStorageClient{}) {
 		return
 	}
-	
+
 	var err error
-	
+
 	client := AzureStorageClient{
 		accountName: config.Data.Azure.AccountName,
 		accountKey:  config.Data.Azure.AccountKey,
 	}
-	
+
 	client.credential, err = azblob.NewSharedKeyCredential(client.accountName, client.accountKey)
-	
+
 	if err != nil {
 		panic(err)
 	}
 
 	client.pipe = azblob.NewPipeline(client.credential, azblob.PipelineOptions{})
 	AzureClient = client
-	
+
 	log.Info("Successfully created Azure client!")
 }
 
@@ -67,41 +67,41 @@ func (c *AzureStorageClient) UploadFile(container string, fileName string, data 
 	containerURL := c.createContainerURL(container)
 	blobURL := containerURL.NewBlockBlobURL(fileName)
 	ctx := context.Background()
-	
+
 	_, err := azblob.UploadBufferToBlockBlob(ctx, data, blobURL, azblob.UploadToBlockBlobOptions{
 		BlockSize:   4 * 1024 * 1024,
 		Parallelism: 16,
 	})
-	
+
 	if err != nil {
 		return err
 	}
-	
+
 	return nil
 }
 
 // DownloadFile Downloads a blob from a given container
-func (c *AzureStorageClient) DownloadFile(container string, name string, path string) (bytes.Buffer, error){
+func (c *AzureStorageClient) DownloadFile(container string, name string, path string) (bytes.Buffer, error) {
 	containerURL := c.createContainerURL(container)
 	blobURL := containerURL.NewBlockBlobURL(name)
 	ctx := context.Background()
-	
-	resp, err := blobURL.Download(ctx, 0, azblob.CountToEnd, azblob.BlobAccessConditions{}, 
-	false, azblob.ClientProvidedKeyOptions{})
-	
+
+	resp, err := blobURL.Download(ctx, 0, azblob.CountToEnd, azblob.BlobAccessConditions{},
+		false, azblob.ClientProvidedKeyOptions{})
+
 	if err != nil {
 		return bytes.Buffer{}, err
 	}
-	
+
 	bodyStream := resp.Body(azblob.RetryReaderOptions{MaxRetryRequests: 20})
-	
+
 	defer func(bodyStream io.ReadCloser) {
 		err := bodyStream.Close()
 		if err != nil {
 			return
 		}
 	}(bodyStream)
-	
+
 	// Read the body into a buffer
 	downloadedData := bytes.Buffer{}
 	_, err = downloadedData.ReadFrom(bodyStream)
@@ -109,13 +109,13 @@ func (c *AzureStorageClient) DownloadFile(container string, name string, path st
 	if err != nil {
 		return bytes.Buffer{}, err
 	}
-	
+
 	err = ioutil.WriteFile(path, downloadedData.Bytes(), fs.ModePerm)
-	
+
 	if err != nil {
 		return bytes.Buffer{}, err
 	}
-	
+
 	return downloadedData, nil
 }
 
@@ -150,25 +150,25 @@ func CacheQuaFile(m db.Map) (string, error) {
 	// Attempt to download the file from azure
 	if needsDownload {
 		buffer, err := AzureClient.DownloadFile("maps", fmt.Sprintf("%v.qua", m.Id), path)
-		
+
 		if err != nil {
 			return "", err
 		}
-		
+
 		// Maps are that are uploaded by donors are gzipped, so we need to unpack and rewrite the file
 		if m.RankedStatus == common.StatusNotSubmitted {
 			err = ungzipFile(&buffer, path)
-			
+
 			if err != nil {
 				return "", err
 			}
 		}
 	}
-	
+
 	if m.RankedStatus == common.StatusNotSubmitted {
 		return path, nil
 	}
-	
+
 	// Do a final Md5 hash check on ranked maps.
 	if _, err := os.Stat(path); err == nil {
 		md5, err := GetFileMD5(path)
@@ -211,6 +211,6 @@ func ungzipFile(buffer *bytes.Buffer, path string) error {
 	if err != nil {
 		return err
 	}
-	
+
 	return nil
 }

@@ -1,7 +1,7 @@
 package db
 
 import (
-	config "github.com/Swan/Nameless/config"
+	"github.com/Swan/Nameless/config"
 	"testing"
 )
 
@@ -12,7 +12,7 @@ func TestInitializeActivityFeed(t *testing.T) {
 
 func TestInsertActivityFeed(t *testing.T) {
 	err := InsertActivityFeed(1, ActivityFeedDonated, "", -1)
-	
+
 	if err != nil {
 		t.Fatalf(err.Error())
 	}

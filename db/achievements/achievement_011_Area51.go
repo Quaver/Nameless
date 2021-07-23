@@ -1,15 +1,15 @@
 package achievements
 
 import (
-	db "github.com/Swan/Nameless/db"
+	"github.com/Swan/Nameless/db"
 )
 
 type AchievementArea51 Achievement
 
 func NewAchievementArea51() AchievementArea51 {
 	return AchievementArea51{
-		Id: 11,
-		Name: "Area 51",
+		Id:           11,
+		Name:         "Area 51",
 		SteamAPIName: "AREA_51",
 	}
 }

@@ -1,7 +1,7 @@
 package scores
 
 import (
-	common "github.com/Swan/Nameless/common"
+	"github.com/Swan/Nameless/common"
 	"testing"
 )
 

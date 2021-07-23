@@ -2,15 +2,15 @@ package achievements
 
 import (
 	"database/sql"
-	db "github.com/Swan/Nameless/db"
+	"github.com/Swan/Nameless/db"
 )
 
 type AchievementCombolicious Achievement
 
 func NewAchievementCombolicious() AchievementCombolicious {
 	return AchievementCombolicious{
-		Id: 3,
-		Name: "Combolicious",
+		Id:           3,
+		Name:         "Combolicious",
 		SteamAPIName: "COMBOLICIOUS",
 	}
 }
@@ -19,7 +19,7 @@ func (a AchievementCombolicious) Check(user *db.User, score *db.Score, stats *db
 	if !score.Failed && score.MaxCombo >= 1000 && !score.IsDonatorScore {
 		return true, nil
 	}
-	
+
 	if user.CheckedPreviousAchievements {
 		return false, nil
 	}

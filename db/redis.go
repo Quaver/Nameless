@@ -2,7 +2,7 @@ package db
 
 import (
 	"context"
-	config "github.com/Swan/Nameless/config"
+	"github.com/Swan/Nameless/config"
 	"github.com/go-redis/redis/v8"
 	log "github.com/sirupsen/logrus"
 )

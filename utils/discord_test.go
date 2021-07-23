@@ -1,9 +1,9 @@
 package utils
 
 import (
-	common "github.com/Swan/Nameless/common"
-	config "github.com/Swan/Nameless/config"
-	db "github.com/Swan/Nameless/db"
+	"github.com/Swan/Nameless/common"
+	"github.com/Swan/Nameless/config"
+	"github.com/Swan/Nameless/db"
 	"testing"
 )
 
@@ -15,17 +15,17 @@ func TestInitializeDiscord(t *testing.T) {
 
 func TestSendFirstPlaceWebhook(t *testing.T) {
 	user, err := db.GetUserById(1)
-	
+
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
-	
+
 	mapData, err := db.GetMapById(2)
-	
+
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
-	
+
 	score := db.Score{
 		Id:                1234,
 		UserId:            user.Id,
@@ -39,15 +39,15 @@ func TestSendFirstPlaceWebhook(t *testing.T) {
 		Mods:              common.ModMirror | common.ModSpeed12X,
 		MaxCombo:          2,
 	}
-	
+
 	oldUser, err := db.GetUserById(2)
-	
+
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
-	
+
 	err = SendFirstPlaceWebhook(&user, &score, &mapData, &oldUser)
-	
+
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
@@ -59,7 +59,7 @@ func TestSendScoreSubmissionErrorWebhook(t *testing.T) {
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
-	
+
 	err = SendScoreSubmissionErrorWebhook(&user, "Failure getting stats")
 
 	if err != nil {

@@ -2,15 +2,15 @@ package achievements
 
 import (
 	"database/sql"
-	db "github.com/Swan/Nameless/db"
+	"github.com/Swan/Nameless/db"
 )
 
 type AchievementBabySteps Achievement
 
 func NewAchievementBabySteps() AchievementBabySteps {
 	return AchievementBabySteps{
-		Id: 1,
-		Name: "Baby Steps",
+		Id:           1,
+		Name:         "Baby Steps",
 		SteamAPIName: "BABY_STEPS",
 	}
 }
@@ -20,7 +20,7 @@ func (a AchievementBabySteps) Check(user *db.User, score *db.Score, stats *db.Us
 	if !score.Failed && !score.IsDonatorScore {
 		return true, nil
 	}
-	
+
 	if user.CheckedPreviousAchievements {
 		return false, nil
 	}
@@ -33,9 +33,9 @@ func (a AchievementBabySteps) Check(user *db.User, score *db.Score, stats *db.Us
 		if err == sql.ErrNoRows {
 			return false, nil
 		}
-		
+
 		return false, err
 	}
-	
+
 	return true, err
 }

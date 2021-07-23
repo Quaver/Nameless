@@ -1,15 +1,15 @@
 package achievements
 
 import (
-	db "github.com/Swan/Nameless/db"
+	"github.com/Swan/Nameless/db"
 )
 
 type AchievementET Achievement
 
 func NewAchievementET() AchievementET {
 	return AchievementET{
-		Id: 14,
-		Name: "ET",
+		Id:           14,
+		Name:         "ET",
 		SteamAPIName: "ET",
 	}
 }

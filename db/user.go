@@ -3,7 +3,7 @@ package db
 import (
 	"database/sql"
 	"fmt"
-	common "github.com/Swan/Nameless/common"
+	"github.com/Swan/Nameless/common"
 	"strconv"
 	"strings"
 	"time"
@@ -19,7 +19,7 @@ type User struct {
 	LatestActivity              int64
 	Country                     string
 	CheckedPreviousAchievements bool
-	AvatarURL					sql.NullString
+	AvatarURL                   sql.NullString
 }
 
 // GetUserById Fetches a user object by their id
@@ -35,7 +35,7 @@ func GetUserById(id int) (User, error) {
 		&user.Id, &user.SteamId, &user.Username, &user.Allowed,
 		&user.Privileges, &user.UserGroups, &user.LatestActivity,
 		&user.Country, &user.CheckedPreviousAchievements, &user.AvatarURL)
-	
+
 	if err != nil {
 		return User{}, err
 	}
@@ -47,11 +47,11 @@ func GetUserById(id int) (User, error) {
 func UpdateUserLatestActivity(id int) error {
 	timestamp := time.Now().UnixNano() / int64(time.Millisecond)
 	_, err := SQL.Exec("UPDATE users SET latest_activity = ? WHERE id = ?", timestamp, id)
-	
+
 	if err != nil {
 		return err
 	}
-	
+
 	return err
 }
 
@@ -87,8 +87,7 @@ func (u *User) GetAvatarURL() string {
 	if !u.AvatarURL.Valid {
 		return ""
 	}
-	
-	return u.AvatarURL.String
-	
-}
 
+	return u.AvatarURL.String
+
+}

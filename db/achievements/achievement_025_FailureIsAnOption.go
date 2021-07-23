@@ -1,15 +1,15 @@
 package achievements
 
 import (
-	db "github.com/Swan/Nameless/db"
+	"github.com/Swan/Nameless/db"
 )
 
 type AchievementFailureIsAnOption Achievement
 
 func NewAchievementFailureIsAnOption() AchievementFailureIsAnOption {
 	return AchievementFailureIsAnOption{
-		Id: 25,
-		Name: "Failure Is An Option",
+		Id:           25,
+		Name:         "Failure Is An Option",
 		SteamAPIName: "FAILURE_IS_AN_OPTION",
 	}
 }

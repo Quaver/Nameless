@@ -2,7 +2,7 @@ package db
 
 import "time"
 
-type ActivityFeed int 
+type ActivityFeed int
 
 const (
 	ActivityFeedRegistered ActivityFeed = iota
@@ -21,12 +21,12 @@ const (
 func InsertActivityFeed(userId int, feed ActivityFeed, value string, mapsetId int) error {
 	query := "INSERT INTO activity_feed (user_id, type, timestamp, value, mapset_id) VALUES (?, ?, ?, ?, ?)"
 	timestamp := time.Now().UnixNano() / int64(time.Millisecond)
-	
+
 	_, err := SQL.Exec(query, userId, feed, timestamp, value, mapsetId)
-	
+
 	if err != nil {
 		return err
 	}
-	
+
 	return nil
 }

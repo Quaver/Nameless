@@ -2,7 +2,7 @@ package processors
 
 import (
 	"encoding/json"
-	common "github.com/Swan/Nameless/common"
+	"github.com/Swan/Nameless/common"
 	"os/exec"
 	"strconv"
 )
@@ -13,15 +13,15 @@ type DifficultyProcessor struct {
 }
 
 type DifficultyProcessorMetadata struct {
-	Artist         string       `json:"Artist"`
-	Title          string       `json:"Title"`
-	DifficultyName string       `json:"DifficultyName"`
-	Creator        string       `json:"Creator"`
+	Artist         string      `json:"Artist"`
+	Title          string      `json:"Title"`
+	DifficultyName string      `json:"DifficultyName"`
+	Creator        string      `json:"Creator"`
 	Mode           common.Mode `json:"Mode"`
-	Length         int          `json:"Length"`
-	MapId          int          `json:"MapId"`
-	MapSetId       int          `json:"MapSetId"`
-	ObjectCount    int          `json:"ObjectCount"`
+	Length         int         `json:"Length"`
+	MapId          int         `json:"MapId"`
+	MapSetId       int         `json:"MapSetId"`
+	ObjectCount    int         `json:"ObjectCount"`
 }
 
 type DifficultyProcessorResult struct {
