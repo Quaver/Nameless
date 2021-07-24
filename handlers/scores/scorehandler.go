@@ -37,7 +37,6 @@ func (h Handler) SubmitPOST(c *gin.Context) {
 	h.user, err = auth.GetInGameUser(c)
 
 	if err != nil {
-		log.Errorf("Could not authenticate user - %v\n", err)
 		handlers.ReturnError(c, http.StatusForbidden, err.Error())
 		return
 	}
