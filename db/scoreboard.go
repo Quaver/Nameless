@@ -37,6 +37,16 @@ func UpdateScoreboardCache(s *Score, m *Map) error {
 			return err
 		}
 
+		if len(scores) == 0 {
+			err = Redis.Del(RedisCtx, key).Err()
+
+			if err != nil {
+				return err
+			}
+			
+			continue
+		} 
+		
 		for _, score := range scores {
 			if s.PerformanceRating > score.PerformanceRating {
 				err = Redis.Del(RedisCtx, key).Err()
