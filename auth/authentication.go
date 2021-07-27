@@ -35,7 +35,7 @@ func GetInGameUser(c *gin.Context) (db.User, error) {
 	}
 
 	if !user.Allowed {
-		return db.User{}, err
+		return db.User{}, fmt.Errorf("user %v is banned", user.Id)
 	}
 
 	return user, nil
