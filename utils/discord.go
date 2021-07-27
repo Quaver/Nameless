@@ -159,6 +159,44 @@ func SendScoreSubmissionErrorWebhook(user *db.User, reason string) error {
 	return nil
 }
 
+// SendScoreSubmissionWarningWebhook Sends a message to Discord that a warning has occurred during score submission
+func SendScoreSubmissionWarningWebhook(user *db.User, reason string) error {
+	t := time.Now().UTC()
+
+	_, err := ScoreSubmissionErrors.Execute(nil, &discordhook.WebhookExecuteParams{
+		Embeds: []*discordhook.Embed{
+			{
+				Author: &discordhook.EmbedAuthor{
+					Name:    user.Username,
+					URL:     fmt.Sprintf("%v/user/%v", config.Data.WebsiteUrl, user.Id),
+					IconURL: user.GetAvatarURL(),
+				},
+				Description: "⚠ **Score Submission Warning!**",
+				Fields: []*discordhook.EmbedField{
+					{
+						Name:   "Reason",
+						Value:  reason,
+						Inline: false,
+					},
+				},
+				Timestamp: &t,
+				Thumbnail: &discordhook.EmbedThumbnail{URL: config.Data.QuaverAvatar},
+				Footer: &discordhook.EmbedFooter{
+					Text:    "Quaver",
+					IconURL: config.Data.QuaverAvatar,
+				},
+				Color: 0xFFFF00,
+			},
+		},
+	}, nil, "")
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // SendAnticheatWebhook Sends an anti-cheat related webhook to Discord
 func SendAnticheatWebhook(user *db.User, mapData *db.Map, scoreId int, isPersonalBest bool, reason string) error {
 	t := time.Now().UTC()

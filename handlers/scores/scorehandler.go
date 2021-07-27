@@ -82,15 +82,14 @@ func (h Handler) SubmitPOST(c *gin.Context) {
 	h.mapPath, err = utils.CacheQuaFile(h.mapData)
 
 	if err != nil {
-		h.logError(fmt.Sprintf("Unable to cache map file - %v - %v", h.mapData.Id, err))
-
-		if err == utils.ErrAzureMismatchedMD5 {
-			handlers.Return400(c)
+		if err != utils.ErrAzureMismatchedMD5 {
+			h.logError(fmt.Sprintf("Unable to cache map file - %v - %v", h.mapData.Id, err))
+			handlers.Return500(c)
 			return
 		}
-
-		handlers.Return500(c)
-		return
+		
+		h.logWarningToDiscord(fmt.Sprintf("Failed to cache map file - %v. %v. " +
+			"Allowing score submission to go through, however map file needs an update.", h.mapData, err))
 	}
 
 	h.stats, err = db.GetUserStats(h.user.Id, h.scoreData.GameMode)
@@ -783,6 +782,16 @@ func (h *Handler) logIgnoringScore(reason string) {
 
 func (h *Handler) logWarning(reason string) {
 	log.Warning(fmt.Sprintf("Error submitting score from %v: %v", h.user.ToString(), reason))
+}
+
+func (h *Handler) logWarningToDiscord(reason string) {
+	log.Warning(fmt.Sprintf("Warning while submitting score from %v: %v", h.user.ToString(), reason))
+
+	err := utils.SendScoreSubmissionWarningWebhook(&h.user, reason)
+
+	if err != nil {
+		log.Errorf("Failed to send score submission warning webhook - %v\n", err)
+	}
 }
 
 func (h *Handler) logError(reason string) {
