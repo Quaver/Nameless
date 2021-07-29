@@ -173,6 +173,12 @@ func (h *Handler) handleSubmission(c *gin.Context) error {
 		return err
 	}
 
+	err = h.updateMapPlayCount(c)
+
+	if err != nil {
+		return err
+	}
+	
 	// Check if the score is suspicious for possible cheats.
 	isCleanScore := h.scoreData.checkSuspiciousScore(h)
 
@@ -205,15 +211,7 @@ func (h *Handler) handleSubmission(c *gin.Context) error {
 	if err != nil {
 		return err
 	}
-
-	err = h.updateMapPlayCount(c)
 	
-	if err != nil {
-		return err
-	}
-	
-	h.updateElasticSearch()
-
 	return nil
 }
 
@@ -403,6 +401,7 @@ func (h *Handler) updateMapPlayCount(c *gin.Context) error {
 		return err
 	}
 
+	h.updateElasticSearch()
 	return nil
 }
 
