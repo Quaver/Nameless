@@ -44,7 +44,7 @@ func CalcDifficulty(path string, mods common.Mods) (DifficultyProcessor, error) 
 	err := cmd.Run()
 	
 	if err != nil {
-		return DifficultyProcessor{}, fmt.Errorf("%v\n\nCMD: `%v` \n\n```%v```", err, cmd.String(), stderr.String())
+		return DifficultyProcessor{}, fmt.Errorf("%v\n\n```%v```", err, stderr.String())
 	}
 
 	var d DifficultyProcessor
