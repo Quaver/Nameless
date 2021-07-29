@@ -88,8 +88,8 @@ func (h Handler) SubmitPOST(c *gin.Context) {
 			return
 		}
 		
-		h.logWarningToDiscord(fmt.Sprintf("Failed to cache map file - %v. %v. " +
-			"Allowing score submission to go through, however map file needs an update.", h.mapData, err))
+		h.logWarningToDiscord(fmt.Sprintf("Failed to cache map file - `%v (#%v)`.\n\n%v\n\n" +
+			"Allowing score submission to go through, however map file needs an update.", h.mapData.GetString(), h.mapData.Id, err))
 	}
 
 	h.stats, err = db.GetUserStats(h.user.Id, h.scoreData.GameMode)
