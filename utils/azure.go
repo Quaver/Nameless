@@ -178,7 +178,7 @@ func CacheQuaFile(m db.Map) (string, error) {
 		}
 
 		if md5 != m.MD5 {
-			return "", ErrAzureMismatchedMD5
+			return path, ErrAzureMismatchedMD5
 		}
 
 		return path, nil
