@@ -82,15 +82,21 @@ func (h Handler) SubmitPOST(c *gin.Context) {
 	h.mapPath, err = utils.CacheQuaFile(h.mapData)
 
 	if err != nil {
+		logStr := fmt.Sprintf("Unable to cache map file - %v - %v", h.mapData.Id, err)
+		
 		switch err {
+		// File doesn't exist on azure.
 		case utils.ErrAzureBlobNotFound:
+			h.logError(logStr)
+			handlers.Return400(c)
+			return
+		// Database does not match the stored file on azure. Let the score go through
 		case utils.ErrAzureMismatchedMD5:
-			h.logError(fmt.Sprintf("Unable to cache map file - %v - %v", h.mapData.Id, err))
+			h.logWarning(logStr)
+		default:
+			h.logError(logStr)
 			handlers.Return500(c)
 			return
-		default:
-			h.logWarningToDiscord(fmt.Sprintf("Failed to cache map file - `%v (#%v)`.\n\n%v\n\n" +
-				"Allowing score submission to go through, however map file needs an update.", h.mapData.GetString(), h.mapData.Id, err))
 		}
 	}
 
