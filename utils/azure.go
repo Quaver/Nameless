@@ -17,6 +17,7 @@ import (
 	"io/ioutil"
 	"net/url"
 	"os"
+	"strings"
 )
 
 type AzureStorageClient struct {
@@ -30,6 +31,7 @@ type AzureStorageClient struct {
 // Must call InitializeAzure to create
 var AzureClient AzureStorageClient
 var ErrAzureMismatchedMD5 = errors.New("MD5 hash of cached file mismatches database")
+var ErrAzureBlobNotFound = errors.New("BlobNotFound")
 
 // InitializeAzure Initializes the azure storage client
 func InitializeAzure() {
@@ -152,6 +154,10 @@ func CacheQuaFile(m db.Map) (string, error) {
 		buffer, err := AzureClient.DownloadFile("maps", fmt.Sprintf("%v.qua", m.Id), path)
 
 		if err != nil {
+			if strings.Contains(err.Error(), ErrAzureBlobNotFound.Error()) {
+				return "", ErrAzureBlobNotFound
+			}
+			
 			return "", err
 		}
 
