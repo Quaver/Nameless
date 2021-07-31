@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"archive/zip"
 	"bytes"
 	"compress/gzip"
 	"context"
@@ -191,6 +192,72 @@ func CacheQuaFile(m db.Map) (string, error) {
 	}
 
 	return "", fmt.Errorf("failed to cache `%v.qua`", m.Id)
+}
+
+// FixMapNotFound Attempts to fix a missing map file from azure storage.
+// This will find the mapset, retrieve the .qua from it, and upload it.
+//goland:noinspection ALL
+func FixMapNotFound(m *db.Map) error {
+	if m.MapsetId == -1 {
+		return fmt.Errorf("unable to fix missing blob. mapset is fully unsubmitted")
+	}
+
+	err := os.MkdirAll(config.Data.TempFileDir, os.ModePerm)
+
+	if err != nil {
+		return err
+	}
+	
+	name := fmt.Sprintf("%v.qp", m.MapsetId)
+	quaPath := fmt.Sprintf("%v/%v.qp", config.Data.TempFileDir, m.MapsetId)
+	
+	// Retrieve the mapset file
+	buffer, err := AzureClient.DownloadFile("mapsets", name, quaPath)
+	
+	if err != nil {
+		return err
+	}
+	
+	reader, err := zip.NewReader(bytes.NewReader(buffer.Bytes()), int64(len(buffer.Bytes())))
+	
+	if err != nil {
+		return err
+	}
+
+	quaFileName := fmt.Sprintf("%v.qua", m.Id)
+	
+	// Find the map file and upload it again to azure.
+	for _, file := range reader.File {
+		if quaFileName != file.Name {
+			continue
+		}
+		
+		f, err := file.Open()
+		
+		if err != nil {
+			return err
+		}
+		
+		defer f.Close()
+		
+		fileBytes, err := ioutil.ReadAll(f)
+		
+		if err != nil {
+			return err
+		}
+		
+		err = AzureClient.UploadFile("maps", quaFileName, fileBytes)
+		
+		if err != nil {
+			return err
+		}
+		
+		_ = SendFixedMapNotFoundWebhook(m.Id)
+	}
+	
+	_ = os.Remove(quaPath)
+	
+	return nil
 }
 
 // Ungzips a file and rewrites it

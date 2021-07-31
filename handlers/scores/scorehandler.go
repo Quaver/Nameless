@@ -88,8 +88,22 @@ func (h Handler) SubmitPOST(c *gin.Context) {
 		// File doesn't exist on azure.
 		case utils.ErrAzureBlobNotFound:
 			h.logError(logStr)
-			handlers.Return400(c)
-			return
+			
+			// Attempt to fix the issue automatically
+			err = utils.FixMapNotFound(&h.mapData)
+			
+			if err != nil {
+				handlers.Return400(c)
+				return
+			}
+			
+			// Attempt to cache the file once more
+			h.mapPath, err = utils.CacheQuaFile(h.mapData)
+			
+			if err != nil {
+				handlers.Return400(c)
+				return
+			}
 		// Database does not match the stored file on azure. Let the score go through
 		case utils.ErrAzureMismatchedMD5:
 			h.logWarning(logStr)

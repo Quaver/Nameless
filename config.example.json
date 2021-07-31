@@ -20,6 +20,7 @@
   },
   "quaver_api_path": "",
   "map_cache_dir": "",
+  "temp_file_dir": "",
   "discord_webhook_first_place": {
     "id": -1,
     "secret": ""

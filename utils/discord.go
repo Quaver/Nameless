@@ -197,6 +197,39 @@ func SendScoreSubmissionWarningWebhook(user *db.User, reason string) error {
 	return nil
 }
 
+// SendFixedMapNotFoundWebhook Sends a webhook to Discord stating that a blob not found issue has been fixed.
+func SendFixedMapNotFoundWebhook(id int) error {
+	t := time.Now().UTC()
+
+	_, err := ScoreSubmissionErrors.Execute(nil, &discordhook.WebhookExecuteParams{
+		Embeds: []*discordhook.Embed{
+			{
+				Description: "✅ **BlobNotFound Error Fixed!**",
+				Fields: []*discordhook.EmbedField{
+					{
+						Name:   "Status",
+						Value:  fmt.Sprintf("Automatically fixed missing blob file - %v.qua", id),
+						Inline: false,
+					},
+				},
+				Timestamp: &t,
+				Thumbnail: &discordhook.EmbedThumbnail{URL: config.Data.QuaverAvatar},
+				Footer: &discordhook.EmbedFooter{
+					Text:    "Quaver",
+					IconURL: config.Data.QuaverAvatar,
+				},
+				Color: 0x00FF00,
+			},
+		},
+	}, nil, "")
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // SendAnticheatWebhook Sends an anti-cheat related webhook to Discord
 func SendAnticheatWebhook(user *db.User, mapData *db.Map, scoreId int, isPersonalBest bool, reason string) error {
 	t := time.Now().UTC()

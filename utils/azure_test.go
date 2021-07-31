@@ -10,6 +10,7 @@ func TestInitialize(t *testing.T) {
 	config.InitializeConfig("../")
 	db.InitializeSQL()
 	InitializeAzure()
+	InitializeDiscordWebhooks()
 }
 
 func TestUploadFile(t *testing.T) {
@@ -31,6 +32,22 @@ func TestDownloadMap(t *testing.T) {
 
 	_, err = CacheQuaFile(m)
 
+	if err != nil {
+		t.Fatalf(err.Error())
+		return
+	}
+}
+
+func TestFixMapNotFound(t *testing.T) {
+	m, err := db.GetMapById(564)
+	
+	if err != nil {
+		t.Fatalf(err.Error())
+		return
+	}
+	
+	err = FixMapNotFound(&m)
+	
 	if err != nil {
 		t.Fatalf(err.Error())
 		return
