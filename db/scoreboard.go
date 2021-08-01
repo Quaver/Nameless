@@ -37,7 +37,7 @@ func UpdateScoreboardCache(s *Score, m *Map) error {
 			return err
 		}
 
-		if len(scores) == 0 {
+		if len(scores) < 50 {
 			err = Redis.Del(RedisCtx, key).Err()
 
 			if err != nil {
