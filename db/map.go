@@ -24,7 +24,7 @@ type Map struct {
 
 // GetString Returns a stringified version of the map's artist, title, and difficulty name
 func (m *Map) GetString() string {
-	return fmt.Sprintf("%v -%v [%v]", m.Artist, m.Title, m.DifficultyName)
+	return fmt.Sprintf("%v - %v [%v]", m.Artist, m.Title, m.DifficultyName)
 }
 
 // GetMapByMD5 Fetches a map in the database by its MD5 hash
