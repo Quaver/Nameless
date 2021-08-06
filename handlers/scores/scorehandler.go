@@ -87,7 +87,7 @@ func (h Handler) SubmitPOST(c *gin.Context) {
 		switch err {
 		// File doesn't exist on azure.
 		case utils.ErrAzureBlobNotFound:
-			h.logError(logStr)
+			h.logWarning(logStr)
 			
 			// Attempt to fix the issue automatically
 			err = utils.FixMapNotFound(&h.mapData)
