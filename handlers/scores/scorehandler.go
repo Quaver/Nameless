@@ -79,41 +79,12 @@ func (h Handler) SubmitPOST(c *gin.Context) {
 		return
 	}
 
-	h.mapPath, err = utils.CacheQuaFile(h.mapData)
-
+	err = h.cacheQuaFile(c)
+	
 	if err != nil {
-		logStr := fmt.Sprintf("Unable to cache map file - %v - %v", h.mapData.Id, err)
-		
-		switch err {
-		// File doesn't exist on azure.
-		case utils.ErrAzureBlobNotFound:
-			h.logWarning(logStr)
-			
-			// Attempt to fix the issue automatically
-			err = utils.FixMapNotFound(&h.mapData)
-			
-			if err != nil {
-				handlers.Return400(c)
-				return
-			}
-			
-			// Attempt to cache the file once more
-			h.mapPath, err = utils.CacheQuaFile(h.mapData)
-			
-			if err != nil {
-				handlers.Return400(c)
-				return
-			}
-		// Database does not match the stored file on azure. Let the score go through
-		case utils.ErrAzureMismatchedMD5:
-			h.logWarning(logStr)
-		default:
-			h.logError(logStr)
-			handlers.Return500(c)
-			return
-		}
+		return
 	}
-
+	
 	h.stats, err = db.GetUserStats(h.user.Id, h.scoreData.GameMode)
 
 	if err != nil {
@@ -231,6 +202,51 @@ func (h *Handler) handleSubmission(c *gin.Context) error {
 	err = h.unlockAchievements(c)
 
 	if err != nil {
+		return err
+	}
+	
+	return nil
+}
+
+// Caches the .qua file and sets the mapPath. If it fails, it will send a failing
+// response to the user
+func (h *Handler) cacheQuaFile(c *gin.Context) error {
+	var err error
+	
+	h.mapPath, err = utils.CacheQuaFile(h.mapData)
+
+	if err == nil {
+		return nil
+	}
+
+	logStr := fmt.Sprintf("Unable to cache map file - %v - %v", h.mapData.Id, err)
+
+	switch err {
+	// File doesn't exist on azure.
+	case utils.ErrAzureBlobNotFound:
+		h.logWarning(logStr)
+
+		// Attempt to fix the issue automatically
+		err = utils.FixMapNotFound(&h.mapData)
+
+		if err != nil {
+			handlers.Return400(c)
+			return err
+		}
+
+		// Attempt to cache the file once more
+		h.mapPath, err = utils.CacheQuaFile(h.mapData)
+
+		if err != nil {
+			handlers.Return400(c)
+			return err
+		}
+	// Database does not match the stored file on azure. Let the score go through
+	case utils.ErrAzureMismatchedMD5:
+		h.logWarning(logStr)
+	default:
+		h.logError(logStr)
+		handlers.Return500(c)
 		return err
 	}
 	
