@@ -14,6 +14,7 @@ import (
 	"github.com/go-redis/redis/v8"
 	log "github.com/sirupsen/logrus"
 	"net/http"
+	"sync"
 	"time"
 )
 
@@ -29,6 +30,10 @@ type Handler struct {
 	newScoreId           int64
 	unlockedAchievements []achievements.Achievement
 }
+
+// Mutexes used for locking multiple score submissions on the same map at the same time.
+// Fixes issues that depend on previous scores such as first places and scoreboards.
+var mutexes = map[int] *sync.Mutex {}
 
 func (h Handler) SubmitPOST(c *gin.Context) {
 	timeStart := time.Now()
@@ -107,6 +112,11 @@ func (h Handler) SubmitPOST(c *gin.Context) {
 
 // Handles submitting the score into the database, achievements, leaderboards, etc
 func (h *Handler) handleSubmission(c *gin.Context) error {
+	// Prevent handling of score submission on the same map twice.
+	mutex := h.getMutex()
+	mutex.Lock()
+	defer mutex.Unlock()
+	
 	isValidScore := h.checkValidTotalScore(c)
 
 	if !isValidScore {
@@ -772,10 +782,55 @@ func (h *Handler) sendSuccessfulResponse(c *gin.Context) {
 	})
 }
 
+// Retrieves the mutex for this specific map. If none exists,
+// one will be created and cached.
+func (h *Handler) getMutex() *sync.Mutex {
+	mutex, ok := mutexes[h.mapData.Id]
+	
+	if !ok {
+		mutex = &sync.Mutex{}
+		mutexes[h.mapData.Id] = mutex
+	}
+	
+	return mutex
+}
+
 // Logs out the score in a readable way
 func (h *Handler) logScore(d time.Duration) {
 	log.Info(fmt.Sprintf("Score: #%v | User: %v (#%v) | Map: #%v | PR: %.2f | Acc: %.2f%%",
 		h.newScoreId, h.user.Username, h.user.Id, h.mapData.Id, h.rating.Rating, h.scoreData.Accuracy))
+}
+
+// Logs that the score will be ignored for a given reason.
+func (h *Handler) logIgnoringScore(reason string) {
+	log.Warning(fmt.Sprintf("Ignoring score from %v: %v", h.user.ToString(), reason))
+}
+
+// Logs a warning to the console
+func (h *Handler) logWarning(reason string) {
+	log.Warning(fmt.Sprintf("Error submitting score from %v: %v", h.user.ToString(), reason))
+}
+
+// Logs a warning to the console and Discord.
+func (h *Handler) logWarningToDiscord(reason string) {
+	log.Warning(fmt.Sprintf("Warning while submitting score from %v: %v", h.user.ToString(), reason))
+
+	err := utils.SendScoreSubmissionWarningWebhook(&h.user, reason)
+
+	if err != nil {
+		log.Errorf("Failed to send score submission warning webhook - %v\n", err)
+	}
+}
+
+// Logs an error to the console and Discord.
+func (h *Handler) logError(reason string) {
+	log.Errorf(fmt.Sprintf("Error submitting score from %v: %v", h.user.ToString(), reason))
+
+	err := utils.SendScoreSubmissionErrorWebhook(&h.user, reason)
+
+	if err != nil {
+		log.Errorf("Failed to send score submission error webhook - %v\n", err)
+	}
 }
 
 // Converts the incoming score's to a db score.
@@ -810,33 +865,5 @@ func (h *Handler) convertToDbScore() db.Score {
 		PerformanceProcessorVersion: h.rating.Version,
 		DifficultyProcessorVersion:  h.difficulty.Result.Version,
 		IsDonatorScore:              h.mapData.RankedStatus != common.StatusRanked,
-	}
-}
-
-func (h *Handler) logIgnoringScore(reason string) {
-	log.Warning(fmt.Sprintf("Ignoring score from %v: %v", h.user.ToString(), reason))
-}
-
-func (h *Handler) logWarning(reason string) {
-	log.Warning(fmt.Sprintf("Error submitting score from %v: %v", h.user.ToString(), reason))
-}
-
-func (h *Handler) logWarningToDiscord(reason string) {
-	log.Warning(fmt.Sprintf("Warning while submitting score from %v: %v", h.user.ToString(), reason))
-
-	err := utils.SendScoreSubmissionWarningWebhook(&h.user, reason)
-
-	if err != nil {
-		log.Errorf("Failed to send score submission warning webhook - %v\n", err)
-	}
-}
-
-func (h *Handler) logError(reason string) {
-	log.Errorf(fmt.Sprintf("Error submitting score from %v: %v", h.user.ToString(), reason))
-
-	err := utils.SendScoreSubmissionErrorWebhook(&h.user, reason)
-
-	if err != nil {
-		log.Errorf("Failed to send score submission error webhook - %v\n", err)
 	}
 }
