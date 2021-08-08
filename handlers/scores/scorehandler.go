@@ -635,7 +635,7 @@ func (h *Handler) handleFirstPlaceScore(c *gin.Context, isCleanScore bool) error
 	mapStr := h.mapData.GetString()
 
 	// Update Activity Feed For First Place Winner
-	err = db.InsertActivityFeed(h.user.Id, db.ActivityFeedAchievedFirstPlace, mapStr, h.mapData.MapsetId)
+	err = db.InsertActivityFeed(h.user.Id, db.ActivityFeedAchievedFirstPlace, mapStr, h.mapData.Id)
 
 	if err != nil {
 		h.logError(fmt.Sprintf("Failed to insert first place winner activity feed - %v", err))
