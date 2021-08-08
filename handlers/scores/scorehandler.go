@@ -645,7 +645,7 @@ func (h *Handler) handleFirstPlaceScore(c *gin.Context, isCleanScore bool) error
 
 	// Update activity feed for the first place loser
 	if existingFp != (db.FirstPlaceScore{}) && existingFp.UserId != h.user.Id {
-		err = db.InsertActivityFeed(existingFp.UserId, db.ActivityFeedLostFirstPlace, mapStr, h.mapData.MapsetId)
+		err = db.InsertActivityFeed(existingFp.UserId, db.ActivityFeedLostFirstPlace, mapStr, h.mapData.Id)
 
 		if err != nil {
 			h.logError(fmt.Sprintf("Failed to insert first place loser activity feed - %v", err))
