@@ -84,6 +84,7 @@ var RankedMods = []Mods{
 	ModSpeed195X,
 	ModSpeed20X,
 	ModMirror,
+	ModNoLongNotes,
 }
 
 var ModStrings = map[Mods]string{
