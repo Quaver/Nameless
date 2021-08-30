@@ -533,9 +533,17 @@ func (h *Handler) updateUserStats(c *gin.Context) error {
 			handlers.Return500(c)
 			return err
 		}
-
+		
 		h.stats.OverallRating = db.CalculateOverallRating(scores)
 		h.stats.OverallAccuracy = db.CalculateOverallAccuracy(scores)
+		
+		err = h.stats.UpdateGradeCount(h.convertToDbScore(), h.oldPersonalBest)
+		
+		if err != nil {
+			h.logError(fmt.Sprintf("Failed to update user grade count - %v", err))
+			handlers.Return500(c)
+			return err
+		}
 	}
 
 	err := h.stats.UpdateDatabase()
