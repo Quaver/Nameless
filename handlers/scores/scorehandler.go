@@ -55,8 +55,9 @@ func (h Handler) SubmitPOST(c *gin.Context) {
 	}
 
 	hasRankedMods := common.IsModComboRanked(h.scoreData.Mods)
-
-	if !hasRankedMods {
+	hasAllowedUnrankedMods := common.IsUnrankedModComboAllowed(h.scoreData.Mods)
+	
+	if !hasRankedMods && !hasAllowedUnrankedMods {
 		h.logIgnoringScore(fmt.Sprintf("unranked modifiers -%v", common.GetModsString(h.scoreData.Mods)))
 		handlers.Return400(c)
 		return
@@ -187,7 +188,7 @@ func (h *Handler) handleSubmission(c *gin.Context) error {
 
 	// Anything below this point requires the map to be ranked
 	// since there will be updating leaderboards, handling achievements, etc.
-	if h.mapData.RankedStatus != common.StatusRanked {
+	if h.mapData.RankedStatus != common.StatusRanked || !common.IsModComboRanked(h.scoreData.Mods) {
 		return nil
 	}
 
@@ -316,6 +317,11 @@ func (h *Handler) calculatePerformanceRating(c *gin.Context) error {
 
 // Fetches the old personal best score and makes it no longer a PB if it isn't
 func (h *Handler) updateOldPersonalBest(c *gin.Context) error {
+	// Scores with unranked modifiers are never considered personal bests.
+	if !common.IsModComboRanked(h.scoreData.Mods) {
+		return nil
+	}
+	
 	var err error
 
 	h.oldPersonalBest, err = db.GetPersonalBestScore(&h.user, &h.mapData)
@@ -358,7 +364,8 @@ func (h *Handler) unsetOldPersonalBest() error {
 
 // Returns if the incoming score is a personal best
 func (h *Handler) isPersonalBestScore() bool {
-	return !h.scoreData.Failed && h.rating.Rating > h.oldPersonalBest.PerformanceRating
+	return common.IsModComboRanked(h.scoreData.Mods) && !h.scoreData.Failed && 
+			h.rating.Rating > h.oldPersonalBest.PerformanceRating
 }
 
 // Inserts the incoming score into the database

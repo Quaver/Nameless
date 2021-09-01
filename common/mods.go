@@ -1,6 +1,8 @@
 package common
 
-import "strings"
+import (
+	"strings"
+)
 
 type Mods int64
 
@@ -84,7 +86,6 @@ var RankedMods = []Mods{
 	ModSpeed195X,
 	ModSpeed20X,
 	ModMirror,
-	ModNoLongNotes,
 }
 
 var ModStrings = map[Mods]string{
@@ -140,28 +141,12 @@ func IsModActivated(modCombo Mods, mod Mods) bool {
 	return modCombo&mod != 0
 }
 
-// IsModRanked Returns if a particular mod is ranked
-func IsModRanked(mod Mods) bool {
-	if mod == 0 {
-		return true
-	}
-
-	for _, rankedMod := range RankedMods {
-		if rankedMod == mod {
-			return true
-		}
-	}
-
-	return false
-}
-
 // IsModComboRanked Returns if a combination of mods is ranked
 func IsModComboRanked(modCombo Mods) bool {
 	if modCombo == 0 {
 		return true
 	}
-
-	// Loops over every mod in the enum and checks if the mod is active & ranked or not
+	
 	for i := 0; (1 << i) < ModEnumMaxValue-1; i++ {
 		mod := Mods(1 << i)
 
@@ -169,7 +154,28 @@ func IsModComboRanked(modCombo Mods) bool {
 			continue
 		}
 
-		if !IsModRanked(Mods(1 << i)) {
+		if !isModRanked(mod) {
+			return false
+		}
+	}
+
+	return true
+}
+
+// IsUnrankedModComboAllowed Returns if a combination of mods is allowed in score submission
+func IsUnrankedModComboAllowed(modCombo Mods) bool {
+	if modCombo == 0 {
+		return true
+	}
+	
+	for i := 0; (1 << i) < ModEnumMaxValue-1; i++ {
+		mod := Mods(1 << i)
+
+		if !IsModActivated(modCombo, mod) {
+			continue
+		}
+
+		if !isUnrankedModAllowed(mod) && !isModRanked(mod){
 			return false
 		}
 	}
@@ -196,4 +202,33 @@ func GetModsString(modCombo Mods) string {
 	}
 
 	return strings.Join(mods[:], ", ")
+}
+
+// isModRanked Returns if a particular mod is ranked
+func isModRanked(mod Mods) bool {
+	if mod == 0 {
+		return true
+	}
+
+	for _, rankedMod := range RankedMods {
+		if rankedMod == mod {
+			return true
+		}
+	}
+
+	return false
+}
+
+// isUnrankedModAllowed  Returns if a particular mod is allowed to be submitted.
+func isUnrankedModAllowed(mod Mods) bool {
+	if mod == 0 {
+		return true
+	}
+
+	switch mod {
+	case ModNoLongNotes, ModFullLN, ModInverse:
+		return true
+	}
+
+	return false
 }
