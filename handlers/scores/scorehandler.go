@@ -3,6 +3,10 @@ package scores
 import (
 	"database/sql"
 	"fmt"
+	"net/http"
+	"sync"
+	"time"
+
 	"github.com/Swan/Nameless/auth"
 	"github.com/Swan/Nameless/common"
 	"github.com/Swan/Nameless/db"
@@ -13,9 +17,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
 	log "github.com/sirupsen/logrus"
-	"net/http"
-	"sync"
-	"time"
 )
 
 type Handler struct {
@@ -33,7 +34,7 @@ type Handler struct {
 
 // Mutexes used for locking multiple score submissions on the same map at the same time.
 // Fixes issues that depend on previous scores such as first places and scoreboards.
-var mutexes = map[int] *sync.Mutex {}
+var mutexes = map[int]*sync.Mutex{}
 
 func (h Handler) SubmitPOST(c *gin.Context) {
 	timeStart := time.Now()
@@ -56,7 +57,7 @@ func (h Handler) SubmitPOST(c *gin.Context) {
 
 	hasRankedMods := common.IsModComboRanked(h.scoreData.Mods)
 	hasAllowedUnrankedMods := common.IsUnrankedModComboAllowed(h.scoreData.Mods)
-	
+
 	if !hasRankedMods && !hasAllowedUnrankedMods {
 		h.logIgnoringScore(fmt.Sprintf("unranked modifiers -%v", common.GetModsString(h.scoreData.Mods)))
 		handlers.Return400(c)
@@ -86,11 +87,11 @@ func (h Handler) SubmitPOST(c *gin.Context) {
 	}
 
 	err = h.cacheQuaFile(c)
-	
+
 	if err != nil {
 		return
 	}
-	
+
 	h.stats, err = db.GetUserStats(h.user.Id, h.scoreData.GameMode)
 
 	if err != nil {
@@ -117,7 +118,7 @@ func (h *Handler) handleSubmission(c *gin.Context) error {
 	mutex := h.getMutex()
 	mutex.Lock()
 	defer mutex.Unlock()
-	
+
 	isValidScore := h.checkValidTotalScore(c)
 
 	if !isValidScore {
@@ -182,7 +183,7 @@ func (h *Handler) handleSubmission(c *gin.Context) error {
 	if err != nil {
 		return err
 	}
-	
+
 	// Check if the score is suspicious for possible cheats.
 	isCleanScore := h.scoreData.checkSuspiciousScore(h)
 
@@ -215,7 +216,7 @@ func (h *Handler) handleSubmission(c *gin.Context) error {
 	if err != nil {
 		return err
 	}
-	
+
 	return nil
 }
 
@@ -223,7 +224,7 @@ func (h *Handler) handleSubmission(c *gin.Context) error {
 // response to the user
 func (h *Handler) cacheQuaFile(c *gin.Context) error {
 	var err error
-	
+
 	h.mapPath, err = utils.CacheQuaFile(h.mapData)
 
 	if err == nil {
@@ -260,7 +261,7 @@ func (h *Handler) cacheQuaFile(c *gin.Context) error {
 		handlers.Return500(c)
 		return err
 	}
-	
+
 	return nil
 }
 
@@ -321,7 +322,7 @@ func (h *Handler) updateOldPersonalBest(c *gin.Context) error {
 	if !common.IsModComboRanked(h.scoreData.Mods) {
 		return nil
 	}
-	
+
 	var err error
 
 	h.oldPersonalBest, err = db.GetPersonalBestScore(&h.user, &h.mapData)
@@ -364,8 +365,8 @@ func (h *Handler) unsetOldPersonalBest() error {
 
 // Returns if the incoming score is a personal best
 func (h *Handler) isPersonalBestScore() bool {
-	return common.IsModComboRanked(h.scoreData.Mods) && !h.scoreData.Failed && 
-			h.rating.Rating > h.oldPersonalBest.PerformanceRating
+	return common.IsModComboRanked(h.scoreData.Mods) && !h.scoreData.Failed &&
+		h.rating.Rating > h.oldPersonalBest.PerformanceRating
 }
 
 // Inserts the incoming score into the database
@@ -540,12 +541,12 @@ func (h *Handler) updateUserStats(c *gin.Context) error {
 			handlers.Return500(c)
 			return err
 		}
-		
+
 		h.stats.OverallRating = db.CalculateOverallRating(scores)
 		h.stats.OverallAccuracy = db.CalculateOverallAccuracy(scores)
-		
+
 		err = h.stats.UpdateGradeCount(h.convertToDbScore(), h.oldPersonalBest)
-		
+
 		if err != nil {
 			h.logError(fmt.Sprintf("Failed to update user grade count - %v", err))
 			handlers.Return500(c)
@@ -748,7 +749,7 @@ func (h *Handler) updateElasticSearch() {
 		err := utils.UpdateElasticSearchMapset(h.mapData.MapsetId)
 
 		if err != nil {
-			h.logError(fmt.Sprintf("Failed while updating ElasticSearch - %v", err))
+			h.logWarning(fmt.Sprintf("Failed while updating ElasticSearch - %v", err))
 		}
 	}()
 }
@@ -801,12 +802,12 @@ func (h *Handler) sendSuccessfulResponse(c *gin.Context) {
 // one will be created and cached.
 func (h *Handler) getMutex() *sync.Mutex {
 	mutex, ok := mutexes[h.mapData.Id]
-	
+
 	if !ok {
 		mutex = &sync.Mutex{}
 		mutexes[h.mapData.Id] = mutex
 	}
-	
+
 	return mutex
 }
 
