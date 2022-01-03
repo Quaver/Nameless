@@ -146,7 +146,7 @@ func IsModComboRanked(modCombo Mods) bool {
 	if modCombo == 0 {
 		return true
 	}
-	
+
 	for i := 0; (1 << i) < ModEnumMaxValue-1; i++ {
 		mod := Mods(1 << i)
 
@@ -167,7 +167,7 @@ func IsUnrankedModComboAllowed(modCombo Mods) bool {
 	if modCombo == 0 {
 		return true
 	}
-	
+
 	for i := 0; (1 << i) < ModEnumMaxValue-1; i++ {
 		mod := Mods(1 << i)
 
@@ -175,7 +175,7 @@ func IsUnrankedModComboAllowed(modCombo Mods) bool {
 			continue
 		}
 
-		if !isUnrankedModAllowed(mod) && !isModRanked(mod){
+		if !isUnrankedModAllowed(mod) && !isModRanked(mod) {
 			return false
 		}
 	}
@@ -226,7 +226,7 @@ func isUnrankedModAllowed(mod Mods) bool {
 	}
 
 	switch mod {
-	case ModNoLongNotes, ModFullLN, ModInverse:
+	case ModNoLongNotes, ModFullLN, ModInverse, ModNoSliderVelocities:
 		return true
 	}
 
