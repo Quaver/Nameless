@@ -3,6 +3,7 @@ package scores
 import (
 	"encoding/base64"
 	"fmt"
+
 	"github.com/Swan/Nameless/common"
 	"github.com/Swan/Nameless/db"
 	"github.com/Swan/Nameless/utils"
@@ -92,10 +93,11 @@ func (data *scoreSubmissionData) validateReplayData(d []string) []string {
 		d = append(d, "Player passed but did not provide replay data")
 	}
 
-	// Player stated that they failed, but gave us replay data
-	if data.Failed && data.ReplayData != "" {
-		d = append(d, "Player failed but provided replay data")
-	}
+	// Player stated that they failed, but gave us replay data - Messes up if player fails
+	// in tournament mode
+	// if data.Failed && data.ReplayData != "" {
+	// 	d = append(d, "Player failed but provided replay data")
+	// }
 
 	var err error
 
