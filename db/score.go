@@ -2,8 +2,9 @@ package db
 
 import (
 	"database/sql"
-	"github.com/Swan/Nameless/common"
 	"math"
+
+	"github.com/Swan/Nameless/common"
 )
 
 type Score struct {
@@ -39,6 +40,7 @@ type Score struct {
 	DifficultyProcessorVersion  string
 	IsDonatorScore              bool
 	TournamentGameId            sql.NullInt32
+	ClanId                      sql.NullInt32
 }
 
 // GetScoreByReplayMD5 Fetches a user's score by replay MD5 in the database
@@ -110,6 +112,41 @@ func GetUserTopScores(id int, mode common.Mode) ([]Score, error) {
 	return scores, nil
 }
 
+// Retrieves a clan's scores on a particualr map
+func GetClanScores(clan int, md5 string, limit int) ([]Score, error) {
+	query := "SELECT * FROM scores " +
+		"WHERE clan_id = ? AND map_md5 = ? AND personal_best = 1 " +
+		"ORDER BY performance_rating DESC LIMIT ?"
+
+	rows, err := SQL.Query(query, clan, md5, limit)
+
+	if err != nil {
+		return []Score{}, err
+	}
+
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			return
+		}
+	}(rows)
+
+	var scores []Score
+
+	for rows.Next() {
+		var score Score
+		err = scanScore(&score, rows)
+
+		if err != nil {
+			return []Score{}, err
+		}
+
+		scores = append(scores, score)
+	}
+
+	return scores, nil
+}
+
 // CalculateOverallRating Calculates the overall rating of a list of scores.
 // Assumes that scores are sorted by performance rating
 func CalculateOverallRating(scores []Score) float64 {
@@ -155,7 +192,7 @@ func scanScore(score *Score, scanner RowScanner) error {
 		&score.CountOkay, &score.CountMiss, &score.Grade, &score.ScrollSpeed,
 		&score.TimePlayStart, &score.TimePlayEnd, &score.Ip, &score.ExecutingAssembly,
 		&score.EntryAssembly, &score.QuaverVersion, &score.PauseCount, &score.PerformanceProcessorVersion,
-		&score.DifficultyProcessorVersion, &score.IsDonatorScore, &score.TournamentGameId)
+		&score.DifficultyProcessorVersion, &score.IsDonatorScore, &score.TournamentGameId, &score.ClanId)
 
 	return err
 }
