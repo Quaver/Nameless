@@ -217,6 +217,12 @@ func (h *Handler) handleSubmission(c *gin.Context) error {
 		return err
 	}
 
+	err = h.handleClanScore(c)
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -372,11 +378,16 @@ func (h *Handler) isPersonalBestScore() bool {
 // Inserts the incoming score into the database
 func (h *Handler) insertScore(c *gin.Context) error {
 	const query string = "INSERT INTO scores VALUES " +
-		"(NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+		"(NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 
 	grade := common.GetGradeFromAccuracy(h.scoreData.Accuracy, h.scoreData.Failed)
 	isDonorScore := h.mapData.RankedStatus != common.StatusRanked
 	timestamp := time.Now().UnixNano() / int64(time.Millisecond)
+	var clanId sql.NullInt32
+
+	if h.mapData.ClanRanked {
+		clanId = h.user.ClanId
+	}
 
 	result, err := db.SQL.Exec(query,
 		h.user.Id, h.mapData.MD5, h.scoreData.ReplayMD5, timestamp, h.scoreData.GameMode,
@@ -386,7 +397,7 @@ func (h *Handler) insertScore(c *gin.Context) error {
 		h.scoreData.CountMiss, grade, h.scoreData.ScrollSpeed, h.scoreData.TimePlayStart,
 		h.scoreData.TimePlayEnded, utils.GetIpFromRequest(c), h.scoreData.ExecutingAssemblyMD5,
 		h.scoreData.EntryAssemblyMD5, h.scoreData.ReplayVersion, h.scoreData.PauseCount, h.rating.Version,
-		h.difficulty.Result.Version, isDonorScore, h.scoreData.GameId)
+		h.difficulty.Result.Version, isDonorScore, h.scoreData.GameId, clanId)
 
 	errStr := "Failed to insert score - %v"
 
@@ -739,6 +750,17 @@ func (h *Handler) unlockAchievements(c *gin.Context) error {
 		return err
 	}
 
+	return nil
+}
+
+func (h *Handler) handleClanScore(c *gin.Context) error {
+	if !h.mapData.ClanRanked {
+		return nil
+	}
+
+	// Add/insert clan score
+	// Update clan overall rating/acc
+	// Update clan leaderboards in redis
 	return nil
 }
 
