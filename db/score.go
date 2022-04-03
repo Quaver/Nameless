@@ -113,7 +113,7 @@ func GetUserTopScores(id int, mode common.Mode) ([]Score, error) {
 }
 
 // Retrieves a clan's scores on a particualr map
-func GetClanScores(clan int, md5 string, limit int) ([]Score, error) {
+func GetClanPlayerScores(clan int, md5 string, limit int) ([]Score, error) {
 	query := "SELECT * FROM scores " +
 		"WHERE clan_id = ? AND map_md5 = ? AND personal_best = 1 " +
 		"ORDER BY performance_rating DESC LIMIT ?"
