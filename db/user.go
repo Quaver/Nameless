@@ -3,10 +3,11 @@ package db
 import (
 	"database/sql"
 	"fmt"
-	"github.com/Swan/Nameless/common"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/Swan/Nameless/common"
 )
 
 type User struct {
@@ -20,13 +21,14 @@ type User struct {
 	Country                     string
 	CheckedPreviousAchievements bool
 	AvatarURL                   sql.NullString
+	ClanId                      sql.NullInt32
 }
 
 // GetUserById Fetches a user object by their id
 func GetUserById(id int) (User, error) {
 	query := "SELECT " +
 		"id, steam_id, username, allowed, privileges, usergroups, latest_activity," +
-		"country, checked_previous_achievements, avatar_url " +
+		"country, checked_previous_achievements, avatar_url, clan_id " +
 		"FROM users WHERE id = ? LIMIT 1"
 
 	var user User
@@ -34,7 +36,7 @@ func GetUserById(id int) (User, error) {
 	err := SQL.QueryRow(query, id).Scan(
 		&user.Id, &user.SteamId, &user.Username, &user.Allowed,
 		&user.Privileges, &user.UserGroups, &user.LatestActivity,
-		&user.Country, &user.CheckedPreviousAchievements, &user.AvatarURL)
+		&user.Country, &user.CheckedPreviousAchievements, &user.AvatarURL, &user.ClanId)
 
 	if err != nil {
 		return User{}, err
