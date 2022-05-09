@@ -3,6 +3,8 @@ package db
 import (
 	"database/sql"
 	"fmt"
+
+	"github.com/go-redis/redis/v8"
 )
 
 type ClanScore struct {
@@ -157,6 +159,14 @@ func UpdateClanStats(clan int, mode int, rating float64, acc float64) error {
 
 // Update a clan's rating in redis
 func UpdateClanLeaderboards(clan int, mode int, rating float64) error {
-	fmt.Println("LEADERBOARD UPDATED")
+	err := Redis.ZAdd(RedisCtx, fmt.Sprintf("quaver:clan_leaderboard:%v", mode), &redis.Z{
+		Score:  rating,
+		Member: clan,
+	}).Err()
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
