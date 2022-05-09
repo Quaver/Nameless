@@ -113,12 +113,16 @@ func GetUserTopScores(id int, mode common.Mode) ([]Score, error) {
 }
 
 // Retrieves a clan's scores on a particualr map
-func GetClanPlayerScores(clan int, md5 string, limit int) ([]Score, error) {
-	query := "SELECT * FROM scores " +
-		"WHERE clan_id = ? AND map_md5 = ? AND personal_best = 1 " +
-		"ORDER BY performance_rating DESC LIMIT ?"
+// MariaDB hack... https://stackoverflow.com/questions/6572110/order-by-date-and-time-before-group-by-name-in-mysql
+func GetClanPlayerScores(clan int, md5 string) ([]Score, error) {
+	query := "SELECT * FROM ( " +
+		"SELECT * FROM scores " +
+		"WHERE clan_id = ? AND map_md5 = ? AND failed = 0 " +
+		"ORDER BY performance_rating DESC " +
+		"LIMIT 18446744073709551615 " +
+		") AS tmp_table GROUP BY user_id ORDER by performance_rating DESC"
 
-	rows, err := SQL.Query(query, clan, md5, limit)
+	rows, err := SQL.Query(query, clan, md5)
 
 	if err != nil {
 		return []Score{}, err
@@ -142,6 +146,10 @@ func GetClanPlayerScores(clan int, md5 string, limit int) ([]Score, error) {
 		}
 
 		scores = append(scores, score)
+
+		if len(scores) == 10 {
+			return scores, nil
+		}
 	}
 
 	return scores, nil

@@ -2,9 +2,11 @@ package db
 
 import (
 	"database/sql"
+	"fmt"
+	"testing"
+
 	"github.com/Swan/Nameless/common"
 	"github.com/Swan/Nameless/config"
-	"testing"
 )
 
 func TestInitializeScore(t *testing.T) {
@@ -104,6 +106,22 @@ func TestCalculateOverallAccuracy(t *testing.T) {
 	_ = CalculateOverallAccuracy(scores)
 }
 
+func TestGetClanScores(t *testing.T) {
+	TestInitializeScore(t)
+
+	scores, err := GetClanPlayerScores(1, "a821c04f97744bb7e3da3c3ff382988d")
+
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+
+	for _, s := range scores {
+		fmt.Printf("%v - %v\n", s.UserId, s.PerformanceRating)
+	}
+
+	TestCloseScore(t)
+}
 func TestCloseScore(t *testing.T) {
 	CloseSQLConnection()
 }
