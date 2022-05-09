@@ -12,7 +12,7 @@ func TestInitializeClans(t *testing.T) {
 }
 
 func TestFetchClanPlayerScores(t *testing.T) {
-	scores, err := GetClanPlayerScores(12, "58e4c90b390730bb1553aa0f3356af24", 10)
+	scores, err := GetClanPlayerScores(12, "58e4c90b390730bb1553aa0f3356af24")
 
 	if err != nil {
 		t.Fatal(err)
@@ -24,7 +24,7 @@ func TestFetchClanPlayerScores(t *testing.T) {
 }
 
 func TestFetchClanOverallScores(t *testing.T) {
-	_, err := GetClanOverallScores(1)
+	_, err := GetClanOverallScores(1, 1)
 
 	if err != nil {
 		t.Fatal(err)
@@ -40,7 +40,7 @@ func TestCalculateClanMapScore(t *testing.T) {
 }
 
 func TestCalculateClanOverallRating(t *testing.T) {
-	_, err := CalculateClanOverallRating(1)
+	_, err := CalculateClanOverallRating(1, 1)
 
 	if err != nil {
 		t.Fatal(err)
@@ -48,7 +48,7 @@ func TestCalculateClanOverallRating(t *testing.T) {
 }
 
 func TestCalculateClanOverallAccuracy(t *testing.T) {
-	_, err := CalculateClanOverallAccuracy(1)
+	_, err := CalculateClanOverallAccuracy(1, 1)
 
 	if err != nil {
 		t.Fatal(err)

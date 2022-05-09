@@ -383,8 +383,8 @@ func (h *Handler) insertScore(c *gin.Context) error {
 	grade := common.GetGradeFromAccuracy(h.scoreData.Accuracy, h.scoreData.Failed)
 	isDonorScore := h.mapData.RankedStatus != common.StatusRanked
 	timestamp := time.Now().UnixNano() / int64(time.Millisecond)
-	var clanId sql.NullInt32
 
+	var clanId sql.NullInt32
 	if h.mapData.ClanRanked {
 		clanId = h.user.ClanId
 	}
@@ -753,14 +753,50 @@ func (h *Handler) unlockAchievements(c *gin.Context) error {
 	return nil
 }
 
+// Haandles the updating of clan scores and statistics
 func (h *Handler) handleClanScore(c *gin.Context) error {
-	if !h.mapData.ClanRanked {
+	if !h.mapData.ClanRanked || !h.user.ClanId.Valid || h.scoreData.Failed {
 		return nil
 	}
 
-	// Add/insert clan score
-	// Update clan overall rating/acc
-	// Update clan leaderboards in redis
+	id := int(h.user.ClanId.Int32)
+
+	score, err := db.CalculateClanMapScore(id, h.mapData.MD5)
+
+	if err != nil {
+		return err
+	}
+
+	err = db.InsertClanScore(&score)
+
+	if err != nil {
+		return err
+	}
+
+	rating, err := db.CalculateClanOverallRating(id, score.Mode)
+
+	if err != nil {
+		return err
+	}
+
+	acc, err := db.CalculateClanOverallAccuracy(id, score.Mode)
+
+	if err != nil {
+		return err
+	}
+
+	err = db.UpdateClanStats(id, score.Mode, rating, acc)
+
+	if err != nil {
+		return err
+	}
+
+	err = db.UpdateClanLeaderboards(id, score.Mode, rating)
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
