@@ -51,6 +51,7 @@ const (
 	ModSpeed185X
 	ModSpeed195X
 	ModHealthAdjust
+	ModNoMiss
 	ModEnumMaxValue // This is only in place for looping purposes (i < ModEnumMaxValue - 1; i++)
 )
 
@@ -86,6 +87,7 @@ var RankedMods = []Mods{
 	ModSpeed195X,
 	ModSpeed20X,
 	ModMirror,
+	ModNoMiss,
 }
 
 var ModStrings = map[Mods]string{
@@ -133,6 +135,7 @@ var ModStrings = map[Mods]string{
 	ModSpeed185X:          "1.85x",
 	ModSpeed195X:          "1.95x",
 	ModHealthAdjust:       "Health Adjustments",
+	ModNoMiss:             "NM",
 	ModEnumMaxValue:       "INVALID!",
 }
 
