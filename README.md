@@ -7,7 +7,7 @@
 
 We needed a solution that was **performant, scalable, and reliable** - so we built **Nameless.**
 
-This application is being developed for **internal use.** As such, **no support or proper documentation** will be provided for the usage this software.
+This application is being developed for **internal use.** As such, **no support or proper documentation** will be provided for the usage of this software.
 
 ## LICENSE
 
