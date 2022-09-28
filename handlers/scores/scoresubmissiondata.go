@@ -3,6 +3,8 @@ package scores
 import (
 	"encoding/base64"
 	"fmt"
+	"github.com/Swan/Nameless/processors"
+	"math"
 
 	"github.com/Swan/Nameless/common"
 	"github.com/Swan/Nameless/db"
@@ -218,6 +220,8 @@ func (data *scoreSubmissionData) checkSuspiciousScore(h *Handler) bool {
 		log.Errorf("Failed to check judgement count match - %v", err)
 	}
 	
+	detections = data.checkMismatchingAccuracy(detections, h)
+	
 	// Nothing suspicious has been detected
 	if len(detections) == 0 {
 		return true
@@ -261,14 +265,24 @@ func (data *scoreSubmissionData) checkJudgementCountMatch(detections []string, h
 	userJudgeCount := data.CountMarv + data.CountPerf + data.CountGreat + data.CountGood + data.CountOkay + data.CountMiss
 	mapJudgeCount := h.mapData.CountHitObjectNormal + h.mapData.CountHitObjectLong * 2
 	
-	fmt.Printf("%v, %v\n", userJudgeCount, mapJudgeCount)
-	
 	if userJudgeCount != mapJudgeCount {
 		d := fmt.Sprintf("User judgement count does not match map judgement count - %v vs. %v", userJudgeCount, mapJudgeCount)
 		detections = append(detections, d)
 	}
 	
 	return detections, nil
+}
+
+// Calculates and checks if the accuracy the user provided was correct. Has a margin of error of 0.01%
+func (data *scoreSubmissionData) checkMismatchingAccuracy(detections []string, h *Handler) []string {
+	acc := processors.CalculateAccuracyFromJudgements(h.convertToDbScore())
+	
+	if math.Abs(float64(data.Accuracy) - acc) >= 0.01 {
+		d := fmt.Sprintf("User provided a mismatching accuracy value - %v vs. %v", acc, data.Accuracy)
+		detections = append(detections, d)
+	}
+	
+	return detections
 }
 
 // Converts a list of detections to a readable string
