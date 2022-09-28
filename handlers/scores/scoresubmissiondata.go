@@ -211,13 +211,20 @@ func (data *scoreSubmissionData) checkSuspiciousScore(h *Handler) bool {
 		detections = append(detections, d)
 	}
 
+	var err error
+	detections, err = data.checkJudgementCountMatch(detections, h)
+	
+	if err != nil {
+		log.Errorf("Failed to check judgement count match - %v", err)
+	}
+	
 	// Nothing suspicious has been detected
 	if len(detections) == 0 {
 		return true
 	}
 
 	// Send webhook to discord
-	err := utils.SendAnticheatWebhook(&h.user, &h.mapData, int(h.newScoreId), h.isPersonalBestScore(),
+	err = utils.SendAnticheatWebhook(&h.user, &h.mapData, int(h.newScoreId), h.isPersonalBestScore(),
 		detectionListToString(detections))
 
 	if err != nil {
@@ -236,6 +243,32 @@ func (data *scoreSubmissionData) getMARatio() float32 {
 	}
 
 	return float32(data.CountMarv / perfects)
+}
+
+// Checks if the judgement count the user provided matches the map
+func (data *scoreSubmissionData) checkJudgementCountMatch(detections []string, h *Handler) ([]string, error) {
+	// Judgement count won't match if the user failed
+	if data.Failed {
+		return detections, nil
+	}
+	
+	// We don't keep track of the HitObject count on maps uploaded by donators, so we'll
+	// only be checking for *actually* uploaded maps
+	if h.mapData.MapsetId == -1 {
+		return detections, nil
+	}
+	
+	userJudgeCount := data.CountMarv + data.CountPerf + data.CountGreat + data.CountGood + data.CountOkay + data.CountMiss
+	mapJudgeCount := h.mapData.CountHitObjectNormal + h.mapData.CountHitObjectLong * 2
+	
+	fmt.Printf("%v, %v\n", userJudgeCount, mapJudgeCount)
+	
+	if userJudgeCount != mapJudgeCount {
+		d := fmt.Sprintf("User judgement count does not match map judgement count - %v vs. %v", userJudgeCount, mapJudgeCount)
+		detections = append(detections, d)
+	}
+	
+	return detections, nil
 }
 
 // Converts a list of detections to a readable string
