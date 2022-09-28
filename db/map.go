@@ -22,6 +22,8 @@ type Map struct {
 	DifficultyName   string
 	DifficultyRating float64
 	ClanRanked       bool
+	CountHitObjectNormal int32
+	CountHitObjectLong int32
 }
 
 // GetString Returns a stringified version of the map's artist, title, and difficulty name
@@ -33,14 +35,14 @@ func (m *Map) GetString() string {
 func GetMapByMD5(md5 string) (Map, error) {
 	query := "SELECT " +
 		"id, mapset_id, md5, alternative_md5, creator_id, creator_username, game_mode, " +
-		"ranked_status, length, artist, title, difficulty_name, clan_ranked " +
+		"ranked_status, length, artist, title, difficulty_name, clan_ranked, count_hitobject_normal, count_hitobject_long " +
 		"FROM maps WHERE md5 = ? OR alternative_md5 = ? LIMIT 1"
 
 	var m Map
 
 	err := SQL.QueryRow(query, md5, md5).Scan(
 		&m.Id, &m.MapsetId, &m.MD5, &m.AlternativeMD5, &m.CreatorId, &m.CreatorUsername, &m.GameMode,
-		&m.RankedStatus, &m.Length, &m.Artist, &m.Title, &m.DifficultyName, &m.ClanRanked)
+		&m.RankedStatus, &m.Length, &m.Artist, &m.Title, &m.DifficultyName, &m.ClanRanked, &m.CountHitObjectNormal, &m.CountHitObjectLong)
 
 	if err != nil {
 		return Map{}, err
@@ -53,14 +55,14 @@ func GetMapByMD5(md5 string) (Map, error) {
 func GetMapById(id int32) (Map, error) {
 	query := "SELECT " +
 		"id, mapset_id, md5, alternative_md5, creator_id, creator_username, game_mode, " +
-		"ranked_status, length, artist, title, difficulty_name, clan_ranked " +
+		"ranked_status, length, artist, title, difficulty_name, clan_ranked, count_hitobject_normal, count_hitobject_long " +
 		"FROM maps WHERE id = ? LIMIT 1"
 
 	var m Map
 
 	err := SQL.QueryRow(query, id).Scan(
 		&m.Id, &m.MapsetId, &m.MD5, &m.AlternativeMD5, &m.CreatorId, &m.CreatorUsername, &m.GameMode,
-		&m.RankedStatus, &m.Length, &m.Artist, &m.Title, &m.DifficultyName, &m.ClanRanked)
+		&m.RankedStatus, &m.Length, &m.Artist, &m.Title, &m.DifficultyName, &m.ClanRanked, &m.CountHitObjectNormal, &m.CountHitObjectLong)
 
 	if err != nil {
 		return Map{}, err
