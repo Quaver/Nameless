@@ -256,6 +256,11 @@ func (data *scoreSubmissionData) checkJudgementCountMatch(detections []string, h
 		return detections, nil
 	}
 	
+	// Disregard unranked scores for now
+	if !common.IsModComboRanked(h.scoreData.Mods) {
+		return detections, nil
+	}
+	
 	// We don't keep track of the HitObject count on maps uploaded by donators, so we'll
 	// only be checking for *actually* uploaded maps
 	if h.mapData.MapsetId == -1 {
