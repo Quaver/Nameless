@@ -2,13 +2,14 @@ package utils
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/Swan/Nameless/common"
 	"github.com/Swan/Nameless/config"
 	"github.com/Swan/Nameless/db"
 	"github.com/andersfylling/snowflake"
 	"github.com/nickname32/discordhook"
 	log "github.com/sirupsen/logrus"
-	"time"
 )
 
 var FirstPlace *discordhook.WebhookAPI

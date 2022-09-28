@@ -171,7 +171,11 @@ func (data *scoreSubmissionData) validateScoreData(d []string) []string {
 	if !data.Failed && data.HealthAtEnd == 0 {
 		d = append(d, "Player provided a passing score with zero health")
 	}
-
+	
+	if data.ScrollSpeed < 150 || data.ScrollSpeed >= 1000 {
+		d = append(d, fmt.Sprintf("Player provided an out of bounds scroll speed - %v", data.ScrollSpeed))	
+	}
+	
 	return d
 }
 
