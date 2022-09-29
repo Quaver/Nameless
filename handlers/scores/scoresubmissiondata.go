@@ -270,7 +270,9 @@ func (data *scoreSubmissionData) checkJudgementCountMatch(detections []string, h
 	userJudgeCount := data.CountMarv + data.CountPerf + data.CountGreat + data.CountGood + data.CountOkay + data.CountMiss
 	mapJudgeCount := h.mapData.CountHitObjectNormal + h.mapData.CountHitObjectLong * 2
 	
-	if userJudgeCount != mapJudgeCount {
+	// >= 8 difference because there's currently a bug in the client where missing notes
+	// at the end of a map causes those judgements to not be tracked
+	if math.Abs(float64(userJudgeCount - mapJudgeCount)) >= 8 {
 		d := fmt.Sprintf("User judgement count does not match map judgement count - %v vs. %v", userJudgeCount, mapJudgeCount)
 		detections = append(detections, d)
 	}
