@@ -22,13 +22,14 @@ type User struct {
 	CheckedPreviousAchievements bool
 	AvatarURL                   sql.NullString
 	ClanId                      sql.NullInt32
+	ShadowBanned				bool
 }
 
 // GetUserById Fetches a user object by their id
 func GetUserById(id int) (User, error) {
 	query := "SELECT " +
 		"id, steam_id, username, allowed, privileges, usergroups, latest_activity," +
-		"country, checked_previous_achievements, avatar_url, clan_id " +
+		"country, checked_previous_achievements, avatar_url, clan_id, shadow_banned " +
 		"FROM users WHERE id = ? LIMIT 1"
 
 	var user User
@@ -36,7 +37,7 @@ func GetUserById(id int) (User, error) {
 	err := SQL.QueryRow(query, id).Scan(
 		&user.Id, &user.SteamId, &user.Username, &user.Allowed,
 		&user.Privileges, &user.UserGroups, &user.LatestActivity,
-		&user.Country, &user.CheckedPreviousAchievements, &user.AvatarURL, &user.ClanId)
+		&user.Country, &user.CheckedPreviousAchievements, &user.AvatarURL, &user.ClanId, &user.ShadowBanned)
 
 	if err != nil {
 		return User{}, err
