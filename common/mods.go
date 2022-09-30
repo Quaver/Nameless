@@ -207,6 +207,38 @@ func GetModsString(modCombo Mods) string {
 	return strings.Join(mods[:], ", ")
 }
 
+// HasIncompatibleModifiers Checks if the combination of modifiers is incompatible
+func HasIncompatibleModifiers(modCombo Mods) bool {
+	for i := 0; (1 << i) < ModEnumMaxValue-1; i++ {
+		mod := Mods(1 << i)
+
+		if !IsModActivated(modCombo, mod) {
+			continue
+		}
+		
+		// Go through each modifier 
+		for j := 0; (1 << j) < ModEnumMaxValue-1; j++ {
+			modToCheck := Mods(1 << j)
+			
+			if !IsModActivated(modCombo, modToCheck) || mod == modToCheck {
+				continue
+			}
+			
+			// Both modifiers are speed mods
+			if isSpeedModifier(mod) && isSpeedModifier(modToCheck) {
+				return true
+			}
+			
+			// Both modifiers change long notes in some way
+			if isLongNoteModifier(mod) && isLongNoteModifier(modToCheck) {
+				return true
+			}
+		}
+	}
+	
+	return false
+}
+
 // isModRanked Returns if a particular mod is ranked
 func isModRanked(mod Mods) bool {
 	if mod == 0 {
@@ -234,4 +266,16 @@ func isUnrankedModAllowed(mod Mods) bool {
 	}
 
 	return false
+}
+
+// Returns if the modifier is a speed modifier
+func isSpeedModifier(mod Mods) bool {
+	return (mod >= ModSpeed05X && mod <= ModSpeed20X) || 
+		(mod >= ModSpeed055X && mod <= ModSpeed095X) || 
+		(mod >= ModSpeed105X && mod <= ModSpeed195X)
+}
+
+// Returns if a modifier changes the long notes within the map
+func isLongNoteModifier(mod Mods) bool {
+	return mod == ModFullLN || mod == ModInverse || mod == ModNoLongNotes
 }
