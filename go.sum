@@ -8,6 +8,8 @@ github.com/Azure/go-autorest/autorest/adal v0.9.2/go.mod h1:/3SMAM86bP6wC9Ev35pe
 github.com/Azure/go-autorest/autorest/date v0.3.0/go.mod h1:BI0uouVdmngYNUzGWeSYnokU+TrmwEsOqdt8Y6sso74=
 github.com/Azure/go-autorest/autorest/mocks v0.4.1/go.mod h1:LTp+uSrOhSkaKrUy935gNZuuIPPVsHlr9DSOxSayd+k=
 github.com/Azure/go-autorest/tracing v0.6.0/go.mod h1:+vhtPC754Xsa23ID7GlGsrdKBpUA79WCAKPPZVC2DeU=
+github.com/Quaver/discordhook v1.0.3 h1:inKXI/q53Gn/mNuS6wYXM41S7HDKoijMhvvpd/2+CxM=
+github.com/Quaver/discordhook v1.0.3/go.mod h1:EWLEEdDBhM/UxtHo2rMeg9dVExmZaYRghfugKMK2BFQ=
 github.com/alecthomas/gometalinter v2.0.10+incompatible/go.mod h1:qfIpQGGz3d+NmgyPBqv+LSh50emm1pt72EtcX2vKYQk=
 github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf/go.mod h1:ybxpYRFXyAe+OPACYpWeL0wqObRcbAqCMya13uyzqw0=
 github.com/andersfylling/snowflake v1.3.0 h1:dobYwnkDhe3EzvX3FMZlrRygQ1CVj1W+s3wlJuiuqwQ=
