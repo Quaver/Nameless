@@ -1,5 +1,9 @@
 package db
 
+import (
+	"encoding/json"
+)
+
 type FirstPlaceScore struct {
 	MD5               string
 	UserId            int
@@ -56,4 +60,46 @@ func NewFirstPlaceScore(md5 string, userId int, scoreId int, rating float64) Fir
 		ScoreId:           scoreId,
 		PerformanceRating: rating,
 	}
+}
+
+func PublishFirstPlaceScoreRedis(username, artist, title, difficultyName string) error {
+	type redisFirstPlaceScore struct {
+		User struct {
+			Username string `json:"username"`
+		} `json:"user"`
+		Map struct {
+			Artist         string `json:"artist"`
+			Title          string `json:"title"`
+			DifficultyName string `json:"difficulty_name"`
+		} `json:"map"`
+	}
+
+	jsonData, err := json.Marshal(redisFirstPlaceScore{
+		User: struct {
+			Username string `json:"username"`
+		}{
+			Username: username,
+		},
+		Map: struct {
+			Artist         string `json:"artist"`
+			Title          string `json:"title"`
+			DifficultyName string `json:"difficulty_name"`
+		}{
+			Artist:         artist,
+			Title:          title,
+			DifficultyName: difficultyName,
+		},
+	})
+
+	if err != nil {
+		return err
+	}
+
+	_, err = Redis.Publish(RedisCtx, "quaver:first_place_scores", string(jsonData)).Result()
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

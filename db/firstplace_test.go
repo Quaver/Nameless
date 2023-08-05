@@ -25,6 +25,20 @@ func TestInsertFirstPlace(t *testing.T) {
 	}
 }
 
+func TestPublishFirstPlaceScoreRedis(t *testing.T) {
+	config.InitializeConfig("../")
+	InitializeSQL()
+	InitializeRedis()
+
+	err := PublishFirstPlaceScoreRedis("Swan", "Random Artist", "Random Title", "Random Diff")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	CloseSQLConnection()
+}
+
 func TestCloseFirstPlace(t *testing.T) {
 	CloseSQLConnection()
 }
