@@ -12,9 +12,14 @@ type scoreboardScore struct {
 
 // UpdateScoreboardCache Updates the redis cache for a particular score
 func UpdateScoreboardCache(s *Score, m *Map) error {
-	keys, err := Redis.Keys(RedisCtx, fmt.Sprintf("quaver:scores:%v_*", m.Id)).Result()
+	var keys []string
+	iter := Redis.Scan(RedisCtx, 0, fmt.Sprintf("quaver:scores:%v_*", m.Id), 0).Iterator()
 
-	if err != nil {
+	for iter.Next(RedisCtx) {
+		keys = append(keys, iter.Val())
+	}
+
+	if err := iter.Err(); err != nil {
 		return err
 	}
 
@@ -43,10 +48,10 @@ func UpdateScoreboardCache(s *Score, m *Map) error {
 			if err != nil {
 				return err
 			}
-			
+
 			continue
-		} 
-		
+		}
+
 		for _, score := range scores {
 			if s.PerformanceRating > score.PerformanceRating {
 				err = Redis.Del(RedisCtx, key).Err()
