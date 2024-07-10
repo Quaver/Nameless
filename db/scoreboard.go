@@ -18,6 +18,16 @@ func UpdateScoreboardCache(s *Score, m *Map) error {
 		return err
 	}
 
+	keysApiV2, err := Redis.Keys(RedisCtx, fmt.Sprintf("quaver:scoreboard:%v:*", m.MD5)).Result()
+
+	if err != nil {
+		return err
+	}
+
+	if len(keysApiV2) > 0 {
+		keys = append(keys, keysApiV2...)
+	}
+
 	for _, key := range keys {
 		str, err := Redis.Get(RedisCtx, key).Result()
 
@@ -43,10 +53,10 @@ func UpdateScoreboardCache(s *Score, m *Map) error {
 			if err != nil {
 				return err
 			}
-			
+
 			continue
-		} 
-		
+		}
+
 		for _, score := range scores {
 			if s.PerformanceRating > score.PerformanceRating {
 				err = Redis.Del(RedisCtx, key).Err()
