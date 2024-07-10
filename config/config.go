@@ -17,7 +17,7 @@ type Configuration struct {
 	Redis                          ConfigurationRedis          `json:"redis"`
 	SQL                            ConfigurationSQL            `json:"sql"`
 	Azure                          ConfigurationAzure          `json:"azure"`
-	QuaverAPIPath                  string                      `json:"quaver_api_path"`
+	QuaverToolsPath                string                      `json:"quaver_tools_path"`
 	MapCacheDir                    string                      `json:"map_cache_dir"`
 	TempFileDir                    string                      `json:"temp_file_dir"`
 	DiscordWebhookFirstPlace       ConfigurationDiscordWebhook `json:"discord_webhook_first_place"`

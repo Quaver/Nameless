@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/Swan/Nameless/common"
+	"github.com/Swan/Nameless/config"
 	"os/exec"
 	"strconv"
 )
@@ -33,16 +34,16 @@ type DifficultyProcessorResult struct {
 
 // CalcDifficulty Calculates the difficulty rating of a local .qua file
 func CalcDifficulty(path string, mods common.Mods) (DifficultyProcessor, error) {
-	modsStr := strconv.Itoa(int(mods))
-	cmd := exec.Command("dotnet", getQuaverToolsDllPath(), "-calcdiff", path, modsStr)
-	
+	modsStr := strconv.FormatInt(int64(mods), 10)
+	cmd := exec.Command(config.Data.QuaverToolsPath, "-calcdiff", path, modsStr)
+
 	var out bytes.Buffer
 	var stderr bytes.Buffer
 	cmd.Stdout = &out
 	cmd.Stderr = &stderr
-	
+
 	err := cmd.Run()
-	
+
 	if err != nil {
 		return DifficultyProcessor{}, fmt.Errorf("%v\n\n```%v```", err, stderr.String())
 	}
