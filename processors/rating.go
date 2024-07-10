@@ -3,6 +3,7 @@ package processors
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/Swan/Nameless/config"
 	"os/exec"
 )
 
@@ -15,7 +16,7 @@ type RatingProcessor struct {
 func CalcPerformance(diff float64, acc float32, failed bool) (RatingProcessor, error) {
 	diffStr := fmt.Sprintf("%f", diff)
 	accStr := fmt.Sprintf("%f", acc)
-	output, err := exec.Command("dotnet", getQuaverToolsDllPath(), "-calcrating", diffStr, accStr).Output()
+	output, err := exec.Command(config.Data.QuaverToolsPath, "-calcrating", diffStr, accStr).Output()
 
 	if err != nil {
 		return RatingProcessor{}, err

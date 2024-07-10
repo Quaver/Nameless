@@ -11,7 +11,7 @@ import (
 func CompileQuaverTools() {
 	log.Info("Compiling Quaver.Tools...")
 
-	cmd := exec.Command("dotnet", "build", "--configuration", "Release", config.Data.QuaverTools)
+	cmd := exec.Command("dotnet", "build", "--configuration", "Release", config.Data.QuaverToolsPath)
 	err := cmd.Run()
 
 	if err != nil {
