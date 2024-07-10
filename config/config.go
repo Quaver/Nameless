@@ -19,12 +19,13 @@ type Configuration struct {
 	Azure                          ConfigurationAzure          `json:"azure"`
 	QuaverAPIPath                  string                      `json:"quaver_api_path"`
 	MapCacheDir                    string                      `json:"map_cache_dir"`
-	TempFileDir					   string					   `json:"temp_file_dir"`
+	TempFileDir                    string                      `json:"temp_file_dir"`
 	DiscordWebhookFirstPlace       ConfigurationDiscordWebhook `json:"discord_webhook_first_place"`
 	DiscordWebhookSubmissionErrors ConfigurationDiscordWebhook `json:"discord_webhook_submission_errors"`
 	DiscordWebhookAnticheat        ConfigurationDiscordWebhook `json:"discord_webhook_anticheat"`
 	APIBaseUrl                     string                      `json:"api_base_url"`
 	APISecretKey                   string                      `json:"api_secret_key"`
+	APIBotJWT                      string                      `json:"api_bot_jwt"`
 }
 
 type ConfigurationRedis struct {

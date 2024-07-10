@@ -34,5 +34,6 @@
     "secret": ""
   },
   "api_secret_key": "",
-  "api_base_url": "http://localhost:8082"
+  "api_base_url": "http://localhost:8082",
+  "api_bot_jwt": ""
 }
