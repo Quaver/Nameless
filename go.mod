@@ -1,6 +1,6 @@
 module github.com/Swan/Nameless
 
-go 1.22
+go 1.23.2
 
 require (
 	github.com/Azure/azure-pipeline-go v0.2.3
