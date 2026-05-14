@@ -27,6 +27,7 @@ type Score struct {
 	CountGood                   int
 	CountOkay                   int
 	CountMiss                   int
+	CountMineHit                int
 	Grade                       common.Grade
 	ScrollSpeed                 int
 	TimePlayStart               int64
@@ -197,7 +198,7 @@ func scanScore(score *Score, scanner RowScanner) error {
 		&score.Mode, &score.PersonalBest, &score.PerformanceRating, &score.Mods,
 		&score.Failed, &score.TotalScore, &score.Accuracy, &score.MaxCombo,
 		&score.CountMarv, &score.CountPerf, &score.CountGreat, &score.CountGood,
-		&score.CountOkay, &score.CountMiss, &score.Grade, &score.ScrollSpeed,
+		&score.CountOkay, &score.CountMiss, &score.CountMineHit, &score.Grade, &score.ScrollSpeed,
 		&score.TimePlayStart, &score.TimePlayEnd, &score.Ip, &score.ExecutingAssembly,
 		&score.EntryAssembly, &score.QuaverVersion, &score.PauseCount, &score.PerformanceProcessorVersion,
 		&score.DifficultyProcessorVersion, &score.IsDonatorScore, &score.TournamentGameId, &score.ClanId)
