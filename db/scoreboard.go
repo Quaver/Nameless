@@ -19,7 +19,7 @@ func UpdateScoreboardCache(s *Score, m *Map) error {
 	}
 
 	for _, pattern := range patterns {
-		iter := Redis.Scan(RedisCtx, 0, pattern, 100).Iterator()
+		iter := Redis.Scan(RedisCtx, 0, pattern, 10000).Iterator()
 		for iter.Next(RedisCtx) {
 			key := iter.Val()
 			str, err := Redis.Get(RedisCtx, key).Result()
