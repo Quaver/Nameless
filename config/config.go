@@ -24,6 +24,7 @@ type Configuration struct {
 	DiscordWebhookSubmissionErrors ConfigurationDiscordWebhook `json:"discord_webhook_submission_errors"`
 	DiscordWebhookAnticheat        ConfigurationDiscordWebhook `json:"discord_webhook_anticheat"`
 	APIBaseUrl                     string                      `json:"api_base_url"`
+	InternalAPISecret              string                      `json:"internal_api_secret"`
 	APISecretKey                   string                      `json:"api_secret_key"`
 	APIBotJWT                      string                      `json:"api_bot_jwt"`
 }

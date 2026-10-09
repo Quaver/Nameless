@@ -1,71 +1,45 @@
 package db
 
 import (
-	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
+	"net/url"
+	"strings"
+	"time"
 
-	"github.com/go-redis/redis/v8"
+	"github.com/Swan/Nameless/config"
 )
 
-type scoreboardScore struct {
-	PerformanceRating float64 `json:"performance_rating"`
+var scoreboardCacheClient = &http.Client{
+	Timeout: 10 * time.Second,
+	CheckRedirect: func(req *http.Request, via []*http.Request) error {
+		return http.ErrUseLastResponse
+	},
 }
 
-// UpdateScoreboardCache Updates the redis cache for a particular score
-func UpdateScoreboardCache(s *Score, m *Map) error {
-	patterns := []string{
-		fmt.Sprintf("quaver:scores:%v_*", m.Id),
-		fmt.Sprintf("quaver:scoreboard:%v:*", m.MD5),
+// UpdateScoreboardCache clears a map's scoreboard cache through api-v2.
+func UpdateScoreboardCache(_ *Score, m *Map) error {
+	endpoint := strings.TrimRight(config.Data.APIBaseUrl, "/") +
+		"/v2/private/scoreboards/" + url.PathEscape(m.MD5) + "/cache"
+	req, err := http.NewRequest(http.MethodDelete, endpoint, nil)
+	if err != nil {
+		return fmt.Errorf("create scoreboard cache invalidation request: %w", err)
 	}
+	req.Header.Set("X-Internal-Secret", config.Data.InternalAPISecret)
+	req.Header.Set("Accept", "application/json")
 
-	for _, pattern := range patterns {
-		iter := Redis.Scan(RedisCtx, 0, pattern, 100).Iterator()
-		for iter.Next(RedisCtx) {
-			key := iter.Val()
-			str, err := Redis.Get(RedisCtx, key).Result()
+	response, err := scoreboardCacheClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("invalidate scoreboard cache: %w", err)
+	}
+	defer response.Body.Close()
 
-			if err != nil {
-				// The key does not exist anymore.
-				if err == redis.Nil {
-					continue
-				}
-
-				return err
-			}
-
-			var scores []scoreboardScore
-			err = json.Unmarshal([]byte(str), &scores)
-
-			if err != nil {
-				return err
-			}
-
-			if len(scores) < 50 {
-				err = Redis.Del(RedisCtx, key).Err()
-
-				if err != nil {
-					return err
-				}
-
-				continue
-			}
-
-			for _, score := range scores {
-				if s.PerformanceRating > score.PerformanceRating {
-					err = Redis.Del(RedisCtx, key).Err()
-
-					if err != nil {
-						return err
-					}
-
-					break
-				}
-			}
-		}
-
-		if err := iter.Err(); err != nil {
-			return err
-		}
+	if response.StatusCode != http.StatusOK {
+		return fmt.Errorf("scoreboard cache invalidation failed with status - %v", response.StatusCode)
+	}
+	if _, err := io.Copy(io.Discard, response.Body); err != nil {
+		return fmt.Errorf("read scoreboard cache invalidation response: %w", err)
 	}
 
 	return nil
