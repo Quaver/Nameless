@@ -44,9 +44,17 @@ type Score struct {
 	ClanId                      sql.NullInt32
 }
 
+// Keep this projection in the same order as scanScore, independent of schema additions.
+const scoreColumns = `id, user_id, map_md5, replay_md5, timestamp, mode,
+    personal_best, performance_rating, mods, failed, total_score, accuracy, max_combo,
+    count_marv, count_perf, count_great, count_good, count_okay, count_miss, count_minehit,
+    grade, scroll_speed, time_play_start, time_play_end, ip, executing_assembly,
+    entry_assembly, quaver_version, pause_count, performance_processor_version,
+    difficulty_processor_version, is_donator_score, tournament_game_id, clan_id`
+
 // GetScoreByReplayMD5 Fetches a user's score by replay MD5 in the database
 func GetScoreByReplayMD5(u *User, md5 string) (Score, error) {
-	query := "SELECT * FROM scores WHERE user_id = ? AND replay_md5 = ?  LIMIT 1"
+	query := "SELECT " + scoreColumns + " FROM scores WHERE user_id = ? AND replay_md5 = ? LIMIT 1"
 
 	var score Score
 
@@ -62,7 +70,7 @@ func GetScoreByReplayMD5(u *User, md5 string) (Score, error) {
 
 // GetPersonalBestScore Fetches a user's personal best score on a map
 func GetPersonalBestScore(u *User, m *Map) (Score, error) {
-	query := "SELECT * FROM scores " +
+	query := "SELECT " + scoreColumns + " FROM scores " +
 		"WHERE user_id = ? AND map_md5 = ? AND failed = 0 AND personal_best = 1 " +
 		"LIMIT 1"
 
@@ -80,7 +88,7 @@ func GetPersonalBestScore(u *User, m *Map) (Score, error) {
 
 // GetUserTopScores Fetches a user's top 500 scores
 func GetUserTopScores(id int, mode common.Mode) ([]Score, error) {
-	query := "SELECT * FROM scores " +
+	query := "SELECT " + scoreColumns + " FROM scores " +
 		"WHERE user_id = ? AND mode = ? AND personal_best = 1 AND is_donator_score = 0 " +
 		"ORDER BY performance_rating DESC LIMIT 500"
 
@@ -116,8 +124,8 @@ func GetUserTopScores(id int, mode common.Mode) ([]Score, error) {
 // Retrieves a clan's scores on a particualr map
 // MariaDB hack... https://stackoverflow.com/questions/6572110/order-by-date-and-time-before-group-by-name-in-mysql
 func GetClanPlayerScores(clan int, md5 string) ([]Score, error) {
-	query := "SELECT * FROM ( " +
-		"SELECT * FROM scores " +
+	query := "SELECT " + scoreColumns + " FROM ( " +
+		"SELECT " + scoreColumns + " FROM scores " +
 		"WHERE clan_id = ? AND map_md5 = ? AND failed = 0 " +
 		"ORDER BY performance_rating DESC " +
 		"LIMIT 18446744073709551615 " +
